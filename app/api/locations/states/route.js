@@ -1,0 +1,158 @@
+import { NextResponse } from "next/server";
+import connectDB from "@/lib/db";
+import State from "@/lib/models/State";
+import { withAdminAuth } from "@/lib/middleware/auth";
+
+// GET /api/locations/states - Get all states with pagination and filters
+export async function GET(request) {
+  try {
+    await connectDB();
+
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page")) || 1;
+    const limit = parseInt(searchParams.get("limit")) || 10;
+    const search = searchParams.get("search") || "";
+    const status = searchParams.get("status") || "";
+    const country = searchParams.get("country") || "";
+    const all = searchParams.get("all");
+
+    // If all parameter is present, return all states without pagination
+    if (all) {
+      const filter = { status: "active" };
+      if (country) filter.country = country;
+      if (search) {
+        filter.$or = [
+          { name: { $regex: search, $options: "i" } },
+          { code: { $regex: search, $options: "i" } },
+        ];
+      }
+
+      const states = await State.find(filter)
+        .populate("country", "name code")
+        .sort({ name: 1 })
+        .lean();
+
+      return NextResponse.json({
+        success: true,
+        data: states,
+      });
+    }
+
+    const skip = (page - 1) * limit;
+
+    // Build filter object
+    const filter = {};
+
+    if (search) {
+      // Use regex search instead of text search for better compatibility
+      filter.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { code: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    if (status) {
+      filter.status = status;
+    }
+
+    if (country) {
+      filter.country = country;
+    }
+
+    // Get total count
+    const total = await State.countDocuments(filter);
+
+    // Get states with pagination
+    const states = await State.find(filter)
+      .populate("country", "name code")
+      .sort({ name: 1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+
+    return NextResponse.json({
+      success: true,
+      data: states,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching states:", error);
+    return NextResponse.json(
+      { success: false, error: "Failed to fetch states" },
+      { status: 500 }
+    );
+  }
+}
+
+// POST /api/locations/states - Create a new state (Admin only)
+export const POST = withAdminAuth(async (request) => {
+  try {
+    console.log("🔍 Starting state creation...");
+
+    await connectDB();
+    console.log("✅ Database connected successfully");
+
+    const body = await request.json();
+    console.log("📝 Request body:", body);
+
+    // Validate required fields
+    const requiredFields = ["name", "code", "country"];
+    for (const field of requiredFields) {
+      if (!body[field]) {
+        return NextResponse.json(
+          { success: false, error: `${field} is required` },
+          { status: 400 }
+        );
+      }
+    }
+
+    // Create new state
+    console.log("🏗️ Creating state with data:", body);
+    const state = new State(body);
+    console.log("💾 Saving state to database...");
+    await state.save();
+    console.log("✅ State saved successfully:", state._id);
+
+    return NextResponse.json(
+      {
+        success: true,
+        message: "State created successfully",
+        data: state,
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("❌ Error creating state:", error);
+    console.error("❌ Error name:", error.name);
+    console.error("❌ Error message:", error.message);
+    console.error("❌ Error stack:", error.stack);
+
+    if (error.name === "ValidationError") {
+      const errors = Object.values(error.errors).map((err) => err.message);
+      return NextResponse.json(
+        { success: false, error: "Validation failed", details: errors },
+        { status: 400 }
+      );
+    }
+
+    if (error.code === 11000) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "State with this name or code already exists",
+        },
+        { status: 400 }
+      );
+    }
+
+    return NextResponse.json(
+      { success: false, error: "Failed to create state" },
+      { status: 500 }
+    );
+  }
+});

@@ -1,0 +1,1520 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "CCIC Public API",
+    "version": "1.0.0",
+    "description": "Public API endpoints for colleges, courses, exams, blogs, news, and more. No authentication required."
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Current server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Colleges",
+      "description": "College listings and details"
+    },
+    {
+      "name": "Courses",
+      "description": "Course listings and details"
+    },
+    {
+      "name": "Exams",
+      "description": "Exam listings"
+    },
+    {
+      "name": "Blogs",
+      "description": "Blog posts"
+    },
+    {
+      "name": "News",
+      "description": "News articles"
+    },
+    {
+      "name": "Notices",
+      "description": "Notices and announcements"
+    },
+    {
+      "name": "Pages",
+      "description": "CMS pages"
+    },
+    {
+      "name": "Reviews",
+      "description": "College reviews and replies"
+    },
+    {
+      "name": "Search",
+      "description": "Global search"
+    },
+    {
+      "name": "Misc",
+      "description": "States, testimonials, footer, facilities"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "SuccessResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "data": {
+            "type": "object"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": false
+          },
+          "error": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "security": [],
+  "paths": {
+    "/api/public/colleges": {
+      "get": {
+        "tags": [
+          "Colleges"
+        ],
+        "summary": "Get colleges for public pages",
+        "description": "Returns active colleges with optional featured, popular, or top filters. Supports country → state → district cascading filters.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "country",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by country MongoDB ObjectId"
+          },
+          {
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by state MongoDB ObjectId"
+          },
+          {
+            "in": "query",
+            "name": "district",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by district MongoDB ObjectId"
+          },
+          {
+            "in": "query",
+            "name": "featured",
+            "schema": {
+              "type": "string",
+              "enum": [
+                true,
+                false
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "popular",
+            "schema": {
+              "type": "string",
+              "enum": [
+                true,
+                false
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "top",
+            "schema": {
+              "type": "string",
+              "enum": [
+                true,
+                false
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 6
+            }
+          },
+          {
+            "in": "query",
+            "name": "count",
+            "schema": {
+              "type": "string",
+              "enum": [
+                true
+              ]
+            },
+            "description": "Return total count only"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Colleges list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/public/colleges-listing": {
+      "get": {
+        "tags": [
+          "Colleges"
+        ],
+        "summary": "Paginated college listing with filters",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "country",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "district",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "city",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by district/city name (scoped by country and state when provided)"
+          },
+          {
+            "in": "query",
+            "name": "ownership",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "exam",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "course",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "feeRange",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "alphabetical",
+                "popularity",
+                "fees_low_to_high"
+              ],
+              "default": "alphabetical"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated colleges"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/public/colleges-stats": {
+      "get": {
+        "tags": [
+          "Colleges"
+        ],
+        "summary": "Get college statistics",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "country",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "all",
+                "total",
+                "featured",
+                "popular",
+                "byCountry",
+                "byState",
+                "byOwnership",
+                "topCities"
+              ],
+              "default": "all"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "College statistics"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/public/colleges-filters": {
+      "get": {
+        "tags": [
+          "Colleges"
+        ],
+        "summary": "Get filter options for college listing",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "country",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "all",
+                "countries",
+                "states",
+                "cities",
+                "ownership",
+                "exams",
+                "feeRanges"
+              ],
+              "default": "all"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Filter options"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/public/popular-colleges": {
+      "get": {
+        "tags": [
+          "Colleges"
+        ],
+        "summary": "Get popular colleges",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "country",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "district",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 6
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Popular colleges list"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/public/college-details/{slug}": {
+      "get": {
+        "tags": [
+          "Colleges"
+        ],
+        "summary": "Get college details by slug or ID",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "College slug or MongoDB ObjectId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "College details"
+          },
+          "400": {
+            "description": "Missing slug"
+          },
+          "404": {
+            "description": "College not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/public/courses": {
+      "get": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "Get courses for public pages",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "count",
+            "schema": {
+              "type": "string",
+              "enum": [
+                true
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "featured",
+            "schema": {
+              "type": "string",
+              "enum": [
+                true,
+                false
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 6
+            }
+          },
+          {
+            "in": "query",
+            "name": "listing",
+            "schema": {
+              "type": "string",
+              "enum": [
+                true
+              ]
+            },
+            "description": "Enable paginated listing mode with filters"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "stream",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "degree",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "feeRange",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "type": "string",
+              "default": "alphabetical"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Courses list"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/public/courses-filters": {
+      "get": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "Get filter options for course listing",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "all",
+                "streams",
+                "degrees",
+                "feeRanges"
+              ],
+              "default": "all"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Filter options"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/public/course-details/{slug}": {
+      "get": {
+        "tags": [
+          "Courses"
+        ],
+        "summary": "Get course details by slug or ID",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Course details"
+          },
+          "404": {
+            "description": "Course not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/public/exams": {
+      "get": {
+        "tags": [
+          "Exams"
+        ],
+        "summary": "Get exams for public pages",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "country",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "count",
+            "schema": {
+              "type": "string",
+              "enum": [
+                true
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "featured",
+            "schema": {
+              "type": "string",
+              "enum": [
+                true,
+                false
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 6
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Exams list"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/public/blogs": {
+      "get": {
+        "tags": [
+          "Blogs"
+        ],
+        "summary": "Get published blogs",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "count",
+            "schema": {
+              "type": "string",
+              "enum": [
+                true
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          },
+          {
+            "in": "query",
+            "name": "category",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "featured",
+            "schema": {
+              "type": "string",
+              "enum": [
+                true,
+                false
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blogs list"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/public/blogs/{slug}": {
+      "get": {
+        "tags": [
+          "Blogs"
+        ],
+        "summary": "Get blog post by slug",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Blog post details"
+          },
+          "404": {
+            "description": "Blog not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/public/news": {
+      "get": {
+        "tags": [
+          "News"
+        ],
+        "summary": "Get published news articles",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "count",
+            "schema": {
+              "type": "string",
+              "enum": [
+                true
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "featured",
+            "schema": {
+              "type": "string",
+              "enum": [
+                true,
+                false
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 6
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "News list"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/public/news/{slug}": {
+      "get": {
+        "tags": [
+          "News"
+        ],
+        "summary": "Get news article by slug",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "News article details"
+          },
+          "404": {
+            "description": "News not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/public/notices": {
+      "get": {
+        "tags": [
+          "Notices"
+        ],
+        "summary": "Get notices",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "collegeId",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "global",
+                "college"
+              ]
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notices list"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/public/notices/{id}": {
+      "get": {
+        "tags": [
+          "Notices"
+        ],
+        "summary": "Get notice by ID",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Notice details"
+          },
+          "404": {
+            "description": "Notice not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/public/pages": {
+      "get": {
+        "tags": [
+          "Pages"
+        ],
+        "summary": "Get CMS pages",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pages list"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/public/pages/{slug}": {
+      "get": {
+        "tags": [
+          "Pages"
+        ],
+        "summary": "Get CMS page by slug",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Page details"
+          },
+          "404": {
+            "description": "Page not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/public/reviews/{collegeSlug}": {
+      "get": {
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Get approved reviews for a college",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "collegeSlug",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reviews list with pagination"
+          },
+          "404": {
+            "description": "College not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Submit a college review",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "collegeSlug",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "rating",
+                  "comment"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  },
+                  "mobile": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "rating": {
+                    "type": "number",
+                    "minimum": 1,
+                    "maximum": 5
+                  },
+                  "comment": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Review submitted (pending approval)"
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "404": {
+            "description": "College not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/public/reviews/{collegeSlug}/reply": {
+      "post": {
+        "tags": [
+          "Reviews"
+        ],
+        "summary": "Submit a reply to a review",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "collegeSlug",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "reviewId",
+                  "name",
+                  "comment"
+                ],
+                "properties": {
+                  "reviewId": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "mobile": {
+                    "type": "string"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "comment": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reply submitted (pending approval)"
+          },
+          "400": {
+            "description": "Validation error"
+          },
+          "404": {
+            "description": "College or review not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/public/search": {
+      "get": {
+        "tags": [
+          "Search"
+        ],
+        "summary": "Global search across colleges, courses, exams, and news",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Search query"
+          },
+          {
+            "in": "query",
+            "name": "country",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "district",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "type",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "all",
+                "colleges",
+                "courses",
+                "exams",
+                "news"
+              ],
+              "default": "all"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search results"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/public/countries": {
+      "get": {
+        "tags": [
+          "Locations"
+        ],
+        "summary": "Get countries list",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "default": "active"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Countries list"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/public/states": {
+      "get": {
+        "tags": [
+          "Locations"
+        ],
+        "summary": "Get states list",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "country",
+            "schema": {
+              "type": "string"
+            },
+            "description": "Filter by country MongoDB ObjectId"
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "default": "active"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "States list"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/public/districts": {
+      "get": {
+        "tags": [
+          "Locations"
+        ],
+        "summary": "Get districts list",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "country",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "state",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "search",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "type": "string",
+              "default": "active"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Districts list"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/public/testimonials": {
+      "get": {
+        "tags": [
+          "Misc"
+        ],
+        "summary": "Get testimonials",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 6
+            }
+          },
+          {
+            "in": "query",
+            "name": "featured",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "count",
+            "schema": {
+              "type": "string",
+              "enum": [
+                true
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Testimonials list"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/public/footer-sections": {
+      "get": {
+        "tags": [
+          "Misc"
+        ],
+        "summary": "Get footer sections",
+        "responses": {
+          "200": {
+            "description": "Footer sections"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/public/facility-sections": {
+      "get": {
+        "tags": [
+          "Misc"
+        ],
+        "summary": "Get facility sections for a college",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "collegeId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Facility sections list"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    },
+    "/api/public/facility-sections/{slug}": {
+      "get": {
+        "tags": [
+          "Misc"
+        ],
+        "summary": "Get facility section by slug",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "collegeId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Facility section details"
+          },
+          "404": {
+            "description": "Not found"
+          },
+          "500": {
+            "description": "Server error"
+          }
+        }
+      }
+    }
+  }
+}
