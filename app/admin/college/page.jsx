@@ -405,22 +405,18 @@ export default function CollegeList() {
           <Link
             href={`/admin/college/gallery/${item.id}`}
             className="px-2 py-1 text-xs text-purple-600 border border-purple-300 rounded bg-transparent no-underline hover:bg-purple-50 dark:hover:bg-purple-500/20 transition-colors"
-            title={`Manage Gallery - College: ${
-              item.collegeGallery?.length || 0
-            }, Hostel: ${item.hostelGallery?.length || 0}, Campus: ${
-              item.campusGallery?.length || 0
-            }`}
+            title={`Manage Gallery - College: ${item.collegeGallery?.length || 0
+              }, Hostel: ${item.hostelGallery?.length || 0}, Campus: ${item.campusGallery?.length || 0
+              }`}
           >
             Gallery ({item.collegeGallery?.length || 0},
             {item.hostelGallery?.length || 0},{item.campusGallery?.length || 0})
           </Link>
           <div
             className="px-2 py-1 text-xs text-teal-600 border border-teal-300 rounded bg-transparent"
-            title={`Facilities Count - College: ${
-              item.collegeFacilitiesCount || 0
-            }, Hospital: ${item.hospitalFacilitiesCount || 0}, Hostel: ${
-              item.hostelFacilitiesCount || 0
-            }`}
+            title={`Facilities Count - College: ${item.collegeFacilitiesCount || 0
+              }, Hospital: ${item.hospitalFacilitiesCount || 0}, Hostel: ${item.hostelFacilitiesCount || 0
+              }`}
           >
             Facilities ({item.collegeFacilitiesCount || 0},
             {item.hospitalFacilitiesCount || 0},
@@ -517,15 +513,14 @@ export default function CollegeList() {
       width: "80px",
       render: (item) => (
         <span
-          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-            item.status === "active"
+          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${item.status === "active"
               ? "bg-green-100 text-green-800 dark:bg-green-500/20 dark:text-green-200"
               : item.status === "inactive"
-              ? "bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-200"
-              : item.status === "draft"
-              ? "bg-secondary-100 text-secondary-800 dark:bg-secondary/20 dark:text-secondary-200"
-              : "bg-gray-100 text-gray-800 dark:bg-slate-800/70 dark:text-white/80"
-          }`}
+                ? "bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-200"
+                : item.status === "draft"
+                  ? "bg-secondary-100 text-secondary-800 dark:bg-secondary/20 dark:text-secondary-200"
+                  : "bg-gray-100 text-gray-800 dark:bg-slate-800/70 dark:text-white/80"
+            }`}
         >
           {item.status?.charAt(0).toUpperCase() + item.status?.slice(1) ||
             "N/A"}
@@ -540,11 +535,10 @@ export default function CollegeList() {
       width: "80px",
       render: (item) => (
         <span
-          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-            item.isFeatured
+          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${item.isFeatured
               ? "bg-blue-100 text-primary-800 dark:bg-primary/20 dark:text-primary-200"
               : "bg-gray-100 text-gray-800 dark:bg-slate-800/70 dark:text-white/70"
-          }`}
+            }`}
         >
           {item.isFeatured ? "Yes" : "No"}
         </span>
@@ -558,11 +552,10 @@ export default function CollegeList() {
       width: "80px",
       render: (item) => (
         <span
-          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-            item.isPopular
+          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${item.isPopular
               ? "bg-green-100 text-green-800 dark:bg-green-500/20 dark:text-green-200"
               : "bg-gray-100 text-gray-800 dark:bg-slate-800/70 dark:text-white/70"
-          }`}
+            }`}
         >
           {item.isPopular ? "Yes" : "No"}
         </span>
@@ -621,9 +614,8 @@ export default function CollegeList() {
         {[...Array(8)].map((_, i) => (
           <div
             key={i}
-            className={`p-3 ${
-              i < 7 ? "border-b border-gray-200 dark:border-slate-800" : ""
-            }`}
+            className={`p-3 ${i < 7 ? "border-b border-gray-200 dark:border-slate-800" : ""
+              }`}
           >
             <div className="grid grid-cols-[60px_320px_250px_100px_80px_120px_120px_100px_100px_80px_80px_80px_70px] gap-4 items-center">
               <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded animate-pulse"></div>
