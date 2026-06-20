@@ -180,6 +180,7 @@ export default function EditDistrictPage() {
             }
             showDistrict={false}
             gridClassName="grid grid-cols-2 gap-4 mb-5"
+            countryApiUrl="/api/locations/country-master"
           />
 
           <div className="border-t border-gray-200 dark:border-slate-800 pt-4 flex justify-end gap-2">

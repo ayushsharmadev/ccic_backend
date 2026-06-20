@@ -1,7 +1,26 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import State from "@/lib/models/State";
+import Country from "@/lib/models/Country";
+import CountryMaster from "@/lib/models/CountryMaster";
 import { withAdminAuth } from "@/lib/middleware/auth";
+
+/**
+ * Bridge lookup: accepts either a CountryMaster _id OR a Country(abroad) _id.
+ * If the _id belongs to Country(abroad), resolves to the matching CountryMaster _id by name.
+ * Returns the CountryMaster _id to use in State queries.
+ */
+async function resolveCountryMasterId(countryId) {
+  if (!countryId) return null;
+  // Check if it directly matches a CountryMaster doc
+  const cm = await CountryMaster.findById(countryId).select("_id").lean();
+  if (cm) return cm._id;
+  // Fallback: treat as Country(abroad) _id → look up by name
+  const abroad = await Country.findById(countryId).select("name").lean();
+  if (!abroad) return countryId; // unknown id, pass as-is
+  const cmByName = await CountryMaster.findOne({ name: abroad.name }).select("_id").lean();
+  return cmByName ? cmByName._id : null;
+}
 
 // GET /api/locations/states - Get all states with pagination and filters
 export async function GET(request) {
@@ -19,7 +38,10 @@ export async function GET(request) {
     // If all parameter is present, return all states without pagination
     if (all) {
       const filter = { status: "active" };
-      if (country) filter.country = country;
+      if (country) {
+        const cmId = await resolveCountryMasterId(country);
+        if (cmId) filter.country = cmId;
+      }
       if (search) {
         filter.$or = [
           { name: { $regex: search, $options: "i" } },
@@ -28,7 +50,7 @@ export async function GET(request) {
       }
 
       const states = await State.find(filter)
-        .populate("country", "name code")
+        .populate({ path: "country", select: "name code", model: "CountryMaster" })
         .sort({ name: 1 })
         .lean();
 
@@ -56,7 +78,8 @@ export async function GET(request) {
     }
 
     if (country) {
-      filter.country = country;
+      const cmId = await resolveCountryMasterId(country);
+      if (cmId) filter.country = cmId;
     }
 
     // Get total count
@@ -64,7 +87,7 @@ export async function GET(request) {
 
     // Get states with pagination
     const states = await State.find(filter)
-      .populate("country", "name code")
+      .populate({ path: "country", select: "name code", model: "CountryMaster" })
       .sort({ name: 1 })
       .skip(skip)
       .limit(limit)

@@ -41,7 +41,7 @@ export default function EditStatePage() {
           fetch(`/api/locations/states/${params.id}`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          fetch("/api/locations/countries?all=true"),
+          fetch("/api/locations/country-master?all=true"),
         ]);
 
         const result = await stateResponse.json();

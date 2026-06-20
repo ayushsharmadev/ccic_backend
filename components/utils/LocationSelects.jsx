@@ -18,6 +18,7 @@ export default function LocationSelects({
   stateLabel = "State",
   districtLabel = "District",
   gridClassName = "grid grid-cols-2 gap-4",
+  countryApiUrl = "/api/locations/countries", // default: Country (abroad) — College form
 }) {
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
@@ -88,7 +89,7 @@ export default function LocationSelects({
     const fetchCountries = async () => {
       setLoadingCountries(true);
       try {
-        const response = await fetch("/api/locations/countries?all=true");
+        const response = await fetch(`${countryApiUrl}?all=true`);
         const result = await response.json();
         if (result.success) {
           setCountries(

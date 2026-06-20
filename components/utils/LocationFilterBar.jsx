@@ -95,7 +95,7 @@ export default function LocationFilterBar({
     const fetchCountries = async () => {
       setLoadingCountries(true);
       try {
-        const response = await fetch("/api/locations/countries?all=true");
+        const response = await fetch("/api/locations/country-master?all=true");
         const result = await response.json();
         if (result.success) {
           setCountries(

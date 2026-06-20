@@ -2,7 +2,23 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import District from "@/lib/models/District";
 import State from "@/lib/models/State";
+import Country from "@/lib/models/Country";
+import CountryMaster from "@/lib/models/CountryMaster";
 import { withAdminAuth } from "@/lib/middleware/auth";
+
+/**
+ * Bridge lookup: resolves Country(abroad) _id → CountryMaster _id by name match.
+ * Falls back gracefully if the _id is already a CountryMaster _id.
+ */
+async function resolveCountryMasterId(countryId) {
+  if (!countryId) return null;
+  const cm = await CountryMaster.findById(countryId).select("_id").lean();
+  if (cm) return cm._id;
+  const abroad = await Country.findById(countryId).select("name").lean();
+  if (!abroad) return countryId;
+  const cmByName = await CountryMaster.findOne({ name: abroad.name }).select("_id").lean();
+  return cmByName ? cmByName._id : null;
+}
 
 // GET /api/locations/districts - Get all districts with pagination and filters
 export async function GET(request) {
@@ -24,17 +40,20 @@ export async function GET(request) {
       if (state) {
         filter.state = state;
       } else if (country) {
-        const states = await State.find({ country, status: "active" })
-          .select("_id")
-          .lean();
-        filter.state = { $in: states.map((item) => item._id) };
+        const cmId = await resolveCountryMasterId(country);
+        if (cmId) {
+          const states = await State.find({ country: cmId, status: "active" })
+            .select("_id")
+            .lean();
+          filter.state = { $in: states.map((item) => item._id) };
+        }
       }
 
       const districts = await District.find(filter)
         .populate({
           path: "state",
           select: "name code country",
-          populate: { path: "country", select: "name code" },
+          populate: { path: "country", select: "name code", model: "CountryMaster" },
         })
         .sort({ name: 1 })
         .lean();
@@ -68,10 +87,13 @@ export async function GET(request) {
     if (state) {
       filter.state = state;
     } else if (country) {
-      const states = await State.find({ country, status: "active" })
-        .select("_id")
-        .lean();
-      filter.state = { $in: states.map((item) => item._id) };
+      const cmId = await resolveCountryMasterId(country);
+      if (cmId) {
+        const states = await State.find({ country: cmId, status: "active" })
+          .select("_id")
+          .lean();
+        filter.state = { $in: states.map((item) => item._id) };
+      }
     }
 
     if (status) {
@@ -86,7 +108,7 @@ export async function GET(request) {
       .populate({
         path: "state",
         select: "name code country",
-        populate: { path: "country", select: "name code" },
+        populate: { path: "country", select: "name code", model: "CountryMaster" },
       })
       .sort({ name: 1 })
       .skip(skip)

@@ -256,10 +256,7 @@ export default function DistrictsPage() {
     </div>
   );
 
-  if (loading) {
-    return <LoadingSkeleton />;
-  }
-
+  // Removed early return for LoadingSkeleton so that the filter bar doesn't unmount and reset its internal state on every table fetch.
   return (
     <div className="h-full p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
       {/* Page Header */}

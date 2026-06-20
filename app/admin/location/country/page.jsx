@@ -124,7 +124,7 @@ export default function CountriesPage() {
         status: "active",
       });
 
-      const response = await fetch(`/api/locations/countries?${params}`);
+      const response = await fetch(`/api/locations/country-master?${params}`);
       const data = await response.json();
 
       if (data.success) {
@@ -195,7 +195,7 @@ export default function CountriesPage() {
       }
 
       const response = await fetch(
-        `/api/locations/countries/${deleteModal.countryId}`,
+        `/api/locations/country-master/${deleteModal.countryId}`,
         {
           method: "DELETE",
           headers: {

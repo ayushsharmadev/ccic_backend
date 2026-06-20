@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import ApnaEditor from "@/components/utils/ApnaEditor";
 import ImageUpload from "@/components/utils/ImageUpload";
+import ApnaSelect from "@/components/utils/ApnaSelect";
 import { useAuth } from "@/contexts/AuthContext";
 import { showSuccess, showError } from "@/components/utils/ApnaNotify";
 
@@ -12,6 +13,21 @@ export default function AddCountryPage() {
   const router = useRouter();
   const { getAccessToken } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [countryMasterOptions, setCountryMasterOptions] = useState([]);
+
+  // Fetch CountryMaster list for name/code dropdown
+  useEffect(() => {
+    fetch("/api/locations/country-master?all=true")
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.success) {
+          setCountryMasterOptions(
+            res.data.map((c) => ({ value: c._id, label: c.name, code: c.code }))
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -222,14 +238,23 @@ export default function AddCountryPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className={labelClassName}>Country Name *</label>
-                <input
-                  required
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="Enter country name"
-                  className={inputClassName}
+                <ApnaSelect
+                  title=""
+                  options={countryMasterOptions}
+                  value={countryMasterOptions.find((o) => o.label === formData.name)?.value || ""}
+                  onChange={(val) => {
+                    const selected = countryMasterOptions.find((o) => o.value === val);
+                    if (selected) {
+                      setFormData((prev) => ({
+                        ...prev,
+                        name: selected.label,
+                        code: selected.code,
+                      }));
+                    }
+                  }}
+                  placeholder="Search & select country..."
+                  searchable={true}
+                  buttonClassName={selectButtonClassName}
                 />
               </div>
               <div>
@@ -247,15 +272,25 @@ export default function AddCountryPage() {
                 <label className={labelClassName}>
                   Country Code (e.g. IND) *
                 </label>
-                <input
-                  required
-                  type="text"
-                  name="code"
+                <ApnaSelect
+                  title=""
+                  options={countryMasterOptions.map(o => ({ value: o.code, label: o.code }))}
                   value={formData.code}
-                  onChange={handleInputChange}
-                  placeholder="e.g. IND"
-                  className={inputClassName}
-                  maxLength={3}
+                  onChange={(val) => {
+                    const selected = countryMasterOptions.find((o) => o.code === val);
+                    if (selected) {
+                      setFormData((prev) => ({
+                        ...prev,
+                        code: selected.code,
+                        name: selected.label,
+                      }));
+                    } else {
+                      setFormData((prev) => ({ ...prev, code: val }));
+                    }
+                  }}
+                  placeholder="Select code..."
+                  searchable={true}
+                  buttonClassName={selectButtonClassName}
                 />
               </div>
               <div>

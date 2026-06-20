@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import ApnaEditor from "@/components/utils/ApnaEditor";
 import ImageUpload from "@/components/utils/ImageUpload";
+import ApnaSelect from "@/components/utils/ApnaSelect";
 import { useAuth } from "@/contexts/AuthContext";
 import { showSuccess, showError } from "@/components/utils/ApnaNotify";
 
@@ -16,6 +17,21 @@ export default function EditCountryPage() {
   const { getAccessToken } = useAuth();
   const [loading, setLoading] = useState(true);
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [countryMasterOptions, setCountryMasterOptions] = useState([]);
+
+  // Fetch CountryMaster list for name/code dropdown
+  useEffect(() => {
+    fetch("/api/locations/country-master?all=true")
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.success) {
+          setCountryMasterOptions(
+            res.data.map((c) => ({ value: c._id, label: c.name, code: c.code }))
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -246,6 +262,8 @@ export default function EditCountryPage() {
     "text-xs font-medium text-gray-700 dark:text-white/80 mb-1 block transition-colors";
   const inputClassName =
     "w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30 bg-white dark:bg-slate-900/70 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/50 transition-colors";
+  const selectButtonClassName =
+    "w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded text-sm text-left flex items-center justify-between outline-none focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30 bg-white dark:bg-slate-900/70 text-gray-900 dark:text-white transition-colors cursor-pointer";
   const sectionHeadingClassName =
     "text-lg font-semibold text-gray-900 dark:text-white transition-colors";
   const checkboxClassName =
@@ -320,14 +338,23 @@ export default function EditCountryPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className={labelClassName}>Country Name *</label>
-                <input
-                  required
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="Enter country name"
-                  className={inputClassName}
+                <ApnaSelect
+                  title=""
+                  options={countryMasterOptions}
+                  value={countryMasterOptions.find((o) => o.label === formData.name)?.value || ""}
+                  onChange={(val) => {
+                    const selected = countryMasterOptions.find((o) => o.value === val);
+                    if (selected) {
+                      setFormData((prev) => ({
+                        ...prev,
+                        name: selected.label,
+                        code: selected.code,
+                      }));
+                    }
+                  }}
+                  placeholder="Search & select country..."
+                  searchable={true}
+                  buttonClassName={selectButtonClassName}
                 />
               </div>
               <div>
@@ -345,15 +372,25 @@ export default function EditCountryPage() {
                 <label className={labelClassName}>
                   Country Code (e.g. IND) *
                 </label>
-                <input
-                  required
-                  type="text"
-                  name="code"
+                <ApnaSelect
+                  title=""
+                  options={countryMasterOptions.map(o => ({ value: o.code, label: o.code }))}
                   value={formData.code}
-                  onChange={handleInputChange}
-                  placeholder="e.g. IND"
-                  className={inputClassName}
-                  maxLength={3}
+                  onChange={(val) => {
+                    const selected = countryMasterOptions.find((o) => o.code === val);
+                    if (selected) {
+                      setFormData((prev) => ({
+                        ...prev,
+                        code: selected.code,
+                        name: selected.label,
+                      }));
+                    } else {
+                      setFormData((prev) => ({ ...prev, code: val }));
+                    }
+                  }}
+                  placeholder="Select code..."
+                  searchable={true}
+                  buttonClassName={selectButtonClassName}
                 />
               </div>
               <div>
