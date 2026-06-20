@@ -4,7 +4,7 @@ import { Country } from "@/lib/models";
 import { withAdminAuth } from "@/lib/middleware/auth";
 import mongoose from "mongoose";
 
-export async function GET(request, { params }) {
+export const GET = withAdminAuth(async (request, { params }) => {
   try {
     await connectDB();
     const { id } = await params;
@@ -36,7 +36,7 @@ export async function GET(request, { params }) {
       { status: 500 }
     );
   }
-}
+});
 
 export const PUT = withAdminAuth(async (request, { params }) => {
   try {
@@ -61,6 +61,11 @@ export const PUT = withAdminAuth(async (request, { params }) => {
       "population",
       "timeZone",
       "callingCode",
+      "logo",
+      "banner",
+      "brochure",
+      "shortDescription",
+      "longDescription",
     ];
     
     for (const field of requiredFields) {
@@ -122,6 +127,11 @@ export const PUT = withAdminAuth(async (request, { params }) => {
     // Study Pathways mapping
     if (body.studyPathways && Array.isArray(body.studyPathways)) {
        body.studyPathways = body.studyPathways.filter(p => p.title || p.duration);
+    }
+
+    // Quick Facts mapping
+    if (body.quickFacts && Array.isArray(body.quickFacts)) {
+       body.quickFacts = body.quickFacts.filter(q => q.label || q.value);
     }
 
     const updatedCountry = await Country.findByIdAndUpdate(

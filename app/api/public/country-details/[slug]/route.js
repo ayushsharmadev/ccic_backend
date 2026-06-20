@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
-import { Country, College, News, Blog } from "@/lib/models";
+import { Country, College, News, Blog, Exam } from "@/lib/models";
 import CountrySection from "@/lib/models/CountrySection";
 
 export async function GET(request, { params }) {
@@ -85,13 +85,24 @@ export async function GET(request, { params }) {
         .lean();
     }
 
+    // Fetch Exams for this country
+    const exams = await Exam.find({
+      country: country._id,
+    })
+      .populate("examType", "name")
+      .populate("examLevel", "name")
+      .sort({ displayRank: 1, title: 1 })
+      .select("title slug purpose displayRank examType examLevel")
+      .lean();
+
     const responseData = {
       ...country,
       sections,
       topColleges,
       totalCollegesCount,
       relatedNews,
-      relatedBlogs
+      relatedBlogs,
+      exams
     };
 
     return NextResponse.json({

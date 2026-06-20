@@ -14,6 +14,8 @@ export default function AddCountryPage() {
   const { getAccessToken } = useAuth();
   const [loading, setLoading] = useState(false);
   const [countryMasterOptions, setCountryMasterOptions] = useState([]);
+  const [newPathway, setNewPathway] = useState({ title: "", duration: "", description: "" });
+  const [newQuickFact, setNewQuickFact] = useState({ label: "", value: "" });
 
   // Fetch CountryMaster list for name/code dropdown
   useEffect(() => {
@@ -56,6 +58,8 @@ export default function AddCountryPage() {
     // Media
     logo: null,
     banner: null,
+    brochure: null,
+    countryGallery: [],
 
     // Descriptions
     shortDescription: "",
@@ -65,6 +69,10 @@ export default function AddCountryPage() {
     metaTitle: "",
     metaDescription: "",
     focusKeyword: "",
+
+    studyPathways: [],
+    quickFacts: [],
+    documentsRequired: "",
 
     status: "active",
     isFeatured: false,
@@ -80,12 +88,69 @@ export default function AddCountryPage() {
     }));
   };
 
+  const handleAddPathway = () => {
+    if (!newPathway.title.trim() || !newPathway.duration.trim()) {
+      showError("Pathway Title and Duration are required");
+      return;
+    }
+    setFormData((prev) => ({
+      ...prev,
+      studyPathways: [...prev.studyPathways, newPathway],
+    }));
+    setNewPathway({ title: "", duration: "", description: "" });
+  };
+
+  const handleNewPathwayChange = (field, value) => {
+    setNewPathway((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleRemovePathway = (index) => {
+    const updated = [...formData.studyPathways];
+    updated.splice(index, 1);
+    setFormData((prev) => ({ ...prev, studyPathways: updated }));
+  };
+
+  const handleAddQuickFact = () => {
+    if (!newQuickFact.label.trim() || !newQuickFact.value.trim()) {
+      showError("Quick Fact Label and Value are required");
+      return;
+    }
+    setFormData((prev) => ({
+      ...prev,
+      quickFacts: [...prev.quickFacts, newQuickFact],
+    }));
+    setNewQuickFact({ label: "", value: "" });
+  };
+
+  const handleNewQuickFactChange = (field, value) => {
+    setNewQuickFact((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleRemoveQuickFact = (index) => {
+    const updated = [...formData.quickFacts];
+    updated.splice(index, 1);
+    setFormData((prev) => ({ ...prev, quickFacts: updated }));
+  };
+
   const handleEditorChange = (name, content) => {
     setFormData((prev) => ({ ...prev, [name]: content }));
   };
 
   const handleImageUpload = (name, url) => {
     setFormData((prev) => ({ ...prev, [name]: url }));
+  };
+
+  const handleAddGalleryImage = (fileData) => {
+    setFormData((prev) => ({
+      ...prev,
+      countryGallery: [...prev.countryGallery, { url: fileData.fileUrl, type: "image" }],
+    }));
+  };
+
+  const handleRemoveGalleryImage = (index) => {
+    const updated = [...formData.countryGallery];
+    updated.splice(index, 1);
+    setFormData((prev) => ({ ...prev, countryGallery: updated }));
   };
 
   const handleSubmit = async (e) => {
@@ -113,6 +178,8 @@ export default function AddCountryPage() {
         callingCode: formData.callingCode,
         logo: formData.logo,
         banner: formData.banner,
+        brochure: formData.brochure,
+        countryGallery: formData.countryGallery,
         shortDescription: formData.shortDescription,
         longDescription: formData.longDescription,
         metaTitle: formData.metaTitle,
@@ -137,6 +204,10 @@ export default function AddCountryPage() {
           eligibility: formData.eligibility,
           visaType: formData.visaType,
         },
+        
+        studyPathways: formData.studyPathways,
+        quickFacts: formData.quickFacts,
+        documentsRequired: formData.documentsRequired,
       };
 
       const response = await fetch("/api/countries", {
@@ -517,6 +588,66 @@ export default function AddCountryPage() {
             </div>
           </div>
 
+          {/* Study Pathways */}
+          <div className="border-b border-gray-200 dark:border-slate-800 pb-4">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                <h2 className={sectionHeadingClassName}>Study Pathways</h2>
+              </div>
+            </div>
+
+            <div className="mb-6 p-4 border border-primary-200 dark:border-primary/30 rounded-lg bg-primary-50/30 dark:bg-primary/5">
+              <h4 className="text-sm font-semibold mb-4 text-gray-900 dark:text-white">Add New Pathway</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                <div>
+                  <label className={labelClassName}>Pathway Title</label>
+                  <input type="text" value={newPathway.title} onChange={(e) => handleNewPathwayChange("title", e.target.value)} className={inputClassName} placeholder="e.g. MBBS in China" />
+                </div>
+                <div>
+                  <label className={labelClassName}>Duration</label>
+                  <input type="text" value={newPathway.duration} onChange={(e) => handleNewPathwayChange("duration", e.target.value)} className={inputClassName} placeholder="e.g. 6 years" />
+                </div>
+              </div>
+              <div className="mb-3">
+                <label className={labelClassName}>Description</label>
+                <textarea value={newPathway.description} onChange={(e) => handleNewPathwayChange("description", e.target.value)} rows={2} className={inputClassName} placeholder="Brief description of this pathway..." />
+              </div>
+              <div className="flex justify-end">
+                <button type="button" onClick={handleAddPathway} className="bg-primary text-white px-4 py-2 text-sm rounded hover:bg-primary-700 transition-colors shadow-sm">
+                  + Add to List
+                </button>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              {formData.studyPathways.map((pathway, index) => (
+                <div key={index} className="flex items-center justify-between p-4 border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800/50 hover:shadow-sm transition-shadow">
+                  <div className="flex-1 min-w-0 pr-4">
+                    <div className="flex items-center gap-3 mb-1">
+                      <h4 className="font-semibold text-sm text-gray-900 dark:text-white truncate" title={pathway.title}>{pathway.title}</h4>
+                      <span className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600"></span>
+                      <p className="text-xs text-primary font-medium whitespace-nowrap">{pathway.duration}</p>
+                    </div>
+                    {pathway.description ? (
+                      <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2" title={pathway.description}>{pathway.description}</p>
+                    ) : (
+                      <span className="text-xs text-gray-400 italic">No description</span>
+                    )}
+                  </div>
+                  <button type="button" onClick={() => handleRemovePathway(index)} className="shrink-0 text-xs bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded transition-colors dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40">
+                    Remove
+                  </button>
+                </div>
+              ))}
+              {formData.studyPathways.length === 0 && (
+                <div className="text-center py-6 text-sm text-gray-500 border border-dashed border-gray-300 dark:border-slate-700 rounded-lg">No pathways added yet.</div>
+              )}
+            </div>
+          </div>
+
           {/* Media & Documents */}
           <div className="border-b border-gray-200 dark:border-slate-800 pb-4">
             <div className="flex items-center gap-2 mb-4">
@@ -541,7 +672,7 @@ export default function AddCountryPage() {
               </svg>
               <h2 className={sectionHeadingClassName}>Media & Documents</h2>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className={labelClassName}>Country Logo</label>
                 <ImageUpload
@@ -610,6 +741,57 @@ export default function AddCountryPage() {
                   Upload country banner (PNG, JPG - Max 5MB)
                 </p>
               </div>
+              <div>
+                <label className={labelClassName}>Country Brochure</label>
+                <ImageUpload
+                  title="Country Brochure"
+                  type="document"
+                  preview={formData.brochure}
+                  onFileChange={(file, preview) => setFormData((prev) => ({ ...prev, brochure: preview }))}
+                  onRemove={() => setFormData((prev) => ({ ...prev, brochure: null }))}
+                  accept=".pdf"
+                  maxSize="10MB"
+                  width="100%"
+                  height="120px"
+                  className="w-full"
+                  uploadType="countries"
+                  identifier="country-brochure"
+                  onUploadSuccess={(fileData) => setFormData((prev) => ({ ...prev, brochure: fileData.fileUrl }))}
+                />
+              </div>
+            </div>
+
+            {/* Country Gallery */}
+            <div className="mt-6 pt-4 border-t border-dashed border-gray-200 dark:border-slate-700">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Country Gallery</h3>
+              </div>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-4">
+                {formData.countryGallery && formData.countryGallery.map((item, idx) => (
+                  <div key={idx} className="relative aspect-square border rounded-lg overflow-hidden group border-gray-200 dark:border-slate-700">
+                    <img src={item.url} alt={`Gallery ${idx}`} className="w-full h-full object-cover" />
+                    <button type="button" onClick={() => handleRemoveGalleryImage(idx)} className="absolute top-1 right-1 bg-red-500/90 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                      ✕
+                    </button>
+                  </div>
+                ))}
+                <div className="aspect-square">
+                  <ImageUpload
+                    title="Add Image"
+                    type="image"
+                    onUploadSuccess={handleAddGalleryImage}
+                    accept="image/*"
+                    maxSize="5MB"
+                    width="100%"
+                    height="100%"
+                    className="w-full h-full"
+                    uploadType="countries"
+                    identifier={`gallery-${Date.now()}`}
+                    hidePreview={true}
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -650,7 +832,7 @@ export default function AddCountryPage() {
                 <label className={labelClassName}>Long Description</label>
                 <div className="min-h-[300px] border border-gray-200 dark:border-slate-700 rounded overflow-hidden">
                   <ApnaEditor
-                    content={formData.longDescription}
+                    value={formData.longDescription}
                     onChange={(content) =>
                       handleEditorChange("longDescription", content)
                     }

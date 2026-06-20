@@ -18,6 +18,7 @@ export default function EditCountryPage() {
   const [loading, setLoading] = useState(true);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [countryMasterOptions, setCountryMasterOptions] = useState([]);
+  const [newPathway, setNewPathway] = useState({ title: "", duration: "", description: "" });
 
   // Fetch CountryMaster list for name/code dropdown
   useEffect(() => {
@@ -60,6 +61,11 @@ export default function EditCountryPage() {
     // Media
     logo: null,
     banner: null,
+    brochure: null,
+
+    // Study Pathways & Gallery
+    studyPathways: [],
+    countryGallery: [],
 
     // Descriptions
     shortDescription: "",
@@ -69,6 +75,14 @@ export default function EditCountryPage() {
     metaTitle: "",
     metaDescription: "",
     focusKeyword: "",
+    metaKeywords: "",
+    canonicalUrl: "",
+    ogTitle: "",
+    ogDescription: "",
+    ogImage: "",
+    twitterTitle: "",
+    twitterDescription: "",
+    twitterImage: "",
 
     status: "active",
     isFeatured: false,
@@ -107,7 +121,7 @@ export default function EditCountryPage() {
         );
 
         if (!isMounted) return;
-
+        console.log("countryResponse ", countryResponse.data)
         if (countryResponse.success) {
           const country = countryResponse.data;
           setFormData({
@@ -134,6 +148,10 @@ export default function EditCountryPage() {
 
             logo: country.logo || null,
             banner: country.banner || null,
+            brochure: country.brochure || null,
+
+            studyPathways: country.studyPathways || [],
+            countryGallery: country.countryGallery || [],
 
             shortDescription: country.shortDescription || "",
             longDescription: country.longDescription || "",
@@ -141,6 +159,14 @@ export default function EditCountryPage() {
             metaTitle: country.metaTitle || "",
             metaDescription: country.metaDescription || "",
             focusKeyword: country.focusKeyword || "",
+            metaKeywords: country.metaKeywords && Array.isArray(country.metaKeywords) ? country.metaKeywords.join(", ") : "",
+            canonicalUrl: country.canonicalUrl || "",
+            ogTitle: country.ogTitle || "",
+            ogDescription: country.ogDescription || "",
+            ogImage: country.ogImage || "",
+            twitterTitle: country.twitterTitle || "",
+            twitterDescription: country.twitterDescription || "",
+            twitterImage: country.twitterImage || "",
 
             status: country.status || "active",
             isFeatured: country.isFeatured || false,
@@ -170,6 +196,47 @@ export default function EditCountryPage() {
       isMounted = false;
     };
   }, [countryId, getAccessToken, router]);
+
+  const handleAddPathway = () => {
+    if (!newPathway.title.trim() || !newPathway.duration.trim()) {
+      showError("Pathway Title and Duration are required");
+      return;
+    }
+    setFormData((prev) => ({
+      ...prev,
+      studyPathways: [...prev.studyPathways, newPathway],
+    }));
+    setNewPathway({ title: "", duration: "", description: "" });
+  };
+
+  const handleNewPathwayChange = (field, value) => {
+    setNewPathway((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handlePathwayChange = (index, field, value) => {
+    const updated = [...formData.studyPathways];
+    updated[index] = { ...updated[index], [field]: value };
+    setFormData((prev) => ({ ...prev, studyPathways: updated }));
+  };
+
+  const handleRemovePathway = (index) => {
+    const updated = [...formData.studyPathways];
+    updated.splice(index, 1);
+    setFormData((prev) => ({ ...prev, studyPathways: updated }));
+  };
+
+  const handleAddGalleryImage = (fileData) => {
+    setFormData((prev) => ({
+      ...prev,
+      countryGallery: [...prev.countryGallery, { url: fileData.fileUrl, type: "image" }],
+    }));
+  };
+
+  const handleRemoveGalleryImage = (index) => {
+    const updated = [...formData.countryGallery];
+    updated.splice(index, 1);
+    setFormData((prev) => ({ ...prev, countryGallery: updated }));
+  };
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -208,11 +275,22 @@ export default function EditCountryPage() {
         callingCode: formData.callingCode,
         logo: formData.logo,
         banner: formData.banner,
+        brochure: formData.brochure,
+        studyPathways: formData.studyPathways,
+        countryGallery: formData.countryGallery,
         shortDescription: formData.shortDescription,
         longDescription: formData.longDescription,
         metaTitle: formData.metaTitle,
         metaDescription: formData.metaDescription,
         focusKeyword: formData.focusKeyword,
+        metaKeywords: formData.metaKeywords ? formData.metaKeywords.split(",").map(k => k.trim()).filter(Boolean) : [],
+        canonicalUrl: formData.canonicalUrl,
+        ogTitle: formData.ogTitle,
+        ogDescription: formData.ogDescription,
+        ogImage: formData.ogImage,
+        twitterTitle: formData.twitterTitle,
+        twitterDescription: formData.twitterDescription,
+        twitterImage: formData.twitterImage,
         status: formData.status,
         isFeatured: formData.isFeatured,
         isPopular: formData.isPopular,
@@ -256,6 +334,12 @@ export default function EditCountryPage() {
       setSubmitLoading(false);
     }
   };
+
+  
+  const canAddPathway =
+    formData.studyPathways.length === 0 ||
+    (formData.studyPathways[formData.studyPathways.length - 1]?.title?.trim() !== "" &&
+     formData.studyPathways[formData.studyPathways.length - 1]?.duration?.trim() !== "");
 
   // Common UI Classes
   const labelClassName =
@@ -615,6 +699,66 @@ export default function EditCountryPage() {
             </div>
           </div>
 
+          {/* Study Pathways */}
+          <div className="border-b border-gray-200 dark:border-slate-800 pb-4">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                <h2 className={sectionHeadingClassName}>Study Pathways</h2>
+              </div>
+            </div>
+
+            <div className="mb-6 p-4 border border-primary-200 dark:border-primary/30 rounded-lg bg-primary-50/30 dark:bg-primary/5">
+              <h4 className="text-sm font-semibold mb-4 text-gray-900 dark:text-white">Add New Pathway</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                <div>
+                  <label className={labelClassName}>Pathway Title</label>
+                  <input type="text" value={newPathway.title} onChange={(e) => handleNewPathwayChange("title", e.target.value)} className={inputClassName} placeholder="e.g. MBBS in China" />
+                </div>
+                <div>
+                  <label className={labelClassName}>Duration</label>
+                  <input type="text" value={newPathway.duration} onChange={(e) => handleNewPathwayChange("duration", e.target.value)} className={inputClassName} placeholder="e.g. 6 years" />
+                </div>
+              </div>
+              <div className="mb-3">
+                <label className={labelClassName}>Description</label>
+                <textarea value={newPathway.description} onChange={(e) => handleNewPathwayChange("description", e.target.value)} rows={2} className={inputClassName} placeholder="Brief description of this pathway..." />
+              </div>
+              <div className="flex justify-end">
+                <button type="button" onClick={handleAddPathway} className="bg-primary text-white px-4 py-2 text-sm rounded hover:bg-primary-700 transition-colors shadow-sm">
+                  + Add Pathways
+                </button>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              {formData.studyPathways.map((pathway, index) => (
+                <div key={index} className="flex items-center justify-between p-4 border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800/50 hover:shadow-sm transition-shadow">
+                  <div className="flex-1 min-w-0 pr-4">
+                    <div className="flex items-center gap-3 mb-1">
+                      <h4 className="font-semibold text-sm text-gray-900 dark:text-white truncate" title={pathway.title}>{pathway.title}</h4>
+                      <span className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600"></span>
+                      <p className="text-xs text-primary font-medium whitespace-nowrap">{pathway.duration}</p>
+                    </div>
+                    {pathway.description ? (
+                      <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2" title={pathway.description}>{pathway.description}</p>
+                    ) : (
+                      <span className="text-xs text-gray-400 italic">No description</span>
+                    )}
+                  </div>
+                  <button type="button" onClick={() => handleRemovePathway(index)} className="shrink-0 text-xs bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded transition-colors dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40">
+                    Remove
+                  </button>
+                </div>
+              ))}
+              {formData.studyPathways.length === 0 && (
+                <div className="text-center py-6 text-sm text-gray-500 border border-dashed border-gray-300 dark:border-slate-700 rounded-lg">No pathways added yet.</div>
+              )}
+            </div>
+          </div>
+
           {/* Media & Documents */}
           <div className="border-b border-gray-200 dark:border-slate-800 pb-4">
             <div className="flex items-center gap-2 mb-4">
@@ -641,7 +785,6 @@ export default function EditCountryPage() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className={labelClassName}>Country Logo</label>
                 <ImageUpload
                   title="Country Logo"
                   type="image"
@@ -675,7 +818,6 @@ export default function EditCountryPage() {
                 </p>
               </div>
               <div>
-                <label className={labelClassName}>Country Banner</label>
                 <ImageUpload
                   title="Country Banner"
                   type="image"
@@ -707,6 +849,56 @@ export default function EditCountryPage() {
                 <p className="mt-1 text-xs text-gray-500">
                   Upload country banner (PNG, JPG - Max 5MB)
                 </p>
+              </div>
+              <div className="col-span-2 md:col-span-1">
+                <ImageUpload
+                  title="Country Brochure"
+                  type="document"
+                  preview={formData.brochure}
+                  onFileChange={(file, preview) => setFormData((prev) => ({ ...prev, brochure: preview }))}
+                  onRemove={() => setFormData((prev) => ({ ...prev, brochure: null }))}
+                  accept=".pdf"
+                  maxSize="10MB"
+                  width="100%"
+                  height="120px"
+                  className="w-full"
+                  uploadType="countries"
+                  identifier="country-brochure"
+                  onUploadSuccess={(fileData) => setFormData((prev) => ({ ...prev, brochure: fileData.fileUrl }))}
+                />
+              </div>
+            </div>
+
+            {/* Country Gallery */}
+            <div className="mt-6 pt-4 border-t border-dashed border-gray-200 dark:border-slate-700">
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-4">
+                {formData.countryGallery.map((item, idx) => (
+                  <div key={idx} className="relative aspect-square border rounded-lg overflow-hidden group border-gray-200 dark:border-slate-700">
+                    <img src={item.url} alt={`Gallery ${idx}`} className="w-full h-full object-cover" />
+                    <button type="button" onClick={() => handleRemoveGalleryImage(idx)} className="absolute top-1 right-1 bg-red-500/90 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                      ✕
+                    </button>
+                  </div>
+                ))}
+                <div className="aspect-square">
+                  <ImageUpload
+                    title="Country Gallery (Multiple)"
+                    type="image"
+                    preview={null}
+                    onFileChange={() => {}}
+                    onRemove={() => {}}
+                    accept="image/*"
+                    multiple={true}
+                    maxSize="3MB"
+                    width="100%"
+                    height="100%"
+                    className="w-full h-full"
+                    uploadType="countries"
+                    identifier="country-gallery"
+                    onUploadSuccess={handleAddGalleryImage}
+                    showUploadProgress={true}
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -748,7 +940,7 @@ export default function EditCountryPage() {
                 <label className={labelClassName}>Long Description</label>
                 <div className="min-h-[300px] border border-gray-200 dark:border-slate-700 rounded overflow-hidden">
                   <ApnaEditor
-                    content={formData.longDescription}
+                    value={formData.longDescription}
                     onChange={(content) =>
                       handleEditorChange("longDescription", content)
                     }
@@ -758,63 +950,8 @@ export default function EditCountryPage() {
             </div>
           </div>
 
-          {/* SEO Information */}
-          <div className="border-b border-gray-200 dark:border-slate-800 pb-4">
-            <div className="flex items-center gap-2 mb-4">
-              <svg
-                className="w-5 h-5 text-primary"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
-                />
-              </svg>
-              <h2 className={sectionHeadingClassName}>SEO Information</h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className={labelClassName}>Meta Title</label>
-                <input
-                  type="text"
-                  name="metaTitle"
-                  value={formData.metaTitle}
-                  onChange={handleInputChange}
-                  placeholder="Enter meta title"
-                  className={inputClassName}
-                />
-              </div>
-              <div>
-                <label className={labelClassName}>Focus Keyword</label>
-                <input
-                  type="text"
-                  name="focusKeyword"
-                  value={formData.focusKeyword}
-                  onChange={handleInputChange}
-                  placeholder="Enter focus keyword"
-                  className={inputClassName}
-                />
-              </div>
-              <div className="col-span-2">
-                <label className={labelClassName}>Meta Description</label>
-                <textarea
-                  name="metaDescription"
-                  value={formData.metaDescription}
-                  onChange={handleInputChange}
-                  rows={2}
-                  className={inputClassName}
-                  placeholder="Enter meta description"
-                />
-              </div>
-            </div>
-          </div>
-
           {/* Status & Metadata */}
-          <div className="pb-4">
+          <div className="border-b border-gray-200 dark:border-slate-800 pb-4">
             <div className="flex items-center gap-2 mb-4">
               <svg
                 className="w-5 h-5 text-primary"
@@ -890,6 +1027,98 @@ export default function EditCountryPage() {
                 />
                 Mark as popular
               </label>
+            </div>
+          </div>
+
+          {/* SEO Information */}
+          <div className="pb-4">
+            <div className="flex items-center gap-2 mb-4">
+              <svg
+                className="w-5 h-5 text-primary"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+                />
+              </svg>
+              <h2 className={sectionHeadingClassName}>SEO Information</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className={labelClassName}>Meta Title</label>
+                <input
+                  type="text"
+                  name="metaTitle"
+                  value={formData.metaTitle}
+                  onChange={handleInputChange}
+                  placeholder="Enter meta title"
+                  className={inputClassName}
+                />
+              </div>
+              <div>
+                <label className={labelClassName}>Focus Keyword</label>
+                <input
+                  type="text"
+                  name="focusKeyword"
+                  value={formData.focusKeyword}
+                  onChange={handleInputChange}
+                  placeholder="Enter focus keyword"
+                  className={inputClassName}
+                />
+              </div>
+              <div className="col-span-1 md:col-span-2">
+                <label className={labelClassName}>Meta Description</label>
+                <textarea
+                  name="metaDescription"
+                  value={formData.metaDescription}
+                  onChange={handleInputChange}
+                  rows={2}
+                  className={inputClassName}
+                  placeholder="Enter meta description"
+                />
+              </div>
+              <div className="col-span-1 md:col-span-2 mt-4 pt-4 border-t border-gray-200 dark:border-slate-800">
+                <h3 className="text-sm font-medium mb-3 text-gray-900 dark:text-white">Advanced SEO & Open Graph</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className={labelClassName}>Meta Keywords (comma separated)</label>
+                    <input type="text" name="metaKeywords" value={formData.metaKeywords} onChange={handleInputChange} placeholder="e.g. mbbs in china, study abroad" className={inputClassName} />
+                  </div>
+                  <div>
+                    <label className={labelClassName}>Canonical URL</label>
+                    <input type="text" name="canonicalUrl" value={formData.canonicalUrl} onChange={handleInputChange} placeholder="https://example.com/country/china" className={inputClassName} />
+                  </div>
+                  <div>
+                    <label className={labelClassName}>OG Title</label>
+                    <input type="text" name="ogTitle" value={formData.ogTitle} onChange={handleInputChange} className={inputClassName} />
+                  </div>
+                  <div>
+                    <label className={labelClassName}>OG Description</label>
+                    <textarea name="ogDescription" value={formData.ogDescription} onChange={handleInputChange} rows={2} className={inputClassName} />
+                  </div>
+                  <div className="col-span-1 md:col-span-2">
+                    <label className={labelClassName}>OG Image URL</label>
+                    <input type="text" name="ogImage" value={formData.ogImage} onChange={handleInputChange} className={inputClassName} />
+                  </div>
+                  <div>
+                    <label className={labelClassName}>Twitter Title</label>
+                    <input type="text" name="twitterTitle" value={formData.twitterTitle} onChange={handleInputChange} className={inputClassName} />
+                  </div>
+                  <div>
+                    <label className={labelClassName}>Twitter Description</label>
+                    <textarea name="twitterDescription" value={formData.twitterDescription} onChange={handleInputChange} rows={2} className={inputClassName} />
+                  </div>
+                  <div className="col-span-1 md:col-span-2">
+                    <label className={labelClassName}>Twitter Image URL</label>
+                    <input type="text" name="twitterImage" value={formData.twitterImage} onChange={handleInputChange} className={inputClassName} />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
