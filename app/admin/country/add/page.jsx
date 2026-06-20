@@ -795,6 +795,65 @@ export default function AddCountryPage() {
             </div>
           </div>
 
+          {/* Quick Facts */}
+          <div className="border-b border-gray-200 dark:border-slate-800 pb-4">
+            <div className="flex items-center gap-2 mb-4">
+              <svg
+                className="w-5 h-5 text-primary"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              <h2 className={sectionHeadingClassName}>Quick Facts</h2>
+            </div>
+            
+            <div className="mb-6 p-4 border border-primary-200 dark:border-primary/30 rounded-lg bg-primary-50/30 dark:bg-primary/5">
+              <h4 className="text-sm font-semibold mb-4 text-gray-900 dark:text-white">Add New Quick Fact</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                <div>
+                  <label className={labelClassName}>Label (e.g. Duration)</label>
+                  <input type="text" value={newQuickFact.label} onChange={(e) => handleNewQuickFactChange("label", e.target.value)} className={inputClassName} placeholder="Enter label..." />
+                </div>
+                <div>
+                  <label className={labelClassName}>Value (e.g. 5 Years)</label>
+                  <input type="text" value={newQuickFact.value} onChange={(e) => handleNewQuickFactChange("value", e.target.value)} className={inputClassName} placeholder="Enter value..." />
+                </div>
+              </div>
+              <div className="flex justify-end mt-2">
+                <button type="button" onClick={handleAddQuickFact} className="bg-primary text-white px-4 py-2 text-sm rounded hover:bg-primary-700 transition-colors shadow-sm">
+                  + Add to List
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-3 mb-4">
+              {formData.quickFacts.map((fact, index) => (
+                <div key={index} className="flex items-center justify-between p-4 border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800/50 hover:shadow-sm transition-shadow">
+                  <div className="flex-1 min-w-0 pr-4">
+                    <div className="flex items-center gap-3 mb-1">
+                      <h4 className="font-semibold text-sm text-gray-900 dark:text-white truncate" title={fact.label}>{fact.label}</h4>
+                      <span className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600"></span>
+                      <p className="text-xs text-primary font-medium whitespace-nowrap">{fact.value}</p>
+                    </div>
+                  </div>
+                  <button type="button" onClick={() => handleRemoveQuickFact(index)} className="shrink-0 text-xs bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded transition-colors dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40">
+                    Remove
+                  </button>
+                </div>
+              ))}
+              {formData.quickFacts.length === 0 && (
+                <div className="text-center py-6 text-sm text-gray-500 border border-dashed border-gray-300 dark:border-slate-700 rounded-lg">No quick facts added yet.</div>
+              )}
+            </div>
+          </div>
+
           {/* Description */}
           <div className="border-b border-gray-200 dark:border-slate-800 pb-4">
             <div className="flex items-center gap-2 mb-4">
@@ -835,6 +894,39 @@ export default function AddCountryPage() {
                     value={formData.longDescription}
                     onChange={(content) =>
                       handleEditorChange("longDescription", content)
+                    }
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Documents Required */}
+          <div className="border-b border-gray-200 dark:border-slate-800 pb-4">
+            <div className="flex items-center gap-2 mb-4">
+              <svg
+                className="w-5 h-5 text-primary"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+              <h2 className={sectionHeadingClassName}>Documents Required</h2>
+            </div>
+            <div className="space-y-4">
+              <div>
+                <label className={labelClassName}>List of Documents (HTML via Editor)</label>
+                <div className="min-h-[200px] border border-gray-200 dark:border-slate-700 rounded overflow-hidden">
+                  <ApnaEditor
+                    value={formData.documentsRequired}
+                    onChange={(content) =>
+                      handleEditorChange("documentsRequired", content)
                     }
                   />
                 </div>
