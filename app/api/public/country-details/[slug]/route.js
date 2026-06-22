@@ -3,6 +3,51 @@ import connectDB from "@/lib/db";
 import { Country, College, News, Blog, Exam } from "@/lib/models";
 import CountrySection from "@/lib/models/CountrySection";
 
+const deprecatedSectionTabs = new Set(["study"]);
+
+function buildPublicCountryData(country) {
+  return {
+    _id: country._id,
+    name: country.name,
+    shortName: country.shortName,
+    code: country.code,
+    slug: country.slug,
+    capital: country.capital,
+    currency: country.currency,
+    language: country.language,
+    population: country.population,
+    timeZone: country.timeZone,
+    callingCode: country.callingCode,
+    logo: country.logo,
+    banner: country.banner,
+    brochure: country.brochure,
+    countryGallery: country.countryGallery || [],
+    shortDescription: country.shortDescription,
+    longDescription: country.longDescription,
+    quickFacts: country.quickFacts || [],
+    faqs: country.faqs || [],
+    status: country.status,
+    isFeatured: country.isFeatured,
+    isPopular: country.isPopular,
+    verified: country.verified || false,
+    displayOrder: country.displayOrder,
+    metaTitle: country.metaTitle,
+    metaDescription: country.metaDescription,
+    metaKeywords: country.metaKeywords || [],
+    focusKeyword: country.focusKeyword,
+    canonicalUrl: country.canonicalUrl,
+    ogTitle: country.ogTitle,
+    ogDescription: country.ogDescription,
+    ogImage: country.ogImage,
+    twitterTitle: country.twitterTitle,
+    twitterDescription: country.twitterDescription,
+    twitterImage: country.twitterImage,
+    schemaMarkup: country.schemaMarkup,
+    createdAt: country.createdAt,
+    updatedAt: country.updatedAt,
+  };
+}
+
 export async function GET(request, { params }) {
   try {
     await connectDB();
@@ -18,13 +63,18 @@ export async function GET(request, { params }) {
     }
 
     // Fetch dynamic sections/tabs
-    const sections = await CountrySection.find({
+    const sections = (await CountrySection.find({
       country: country._id,
       status: "active",
     })
       .sort({ displayOrder: 1 })
       .select("title tabName slug content")
-      .lean();
+      .lean()).filter(
+        (section) =>
+          !deprecatedSectionTabs.has(
+            String(section.tabName || "").trim().toLowerCase()
+          )
+      );
 
     // Fetch Top/Featured Colleges in this country dynamically
     const topColleges = await College.find({
@@ -96,7 +146,7 @@ export async function GET(request, { params }) {
       .lean();
 
     const responseData = {
-      ...country,
+      ...buildPublicCountryData(country),
       sections,
       topColleges,
       totalCollegesCount,

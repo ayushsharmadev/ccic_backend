@@ -14,7 +14,10 @@ export default function AddCountryPage() {
   const { getAccessToken } = useAuth();
   const [loading, setLoading] = useState(false);
   const [countryMasterOptions, setCountryMasterOptions] = useState([]);
-  const [newPathway, setNewPathway] = useState({ title: "", duration: "", description: "" });
+  const [newFaq, setNewFaq] = useState({ question: "", answer: "" });
+  const [newSection, setNewSection] = useState({ title: "", content: "" });
+  const [editingSectionIndex, setEditingSectionIndex] = useState(null);
+  const [editingSection, setEditingSection] = useState({ title: "", content: "" });
   const [newQuickFact, setNewQuickFact] = useState({ label: "", value: "" });
 
   // Fetch CountryMaster list for name/code dropdown
@@ -42,19 +45,6 @@ export default function AddCountryPage() {
     timeZone: "",
     callingCode: "",
 
-    // Study Metrics
-    tuitionFeeMin: "",
-    tuitionFeeMax: "",
-    livingCostMin: "",
-    livingCostMax: "",
-    courseDuration: "",
-    mediumOfTeaching: "",
-
-    // Admission Details
-    timeline: "",
-    eligibility: "",
-    visaType: "",
-
     // Media
     logo: null,
     banner: null,
@@ -69,14 +59,24 @@ export default function AddCountryPage() {
     metaTitle: "",
     metaDescription: "",
     focusKeyword: "",
+    metaKeywords: "",
+    canonicalUrl: "",
+    ogTitle: "",
+    ogDescription: "",
+    ogImage: "",
+    twitterTitle: "",
+    twitterDescription: "",
+    twitterImage: "",
 
-    studyPathways: [],
+    faqs: [],
+    sections: [],
     quickFacts: [],
     documentsRequired: "",
 
     status: "active",
     isFeatured: false,
     isPopular: false,
+    verified: false,
     displayOrder: 0,
   });
 
@@ -88,26 +88,109 @@ export default function AddCountryPage() {
     }));
   };
 
-  const handleAddPathway = () => {
-    if (!newPathway.title.trim() || !newPathway.duration.trim()) {
-      showError("Pathway Title and Duration are required");
+  const handleAddSection = () => {
+    const title = newSection.title.trim();
+    const content = newSection.content?.trim() || "";
+
+    if (!title || !content) {
+      showError("Section title and content are required");
       return;
     }
+
     setFormData((prev) => ({
       ...prev,
-      studyPathways: [...prev.studyPathways, newPathway],
+      sections: [
+        ...prev.sections,
+        {
+          title,
+          tabName: "Overview",
+          content,
+          displayOrder: prev.sections.length,
+          status: "active",
+        },
+      ],
     }));
-    setNewPathway({ title: "", duration: "", description: "" });
+    setNewSection({ title: "", content: "" });
   };
 
-  const handleNewPathwayChange = (field, value) => {
-    setNewPathway((prev) => ({ ...prev, [field]: value }));
+  const handleEditSection = (index) => {
+    const section = formData.sections[index];
+    setEditingSectionIndex(index);
+    setEditingSection({
+      title: section?.title || "",
+      content: section?.content || "",
+    });
   };
 
-  const handleRemovePathway = (index) => {
-    const updated = [...formData.studyPathways];
-    updated.splice(index, 1);
-    setFormData((prev) => ({ ...prev, studyPathways: updated }));
+  const handleSaveSection = (index) => {
+    const title = editingSection.title.trim();
+    const content = editingSection.content?.trim() || "";
+
+    if (!title || !content) {
+      showError("Section title and content are required");
+      return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      sections: prev.sections.map((section, itemIndex) =>
+        itemIndex === index
+          ? {
+              ...section,
+              title,
+              tabName: "Overview",
+              content,
+              displayOrder: section.displayOrder ?? index,
+              status: section.status || "active",
+            }
+          : section
+      ),
+    }));
+    setEditingSectionIndex(null);
+    setEditingSection({ title: "", content: "" });
+  };
+
+  const handleCancelSectionEdit = () => {
+    setEditingSectionIndex(null);
+    setEditingSection({ title: "", content: "" });
+  };
+
+  const handleRemoveSection = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      sections: prev.sections.filter((_, itemIndex) => itemIndex !== index),
+    }));
+    setEditingSectionIndex((prevIndex) => {
+      if (prevIndex === null) return prevIndex;
+      if (prevIndex === index) {
+        setEditingSection({ title: "", content: "" });
+        return null;
+      }
+      return prevIndex > index ? prevIndex - 1 : prevIndex;
+    });
+  };
+
+  const handleAddFaq = () => {
+    const question = newFaq.question.trim();
+    const answer = newFaq.answer.trim();
+
+    if (!question || !answer) {
+      showError("FAQ question and answer are required");
+      return;
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      faqs: [...prev.faqs, { question, answer }],
+    }));
+    setNewFaq({ question: "", answer: "" });
+  };
+
+  const handleRemoveFaq = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      faqs: prev.faqs.filter((_, itemIndex) => itemIndex !== index),
+    }));
   };
 
   const handleAddQuickFact = () => {
@@ -153,11 +236,96 @@ export default function AddCountryPage() {
     setFormData((prev) => ({ ...prev, countryGallery: updated }));
   };
 
+  const isBlank = (value) => String(value ?? "").trim() === "";
+
+  const isBlankRichText = (value) => {
+    const text = String(value || "")
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .trim();
+    return text === "";
+  };
+
+  const validateForm = () => {
+    const requiredTextFields = [
+      ["Country Name", formData.name],
+      ["Short Name", formData.shortName],
+      ["Country Code", formData.code],
+      ["Capital City", formData.capital],
+      ["Currency", formData.currency],
+      ["Language", formData.language],
+      ["Population", formData.population],
+      ["Time Zone", formData.timeZone],
+      ["Calling Code", formData.callingCode],
+      ["Short Description", formData.shortDescription],
+      ["Status", formData.status],
+    ];
+
+    for (const [label, value] of requiredTextFields) {
+      if (isBlank(value)) {
+        showError(`${label} is required`);
+        return false;
+      }
+    }
+
+    if (isBlank(formData.displayOrder) || Number.isNaN(Number(formData.displayOrder))) {
+      showError("Display Order is required");
+      return false;
+    }
+
+    if (!formData.logo) {
+      showError("Country Logo is required");
+      return false;
+    }
+
+    if (!formData.banner) {
+      showError("Country Banner is required");
+      return false;
+    }
+
+    if (!formData.brochure) {
+      showError("Country Brochure is required");
+      return false;
+    }
+
+    if (!formData.countryGallery.length) {
+      showError("At least one country gallery image is required");
+      return false;
+    }
+
+    if (!formData.quickFacts.length) {
+      showError("At least one quick fact is required");
+      return false;
+    }
+
+    if (isBlankRichText(formData.longDescription)) {
+      showError("Long Description is required");
+      return false;
+    }
+
+    if (isBlankRichText(formData.documentsRequired)) {
+      showError("Documents Required is required");
+      return false;
+    }
+
+    if (!formData.faqs.length) {
+      showError("At least one FAQ is required");
+      return false;
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
+      if (!validateForm()) {
+        setLoading(false);
+        return;
+      }
+
       const token = getAccessToken();
       if (!token) {
         showError("Authentication required.");
@@ -185,27 +353,24 @@ export default function AddCountryPage() {
         metaTitle: formData.metaTitle,
         metaDescription: formData.metaDescription,
         focusKeyword: formData.focusKeyword,
+        metaKeywords: formData.metaKeywords.split(",").map(k => k.trim()).filter(Boolean),
+        canonicalUrl: formData.canonicalUrl,
+        ogTitle: formData.ogTitle,
+        ogDescription: formData.ogDescription,
+        ogImage: formData.ogImage,
+        twitterTitle: formData.twitterTitle,
+        twitterDescription: formData.twitterDescription,
+        twitterImage: formData.twitterImage,
         status: formData.status,
         isFeatured: formData.isFeatured,
         isPopular: formData.isPopular,
+        verified: formData.verified,
         displayOrder: Number(formData.displayOrder) || 0,
 
-        studyMetrics: {
-          tuitionFeeMin: Number(formData.tuitionFeeMin) || 0,
-          tuitionFeeMax: Number(formData.tuitionFeeMax) || 0,
-          livingCostMin: Number(formData.livingCostMin) || 0,
-          livingCostMax: Number(formData.livingCostMax) || 0,
-          courseDuration: formData.courseDuration,
-          mediumOfTeaching: formData.mediumOfTeaching,
-        },
-
-        admissionDetails: {
-          timeline: formData.timeline,
-          eligibility: formData.eligibility,
-          visaType: formData.visaType,
-        },
         
-        studyPathways: formData.studyPathways,
+
+        faqs: formData.faqs,
+        sections: formData.sections,
         quickFacts: formData.quickFacts,
         documentsRequired: formData.documentsRequired,
       };
@@ -365,9 +530,8 @@ export default function AddCountryPage() {
                 />
               </div>
               <div>
-                <label className={labelClassName}>Capital City *</label>
+                <label className={labelClassName}>Capital City</label>
                 <input
-                  required
                   type="text"
                   name="capital"
                   value={formData.capital}
@@ -377,9 +541,8 @@ export default function AddCountryPage() {
                 />
               </div>
               <div>
-                <label className={labelClassName}>Currency *</label>
+                <label className={labelClassName}>Currency</label>
                 <input
-                  required
                   type="text"
                   name="currency"
                   value={formData.currency}
@@ -389,9 +552,8 @@ export default function AddCountryPage() {
                 />
               </div>
               <div>
-                <label className={labelClassName}>Language *</label>
+                <label className={labelClassName}>Language</label>
                 <input
-                  required
                   type="text"
                   name="language"
                   value={formData.language}
@@ -401,9 +563,8 @@ export default function AddCountryPage() {
                 />
               </div>
               <div>
-                <label className={labelClassName}>Population *</label>
+                <label className={labelClassName}>Population</label>
                 <input
-                  required
                   type="text"
                   name="population"
                   value={formData.population}
@@ -413,9 +574,8 @@ export default function AddCountryPage() {
                 />
               </div>
               <div>
-                <label className={labelClassName}>Time Zone *</label>
+                <label className={labelClassName}>Time Zone</label>
                 <input
-                  required
                   type="text"
                   name="timeZone"
                   value={formData.timeZone}
@@ -425,9 +585,8 @@ export default function AddCountryPage() {
                 />
               </div>
               <div>
-                <label className={labelClassName}>Calling Code *</label>
+                <label className={labelClassName}>Calling Code</label>
                 <input
-                  required
                   type="text"
                   name="callingCode"
                   value={formData.callingCode}
@@ -436,215 +595,6 @@ export default function AddCountryPage() {
                   className={inputClassName}
                 />
               </div>
-            </div>
-          </div>
-
-          {/* Study Metrics */}
-          <div className="border-b border-gray-200 dark:border-slate-800 pb-4">
-            <div className="flex items-center gap-2 mb-4">
-              <svg
-                className="w-5 h-5 text-primary"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <h2 className={sectionHeadingClassName}>
-                Study & Financial Metrics
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div>
-                <label className={labelClassName}>
-                  Min Tuition Fee (INR) *
-                </label>
-                <input
-                  required
-                  type="number"
-                  name="tuitionFeeMin"
-                  value={formData.tuitionFeeMin}
-                  onChange={handleInputChange}
-                  placeholder="e.g. 200000"
-                  className={inputClassName}
-                />
-              </div>
-              <div>
-                <label className={labelClassName}>Max Tuition Fee (INR)</label>
-                <input
-                  type="number"
-                  name="tuitionFeeMax"
-                  value={formData.tuitionFeeMax}
-                  onChange={handleInputChange}
-                  placeholder="e.g. 800000"
-                  className={inputClassName}
-                />
-              </div>
-              <div>
-                <label className={labelClassName}>Min Living Cost (INR)</label>
-                <input
-                  type="number"
-                  name="livingCostMin"
-                  value={formData.livingCostMin}
-                  onChange={handleInputChange}
-                  placeholder="e.g. 15000"
-                  className={inputClassName}
-                />
-              </div>
-              <div>
-                <label className={labelClassName}>Max Living Cost (INR)</label>
-                <input
-                  type="number"
-                  name="livingCostMax"
-                  value={formData.livingCostMax}
-                  onChange={handleInputChange}
-                  placeholder="e.g. 30000"
-                  className={inputClassName}
-                />
-              </div>
-              <div>
-                <label className={labelClassName}>Course Duration *</label>
-                <input
-                  required
-                  type="text"
-                  name="courseDuration"
-                  value={formData.courseDuration}
-                  onChange={handleInputChange}
-                  placeholder="e.g. 5 Years"
-                  className={inputClassName}
-                />
-              </div>
-              <div>
-                <label className={labelClassName}>Medium of Teaching</label>
-                <input
-                  type="text"
-                  name="mediumOfTeaching"
-                  value={formData.mediumOfTeaching}
-                  onChange={handleInputChange}
-                  placeholder="e.g. English"
-                  className={inputClassName}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Admission Details */}
-          <div className="border-b border-gray-200 dark:border-slate-800 pb-4">
-            <div className="flex items-center gap-2 mb-4">
-              <svg
-                className="w-5 h-5 text-primary"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <h2 className={sectionHeadingClassName}>Admission Details</h2>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className={labelClassName}>Admission Timeline</label>
-                <input
-                  type="text"
-                  name="timeline"
-                  value={formData.timeline}
-                  onChange={handleInputChange}
-                  placeholder="e.g. September - November"
-                  className={inputClassName}
-                />
-              </div>
-              <div>
-                <label className={labelClassName}>Eligibility Criteria</label>
-                <input
-                  type="text"
-                  name="eligibility"
-                  value={formData.eligibility}
-                  onChange={handleInputChange}
-                  placeholder="e.g. 10+2 with 50% PCB"
-                  className={inputClassName}
-                />
-              </div>
-              <div>
-                <label className={labelClassName}>Visa Type</label>
-                <input
-                  type="text"
-                  name="visaType"
-                  value={formData.visaType}
-                  onChange={handleInputChange}
-                  placeholder="e.g. Student Visa"
-                  className={inputClassName}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Study Pathways */}
-          <div className="border-b border-gray-200 dark:border-slate-800 pb-4">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <svg className="w-5 h-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                </svg>
-                <h2 className={sectionHeadingClassName}>Study Pathways</h2>
-              </div>
-            </div>
-
-            <div className="mb-6 p-4 border border-primary-200 dark:border-primary/30 rounded-lg bg-primary-50/30 dark:bg-primary/5">
-              <h4 className="text-sm font-semibold mb-4 text-gray-900 dark:text-white">Add New Pathway</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
-                <div>
-                  <label className={labelClassName}>Pathway Title</label>
-                  <input type="text" value={newPathway.title} onChange={(e) => handleNewPathwayChange("title", e.target.value)} className={inputClassName} placeholder="e.g. MBBS in China" />
-                </div>
-                <div>
-                  <label className={labelClassName}>Duration</label>
-                  <input type="text" value={newPathway.duration} onChange={(e) => handleNewPathwayChange("duration", e.target.value)} className={inputClassName} placeholder="e.g. 6 years" />
-                </div>
-              </div>
-              <div className="mb-3">
-                <label className={labelClassName}>Description</label>
-                <textarea value={newPathway.description} onChange={(e) => handleNewPathwayChange("description", e.target.value)} rows={2} className={inputClassName} placeholder="Brief description of this pathway..." />
-              </div>
-              <div className="flex justify-end">
-                <button type="button" onClick={handleAddPathway} className="bg-primary text-white px-4 py-2 text-sm rounded hover:bg-primary-700 transition-colors shadow-sm">
-                  + Add to List
-                </button>
-              </div>
-            </div>
-            
-            <div className="space-y-3">
-              {formData.studyPathways.map((pathway, index) => (
-                <div key={index} className="flex items-center justify-between p-4 border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800/50 hover:shadow-sm transition-shadow">
-                  <div className="flex-1 min-w-0 pr-4">
-                    <div className="flex items-center gap-3 mb-1">
-                      <h4 className="font-semibold text-sm text-gray-900 dark:text-white truncate" title={pathway.title}>{pathway.title}</h4>
-                      <span className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600"></span>
-                      <p className="text-xs text-primary font-medium whitespace-nowrap">{pathway.duration}</p>
-                    </div>
-                    {pathway.description ? (
-                      <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2" title={pathway.description}>{pathway.description}</p>
-                    ) : (
-                      <span className="text-xs text-gray-400 italic">No description</span>
-                    )}
-                  </div>
-                  <button type="button" onClick={() => handleRemovePathway(index)} className="shrink-0 text-xs bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded transition-colors dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40">
-                    Remove
-                  </button>
-                </div>
-              ))}
-              {formData.studyPathways.length === 0 && (
-                <div className="text-center py-6 text-sm text-gray-500 border border-dashed border-gray-300 dark:border-slate-700 rounded-lg">No pathways added yet.</div>
-              )}
             </div>
           </div>
 
@@ -674,7 +624,6 @@ export default function AddCountryPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label className={labelClassName}>Country Logo</label>
                 <ImageUpload
                   title="Country Logo"
                   type="image"
@@ -708,7 +657,6 @@ export default function AddCountryPage() {
                 </p>
               </div>
               <div>
-                <label className={labelClassName}>Country Banner</label>
                 <ImageUpload
                   title="Country Banner"
                   type="image"
@@ -742,7 +690,6 @@ export default function AddCountryPage() {
                 </p>
               </div>
               <div>
-                <label className={labelClassName}>Country Brochure</label>
                 <ImageUpload
                   title="Country Brochure"
                   type="document"
@@ -934,6 +881,120 @@ export default function AddCountryPage() {
             </div>
           </div>
 
+          
+          {/* Dynamic Overview Sections */}
+          <div className="border-b border-gray-200 dark:border-slate-800 pb-4">
+            <h2 className={sectionHeadingClassName}>Dynamic Overview Sections (Optional)</h2>
+            <div className="mb-6 p-4 border border-primary-200 dark:border-primary/30 rounded-lg bg-primary-50/30 dark:bg-primary/5">
+              <h3 className="text-sm font-semibold mb-4 text-gray-900 dark:text-white">Add New Section</h3>
+              <div className="mb-3">
+                <label className={labelClassName}>Section Title</label>
+                <input type="text" value={newSection.title} onChange={(e) => setNewSection({...newSection, title: e.target.value})} className={inputClassName} placeholder="e.g. Admission Timeline" />
+              </div>
+              <div className="mb-3">
+                <label className={labelClassName}>Content</label>
+                <ApnaEditor value={newSection.content} onChange={(content) => setNewSection({...newSection, content})} />
+              </div>
+              <div className="flex justify-end mt-2">
+                <button type="button" onClick={handleAddSection} className="bg-primary text-white px-4 py-2 text-sm rounded hover:bg-primary-700 transition-colors shadow-sm">
+                  + Add to List
+                </button>
+              </div>
+            </div>
+            <div className="space-y-4 mb-4">
+              {formData.sections.map((sec, index) => (
+                <div key={index} className="p-4 border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800/50 hover:shadow-sm transition-shadow">
+                  {editingSectionIndex === index ? (
+                    <div className="space-y-3">
+                      <div>
+                        <label className={labelClassName}>Section Title</label>
+                        <input
+                          type="text"
+                          value={editingSection.title}
+                          onChange={(e) => setEditingSection({ ...editingSection, title: e.target.value })}
+                          className={inputClassName}
+                          placeholder="Enter section title..."
+                        />
+                      </div>
+                      <div>
+                        <label className={labelClassName}>Content</label>
+                        <ApnaEditor
+                          value={editingSection.content}
+                          onChange={(content) => setEditingSection({ ...editingSection, content })}
+                        />
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <button type="button" onClick={handleCancelSectionEdit} className="text-xs bg-gray-100 text-gray-700 hover:bg-gray-200 px-3 py-1.5 rounded transition-colors dark:bg-slate-700 dark:text-gray-200 dark:hover:bg-slate-600">
+                          Cancel
+                        </button>
+                        <button type="button" onClick={() => handleSaveSection(index)} className="text-xs bg-primary text-white hover:bg-primary-700 px-3 py-1.5 rounded transition-colors">
+                          Save
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex items-start justify-between gap-4 mb-2">
+                        <p className="font-medium text-sm text-gray-900 dark:text-white">{sec.title}</p>
+                        <div className="flex shrink-0 gap-2">
+                          <button type="button" onClick={() => handleEditSection(index)} className="text-xs bg-gray-100 text-gray-700 hover:bg-gray-200 px-3 py-1.5 rounded transition-colors dark:bg-slate-700 dark:text-gray-200 dark:hover:bg-slate-600">
+                            Edit
+                          </button>
+                          <button type="button" onClick={() => handleRemoveSection(index)} className="text-xs bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded transition-colors dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40">
+                            Remove
+                          </button>
+                        </div>
+                      </div>
+                      <div className="text-sm prose dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: sec.content }} />
+                    </>
+                  )}
+                </div>
+              ))}
+              {formData.sections.length === 0 && (
+                <div className="text-center py-6 text-sm text-gray-500 border border-dashed border-gray-300 dark:border-slate-700 rounded-lg">No dynamic overview sections added yet.</div>
+              )}
+            </div>
+          </div>
+
+          {/* Structured FAQs */}
+          <div className="border-b border-gray-200 dark:border-slate-800 pb-4">
+            <h2 className={sectionHeadingClassName}>FAQs (Accordion)</h2>
+            <div className="mb-6 p-4 border border-primary-200 dark:border-primary/30 rounded-lg bg-primary-50/30 dark:bg-primary/5">
+              <h3 className="text-sm font-semibold mb-4 text-gray-900 dark:text-white">Add New FAQ</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+                <div>
+                  <label className={labelClassName}>Question</label>
+                  <input type="text" value={newFaq.question} onChange={(e) => setNewFaq({...newFaq, question: e.target.value})} className={inputClassName} placeholder="Enter question..." />
+                </div>
+                <div>
+                  <label className={labelClassName}>Answer</label>
+                  <input type="text" value={newFaq.answer} onChange={(e) => setNewFaq({...newFaq, answer: e.target.value})} className={inputClassName} placeholder="Enter answer..." />
+                </div>
+              </div>
+              <div className="flex justify-end mt-2">
+                <button type="button" onClick={handleAddFaq} className="bg-primary text-white px-4 py-2 text-sm rounded hover:bg-primary-700 transition-colors shadow-sm">
+                  + Add to List
+                </button>
+              </div>
+            </div>
+            <div className="space-y-3 mb-4">
+              {formData.faqs.map((faq, index) => (
+                <div key={index} className="flex items-start justify-between gap-4 p-4 border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800/50 hover:shadow-sm transition-shadow">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm text-gray-900 dark:text-white">Q: {faq.question}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">A: {faq.answer}</p>
+                  </div>
+                  <button type="button" onClick={() => handleRemoveFaq(index)} className="shrink-0 text-xs bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded transition-colors dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40">
+                    Remove
+                  </button>
+                </div>
+              ))}
+              {formData.faqs.length === 0 && (
+                <div className="text-center py-6 text-sm text-gray-500 border border-dashed border-gray-300 dark:border-slate-700 rounded-lg">No FAQs added yet.</div>
+              )}
+            </div>
+          </div>
+  
           {/* SEO Information */}
           <div className="border-b border-gray-200 dark:border-slate-800 pb-4">
             <div className="flex items-center gap-2 mb-4">
@@ -950,11 +1011,11 @@ export default function AddCountryPage() {
                   d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
                 />
               </svg>
-              <h2 className={sectionHeadingClassName}>SEO Information</h2>
+              <h2 className={sectionHeadingClassName}>SEO Information (Optional)</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className={labelClassName}>Meta Title</label>
+                <label className={labelClassName}>Meta Title (Optional)</label>
                 <input
                   type="text"
                   name="metaTitle"
@@ -965,7 +1026,7 @@ export default function AddCountryPage() {
                 />
               </div>
               <div>
-                <label className={labelClassName}>Focus Keyword</label>
+                <label className={labelClassName}>Focus Keyword (Optional)</label>
                 <input
                   type="text"
                   name="focusKeyword"
@@ -976,7 +1037,7 @@ export default function AddCountryPage() {
                 />
               </div>
               <div className="col-span-2">
-                <label className={labelClassName}>Meta Description</label>
+                <label className={labelClassName}>Meta Description (Optional)</label>
                 <textarea
                   name="metaDescription"
                   value={formData.metaDescription}
@@ -985,6 +1046,43 @@ export default function AddCountryPage() {
                   className={inputClassName}
                   placeholder="Enter meta description"
                 />
+              </div>
+              <div className="col-span-1 md:col-span-2 mt-4 pt-4 border-t border-gray-200 dark:border-slate-800">
+                <h3 className="text-sm font-medium mb-3 text-gray-900 dark:text-white">Advanced SEO & Open Graph</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className={labelClassName}>Meta Keywords (Optional)</label>
+                    <input type="text" name="metaKeywords" value={formData.metaKeywords} onChange={handleInputChange} placeholder="e.g. mbbs in china, study abroad" className={inputClassName} />
+                  </div>
+                  <div>
+                    <label className={labelClassName}>Canonical URL (Optional)</label>
+                    <input type="text" name="canonicalUrl" value={formData.canonicalUrl} onChange={handleInputChange} placeholder="https://example.com/country/china" className={inputClassName} />
+                  </div>
+                  <div>
+                    <label className={labelClassName}>OG Title (Optional)</label>
+                    <input type="text" name="ogTitle" value={formData.ogTitle} onChange={handleInputChange} className={inputClassName} />
+                  </div>
+                  <div>
+                    <label className={labelClassName}>OG Description (Optional)</label>
+                    <textarea name="ogDescription" value={formData.ogDescription} onChange={handleInputChange} rows={2} className={inputClassName} />
+                  </div>
+                  <div className="col-span-1 md:col-span-2">
+                    <label className={labelClassName}>OG Image URL (Optional)</label>
+                    <input type="text" name="ogImage" value={formData.ogImage} onChange={handleInputChange} className={inputClassName} />
+                  </div>
+                  <div>
+                    <label className={labelClassName}>Twitter Title (Optional)</label>
+                    <input type="text" name="twitterTitle" value={formData.twitterTitle} onChange={handleInputChange} className={inputClassName} />
+                  </div>
+                  <div>
+                    <label className={labelClassName}>Twitter Description (Optional)</label>
+                    <textarea name="twitterDescription" value={formData.twitterDescription} onChange={handleInputChange} rows={2} className={inputClassName} />
+                  </div>
+                  <div className="col-span-1 md:col-span-2">
+                    <label className={labelClassName}>Twitter Image URL (Optional)</label>
+                    <input type="text" name="twitterImage" value={formData.twitterImage} onChange={handleInputChange} className={inputClassName} />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1053,6 +1151,16 @@ export default function AddCountryPage() {
                   className={checkboxClassName}
                 />
                 Mark as popular
+              </label>
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-white/80 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="verified"
+                  checked={formData.verified}
+                  onChange={handleInputChange}
+                  className={checkboxClassName}
+                />
+                Mark as verified
               </label>
             </div>
           </div>

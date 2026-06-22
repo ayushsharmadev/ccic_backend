@@ -195,6 +195,19 @@ export default function ImageUpload({
     }
   };
 
+  const parseUploadResponse = async (response) => {
+    const text = await response.text();
+
+    try {
+      return text ? JSON.parse(text) : {};
+    } catch {
+      return {
+        success: false,
+        error: text.slice(0, 300) || `Upload failed with status: ${response.status}`,
+      };
+    }
+  };
+
   const handleMultipleDirectUpload = async (files, maxSizeBytes) => {
     setIsUploading(true);
     setUploadError("");
@@ -272,7 +285,7 @@ export default function ImageUpload({
 
           clearInterval(progressInterval);
 
-          const data = await response.json();
+          const data = await parseUploadResponse(response);
 
           if (!response.ok) {
             throw new Error(
@@ -470,7 +483,7 @@ export default function ImageUpload({
       clearInterval(progressInterval);
       setUploadProgress(100);
 
-      const data = await response.json();
+      const data = await parseUploadResponse(response);
 
       if (!response.ok) {
         throw new Error(
