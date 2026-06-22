@@ -4,13 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack -p 3001",
-    "prebuild": "node scripts/generate-swagger.mjs",
     "build": "next build --turbopack",
-    "start": "next start -p 3031",
+    "start": "next start -p 3001",
     "lint": "eslint",
     "seed:admin": "node scripts/seed-admin.mjs",
-    "seed:locations": "node scripts/seed-locations.mjs",
-    "swagger:generate": "node scripts/generate-swagger.mjs"
+    "seed:locations": "node scripts/seed-locations.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
