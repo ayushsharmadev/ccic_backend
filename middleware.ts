@@ -23,7 +23,7 @@ function applyCorsHeaders(response: NextResponse, origin: string | null) {
   return response;
 }
 
-export function proxy(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const origin = request.headers.get("origin");
 
   if (request.method === "OPTIONS") {

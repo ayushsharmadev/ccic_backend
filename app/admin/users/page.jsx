@@ -180,6 +180,7 @@ export default function UsersPage() {
   };
 
   const getRoleBadge = (role) => {
+    const safeRole = role || "user";
     const roleConfig = {
       admin: {
         color: "bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-200",
@@ -196,7 +197,7 @@ export default function UsersPage() {
       },
     };
 
-    const config = roleConfig[role] || roleConfig.user;
+    const config = roleConfig[safeRole] || roleConfig.user;
     const Icon = config.icon;
 
     return (
@@ -204,7 +205,7 @@ export default function UsersPage() {
         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.color}`}
       >
         <Icon className="w-3 h-3 mr-1" />
-        {role.charAt(0).toUpperCase() + role.slice(1)}
+        {safeRole.charAt(0).toUpperCase() + safeRole.slice(1)}
       </span>
     );
   };

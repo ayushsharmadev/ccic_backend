@@ -305,13 +305,4 @@ export default function ApnaNotify() {
   );
 }
 
-// Export all functions for easy access
-export {
-  showNotification,
-  showSuccess,
-  showError,
-  showWarning,
-  showInfo,
-  clearAllNotifications,
-  clearNotification,
-};
+
