@@ -14,6 +14,8 @@ export const GET = async (request) => {
     const country = searchParams.get("country") || "";
     const state = searchParams.get("state") || "";
     const district = searchParams.get("district") || "";
+    const stream = searchParams.get("stream") || "";
+    const examLevel = searchParams.get("examLevel") || "";
 
     if (!query.trim()) {
       return NextResponse.json({
@@ -131,6 +133,8 @@ export const GET = async (request) => {
         status: "active",
       };
       applyDirectLocationFilters(examFilter, { country, state });
+      if (stream) examFilter.stream = stream;
+      if (examLevel) examFilter.examLevel = examLevel;
 
       const exams = await Exam.find(examFilter)
         .populate("examType", "name")
@@ -230,6 +234,8 @@ export const GET = async (request) => {
           country: country || null,
           state: state || null,
           district: district || null,
+          stream: stream || null,
+          examLevel: examLevel || null,
         },
       },
     });

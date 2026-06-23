@@ -9,10 +9,10 @@ export async function POST(request) {
     await connectDB();
 
     const body = await request.json();
-    const { name, mobile, course, neetScore, category, tenthPassingYear, intermediateMarks } = body;
+    const { name, mobile, email, course, tenthPassingYear, intermediateMarks } = body;
 
     // Validation
-    if (!name || !mobile || !course || neetScore === undefined || !category) {
+    if (!name || !mobile || !course) {
       return NextResponse.json(
         { success: false, error: "All required fields are missing" },
         { status: 400 }
@@ -27,31 +27,7 @@ export async function POST(request) {
       );
     }
 
-    // Validate NEET score
-    if (neetScore < 0 || neetScore > 720) {
-      return NextResponse.json(
-        { success: false, error: "NEET score must be between 0 and 720" },
-        { status: 400 }
-      );
-    }
 
-    // Validate category
-    const validCategories = [
-      "UR/EWS",
-      "OBC",
-      "SC",
-      "ST",
-      "UR/EWS - PwBD",
-      "OBC PwD",
-      "SC PwD",
-      "ST PwD",
-    ];
-    if (!validCategories.includes(category)) {
-      return NextResponse.json(
-        { success: false, error: "Invalid category selected" },
-        { status: 400 }
-      );
-    }
 
     // Get tracking data
     const ipAddress = request.headers.get("x-forwarded-for") ||
@@ -65,14 +41,13 @@ export async function POST(request) {
       name,
       mobile,
       course,
-      neetScore: parseFloat(neetScore),
-      category,
       tenthPassingYear: tenthPassingYear ? parseInt(tenthPassingYear) : undefined,
       intermediateMarks: intermediateMarks ? parseFloat(intermediateMarks) : undefined,
       ipAddress,
       userAgent,
       referrer,
       source: "eligibility_checker_page",
+      email,
     });
 
     return NextResponse.json({
@@ -80,7 +55,6 @@ export async function POST(request) {
       message: "Eligibility check submitted successfully",
       data: {
         id: eligibilityCheck._id,
-        neetScore: eligibilityCheck.neetScore,
       },
     });
   } catch (error) {

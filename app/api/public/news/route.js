@@ -11,6 +11,9 @@ export async function GET(request) {
     const count = searchParams.get("count");
     const featured = searchParams.get("featured");
     const limit = parseInt(searchParams.get("limit")) || 6;
+    const category = searchParams.get("category") || "";
+    const tags = searchParams.get("tags") || "";
+    const sort = searchParams.get("sort") || "latest";
 
     // Build filter - only published news
     const filter = {
@@ -19,6 +22,24 @@ export async function GET(request) {
 
     if (featured === "true") {
       filter.isFeatured = true;
+    }
+
+    if (category && category !== "all") {
+      filter.category = category;
+    }
+
+    if (tags) {
+      const tagsArray = tags.split(",").map(t => t.trim()).filter(Boolean);
+      if (tagsArray.length > 0) {
+        filter.tags = { $in: tagsArray };
+      }
+    }
+
+    let sortOption = { publishedAt: -1, views: -1 };
+    if (sort === "popular") {
+      sortOption = { views: -1, publishedAt: -1 };
+    } else if (sort === "oldest") {
+      sortOption = { publishedAt: 1 };
     }
 
     // If only count is requested
@@ -41,7 +62,7 @@ export async function GET(request) {
         .select(
           "title slug shortDescription featuredImage category author publishedAt views isFeatured"
         )
-        .sort({ publishedAt: -1, views: -1 })
+        .sort(sortOption)
         .limit(limit)
         .lean({ virtuals: true });
 
@@ -88,7 +109,7 @@ export async function GET(request) {
         .select(
           "title slug shortDescription featuredImage category author publishedAt views isFeatured"
         )
-        .sort({ publishedAt: -1 })
+        .sort(sortOption)
         .skip(skip)
         .limit(limitAll)
         .lean({ virtuals: true }),

@@ -47,7 +47,7 @@ export async function POST(request) {
       course: course || "MBBS",
       message: message || "",
       preferredColleges: preferredColleges || [],
-      source: source || "other",
+      source: source || "contact",
       formType: formType || "contact",
       meta: meta || {},
       ipAddress,

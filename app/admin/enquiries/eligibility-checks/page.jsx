@@ -7,6 +7,22 @@ import ApnaModal from "@/components/utils/ApnaModal";
 import ApnaSelect from "@/components/utils/ApnaSelect";
 import { showSuccess, showError } from "@/components/utils/ApnaNotify";
 
+const STATUS_OPTIONS = [
+  { value: "new", label: "New" },
+  { value: "contacted", label: "Contacted" },
+  { value: "pending_review", label: "Pending Review" },
+  { value: "converted", label: "Converted" },
+];
+
+const STATUS_COLORS = {
+  new: "bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-200",
+  contacted: "bg-yellow-100 text-yellow-800 dark:bg-amber-500/20 dark:text-amber-200",
+  pending_review: "bg-gray-100 text-gray-800 dark:bg-slate-700 dark:text-slate-200",
+  eligible: "bg-green-100 text-green-800 dark:bg-emerald-500/20 dark:text-emerald-200",
+  not_eligible: "bg-red-100 text-red-800 dark:bg-rose-500/20 dark:text-rose-200",
+  converted: "bg-purple-100 text-purple-800 dark:bg-purple-500/20 dark:text-purple-200",
+};
+
 export default function EligibilityChecksPage() {
   const { requireAdmin } = useAuth();
   const [checks, setChecks] = useState([]);
@@ -19,6 +35,11 @@ export default function EligibilityChecksPage() {
   const [statusFilter, setStatusFilter] = useState("");
   const [viewModal, setViewModal] = useState({ isOpen: false, data: null });
   const [editModal, setEditModal] = useState({ isOpen: false, data: null });
+  const [editStatus, setEditStatus] = useState("");
+  const [editNotes, setEditNotes] = useState("");
+  const [editEligible, setEditEligible] = useState(null);
+  const [editRemarks, setEditRemarks] = useState("");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     requireAdmin();
@@ -30,35 +51,28 @@ export default function EligibilityChecksPage() {
       const params = new URLSearchParams({
         page: page.toString(),
         limit: "10",
-        search: search,
+        search,
         ...(status && { status }),
       });
-
       const token = localStorage.getItem("token");
       const response = await fetch(`/api/eligibility-checks?${params}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       const data = await response.json();
-
       if (data.success) {
-        const transformedData = data.data.map((item) => ({
-          id: item._id,
-          name: item.name,
-          mobile: item.mobile,
-          course: item.course?.name || "N/A",
-          neetScore: item.neetScore,
-          category: item.category,
-          tenthPassingYear: item.tenthPassingYear,
-          intermediateMarks: item.intermediateMarks,
-          status: item.status,
-          isEligible: item.isEligible,
-          createdAt: item.createdAt,
-          rawData: item,
-        }));
-
-        setChecks(transformedData);
+        setChecks(
+          data.data.map((item) => ({
+            id: item._id,
+            name: item.name,
+            mobile: item.mobile,
+            email: item.email || "—",
+            course: item.course?.name || "N/A",
+            isEligible: item.isEligible,
+            status: item.status,
+            createdAt: item.createdAt,
+            rawData: item,
+          }))
+        );
         setTotalPages(data.pagination.totalPages);
         setTotalItems(data.pagination.totalItems);
         setCurrentPage(page);
@@ -75,101 +89,69 @@ export default function EligibilityChecksPage() {
     fetchChecks(1, searchTerm, statusFilter);
   }, [searchTerm, statusFilter]);
 
-  const handlePageChange = (page) => {
-    fetchChecks(page, searchTerm, statusFilter);
+  const handlePageChange = (page) => fetchChecks(page, searchTerm, statusFilter);
+
+  const handleViewClick = (item) => setViewModal({ isOpen: true, data: item.rawData });
+
+  const handleEditClick = (item) => {
+    setEditStatus(item.rawData.status || "new");
+    setEditNotes(item.rawData.notes || "");
+    setEditEligible(item.rawData.isEligible);
+    setEditRemarks(item.rawData.eligibilityRemarks || "");
+    setEditModal({ isOpen: true, data: item.rawData });
   };
 
-  const handleViewClick = (check) => {
-    setViewModal({ isOpen: true, data: check.rawData });
-  };
-
-  const handleEditClick = (check) => {
-    setEditModal({ isOpen: true, data: check.rawData });
-  };
-
-  const handleStatusUpdate = async (checkId, newStatus) => {
+  const handleSaveEdit = async () => {
+    if (!editModal.data) return;
+    setSaving(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`/api/eligibility-checks/${checkId}`, {
+      const body = { status: editStatus, notes: editNotes };
+      if (editEligible !== null) {
+        body.isEligible = editEligible;
+        body.eligibilityRemarks = editRemarks;
+      }
+      
+      const response = await fetch(`/api/eligibility-checks/${editModal.data._id}`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify(body),
       });
-
       const data = await response.json();
-
       if (data.success) {
-        showSuccess("Status updated successfully");
+        showSuccess("Updated successfully");
         fetchChecks(currentPage, searchTerm, statusFilter);
         setEditModal({ isOpen: false, data: null });
       } else {
-        showError(data.error || "Failed to update status");
+        showError(data.error || "Failed to update");
       }
     } catch (error) {
-      console.error("Error updating status:", error);
-      showError("Failed to update status");
+      showError("Failed to update");
+    } finally {
+      setSaving(false);
     }
   };
 
-  const handleEligibilityUpdate = async (checkId, isEligible, remarks) => {
+  const handleDelete = async (id) => {
+    if (!confirm("Delete this submission? This cannot be undone.")) return;
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`/api/eligibility-checks/${checkId}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          isEligible,
-          eligibilityRemarks: remarks,
-          status: isEligible ? "eligible" : "not_eligible",
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        showSuccess("Eligibility updated successfully");
-        fetchChecks(currentPage, searchTerm, statusFilter);
-        setEditModal({ isOpen: false, data: null });
-      } else {
-        showError(data.error || "Failed to update eligibility");
-      }
-    } catch (error) {
-      console.error("Error updating eligibility:", error);
-      showError("Failed to update eligibility");
-    }
-  };
-
-  const handleDelete = async (checkId) => {
-    if (!confirm("Are you sure you want to delete this eligibility check?")) {
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`/api/eligibility-checks/${checkId}`, {
+      const response = await fetch(`/api/eligibility-checks/${id}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
-
       const data = await response.json();
-
       if (data.success) {
-        showSuccess("Eligibility check deleted successfully");
+        showSuccess("Deleted successfully");
         fetchChecks(currentPage, searchTerm, statusFilter);
       } else {
         showError(data.error || "Failed to delete");
       }
     } catch (error) {
-      console.error("Error deleting eligibility check:", error);
-      showError("Failed to delete eligibility check");
+      showError("Failed to delete");
     }
   };
 
@@ -178,65 +160,31 @@ export default function EligibilityChecksPage() {
       key: "name",
       header: "Name",
       headerClassName: "text-left text-gray-700 dark:text-white/80",
-      cellClassName:
-        "text-sm font-medium text-blue-600 dark:text-primary-200 hover:text-blue-800 dark:hover:text-primary cursor-pointer hover:underline transition-colors duration-300",
-      render: (item) => (
-        <span onClick={() => handleViewClick(item)}>{item.name}</span>
-      ),
+      cellClassName: "text-sm font-medium text-blue-600 dark:text-primary-200 hover:text-blue-800 cursor-pointer hover:underline transition-colors duration-300",
+      render: (item) => <span onClick={() => handleViewClick(item)}>{item.name}</span>,
     },
     {
       key: "mobile",
       header: "Mobile",
       headerClassName: "text-left text-gray-700 dark:text-white/80",
-      cellClassName:
-        "text-sm text-gray-700 dark:text-white/80 transition-colors duration-300",
+      cellClassName: "text-sm text-gray-700 dark:text-white/80 transition-colors duration-300",
+    },
+    {
+      key: "email",
+      header: "Email",
+      headerClassName: "text-left text-gray-700 dark:text-white/80",
+      cellClassName: "text-sm text-gray-600 dark:text-white/70 transition-colors duration-300",
+      render: (item) => (
+        <span className="truncate block max-w-[150px]" title={item.email || "No email"}>
+          {item.email || "—"}
+        </span>
+      ),
     },
     {
       key: "course",
       header: "Course",
       headerClassName: "text-left text-gray-700 dark:text-white/80",
-      cellClassName:
-        "text-sm text-gray-600 dark:text-white/70 transition-colors duration-300",
-    },
-    {
-      key: "neetScore",
-      header: "NEET Score",
-      headerClassName: "text-center text-gray-700 dark:text-white/80",
-      cellClassName:
-        "text-center text-sm font-medium text-primary dark:text-primary-200 transition-colors duration-300",
-      render: (item) => <span>{item.neetScore}/720</span>,
-    },
-    {
-      key: "category",
-      header: "Category",
-      headerClassName: "text-center text-gray-700 dark:text-white/80",
-      cellClassName: "text-center",
-      render: (item) => {
-        const categoryColors = {
-          "UR/EWS":
-            "bg-gray-100 text-gray-800 dark:bg-slate-700 dark:text-slate-200",
-          SC: "bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-200",
-          ST: "bg-green-100 text-green-800 dark:bg-emerald-500/20 dark:text-emerald-200",
-          OBC: "bg-yellow-100 text-yellow-800 dark:bg-amber-500/20 dark:text-amber-200",
-          "UR/EWS - PwBD":
-            "bg-purple-100 text-purple-800 dark:bg-purple-500/20 dark:text-purple-200",
-          "OBC PwD":
-            "bg-orange-100 text-orange-800 dark:bg-orange-500/20 dark:text-orange-200",
-          "SC PwD":
-            "bg-indigo-100 text-indigo-800 dark:bg-indigo-500/20 dark:text-indigo-200",
-          "ST PwD":
-            "bg-teal-100 text-teal-800 dark:bg-teal-500/20 dark:text-teal-200",
-        };
-        return (
-          <span
-            className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium transition-colors duration-300 ${
-              categoryColors[item.category] || categoryColors["UR/EWS"]
-            }`}
-          >
-            {item.category}
-          </span>
-        );
-      },
+      cellClassName: "text-sm text-gray-600 dark:text-white/70 transition-colors duration-300",
     },
     {
       key: "isEligible",
@@ -269,371 +217,288 @@ export default function EligibilityChecksPage() {
       header: "Status",
       headerClassName: "text-center text-gray-700 dark:text-white/80",
       cellClassName: "text-center",
-      render: (item) => {
-        const statusColors = {
-          new: "bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-200",
-          contacted:
-            "bg-yellow-100 text-yellow-800 dark:bg-amber-500/20 dark:text-amber-200",
-          eligible:
-            "bg-green-100 text-green-800 dark:bg-emerald-500/20 dark:text-emerald-200",
-          not_eligible:
-            "bg-red-100 text-red-800 dark:bg-rose-500/20 dark:text-rose-200",
-          pending_review:
-            "bg-gray-100 text-gray-800 dark:bg-slate-700 dark:text-slate-200",
-          converted:
-            "bg-purple-100 text-purple-800 dark:bg-purple-500/20 dark:text-purple-200",
-        };
-        return (
-          <span
-            className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium transition-colors duration-300 ${
-              statusColors[item.status] || statusColors.new
-            }`}
-          >
-            {item.status.replace("_", " ")}
-          </span>
-        );
-      },
+      render: (item) => (
+        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium capitalize transition-colors duration-300 ${STATUS_COLORS[item.status] || STATUS_COLORS.new}`}>
+          {item.status?.replace("_", " ")}
+        </span>
+      ),
     },
     {
       key: "createdAt",
       header: "Date",
       headerClassName: "text-center text-gray-700 dark:text-white/80",
-      cellClassName:
-        "text-center text-xs text-gray-600 dark:text-white/65 transition-colors duration-300",
-      render: (item) => new Date(item.createdAt).toLocaleDateString(),
-    },
-  ];
-
-  const actions = [
-    {
-      label: "View",
-      onClick: handleViewClick,
-      className:
-        "text-blue-600 dark:text-blue-200 hover:text-blue-800 dark:hover:text-blue-100 transition-colors duration-200",
+      cellClassName: "text-center text-xs text-gray-600 dark:text-white/65 transition-colors duration-300",
+      render: (item) => new Date(item.createdAt).toLocaleDateString("en-IN"),
     },
     {
-      label: "Edit",
-      onClick: handleEditClick,
-      className:
-        "text-green-600 dark:text-emerald-200 hover:text-green-800 dark:hover:text-emerald-100 transition-colors duration-200",
-    },
-    {
-      label: "Delete",
-      onClick: (item) => handleDelete(item.id),
-      className:
-        "text-red-600 dark:text-rose-200 hover:text-red-800 dark:hover:text-rose-100 transition-colors duration-200",
-    },
-  ];
-
-  if (loading && checks.length === 0) {
-    return (
-      <div className="h-full p-4 sm:p-5 md:p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
-        <div className="space-y-5">
-          <div className="space-y-2">
-            <div className="h-8 w-56 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-            <div className="h-4 w-72 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="h-10 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-            <div className="h-10 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-          </div>
-          <div className="border border-gray-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
-            <div className="hidden md:grid grid-cols-12 gap-4 px-4 py-3 bg-gray-100 dark:bg-slate-900">
-              <div className="col-span-3 h-4 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-              <div className="col-span-2 h-4 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-              <div className="col-span-2 h-4 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-              <div className="col-span-2 h-4 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-              <div className="col-span-1 h-4 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-              <div className="col-span-2 h-4 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-            </div>
-            <div className="divide-y divide-gray-200 dark:divide-slate-800">
-              {[...Array(6)].map((_, idx) => (
-                <div
-                  key={idx}
-                  className="grid grid-cols-1 md:grid-cols-12 gap-4 px-4 py-4 bg-white dark:bg-slate-900 transition-colors duration-300"
-                >
-                  <div className="md:col-span-3">
-                    <div className="h-4 w-36 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-                  </div>
-                  <div className="md:col-span-2">
-                    <div className="h-4 w-28 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-                  </div>
-                  <div className="md:col-span-2">
-                    <div className="h-4 w-32 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-                  </div>
-                  <div className="md:col-span-2">
-                    <div className="h-4 w-20 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-                  </div>
-                  <div className="md:col-span-1">
-                    <div className="h-4 w-16 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-                  </div>
-                  <div className="md:col-span-2">
-                    <div className="h-4 w-28 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-                  </div>
-                  <div className="md:col-span-2 md:col-start-11">
-                    <div className="h-4 w-24 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+      key: "actions",
+      header: "Actions",
+      headerClassName: "text-center text-gray-700 dark:text-white/80",
+      cellClassName: "text-center",
+      render: (item) => (
+        <div className="flex items-center justify-center gap-2">
+          <button
+            onClick={() => handleViewClick(item)}
+            className="px-2 py-1 text-xs text-blue-600 dark:text-blue-200 border border-blue-300 dark:border-blue-500/40 rounded hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors"
+          >
+            View
+          </button>
+          <button
+            onClick={() => handleEditClick(item)}
+            className="px-2 py-1 text-xs text-green-600 dark:text-emerald-200 border border-green-300 dark:border-emerald-500/40 rounded hover:bg-green-50 dark:hover:bg-emerald-500/10 transition-colors"
+          >
+            Edit
+          </button>
+          <button
+            onClick={() => handleDelete(item.id)}
+            className="px-2 py-1 text-xs text-red-600 dark:text-rose-200 border border-red-300 dark:border-rose-500/40 rounded hover:bg-red-50 dark:hover:bg-rose-500/10 transition-colors"
+          >
+            Delete
+          </button>
         </div>
-      </div>
-    );
-  }
+      ),
+    },
+  ];
 
   return (
-    <div className="h-full p-4 md:p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white transition-colors duration-300">
-          Eligibility Checks
+    <div className="h-full p-4 sm:p-5 md:p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
+      {/* Header */}
+      <div className="mb-4">
+        <h1 className="text-xl font-semibold text-gray-900 dark:text-white transition-colors duration-300 mb-0.5">
+          Study Abroad Enquiries
         </h1>
-        <p className="text-sm text-gray-600 dark:text-white/70 mt-1 transition-colors duration-300">
-          Manage eligibility check submissions ({totalItems} total)
+        <p className="text-xs text-gray-600 dark:text-white/70 transition-colors duration-300">
+          Manage counselling form submissions ({totalItems} total)
         </p>
       </div>
 
       {/* Filters */}
-      <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-3">
-        <div>
+      <div className="flex gap-3 mb-4">
+        <div className="flex-1 max-w-xs">
           <input
             type="text"
             placeholder="Search by name or mobile..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md text-sm focus:ring-1 focus:ring-primary focus:border-primary bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors duration-300 placeholder:text-gray-400 dark:placeholder:text-white/40"
+            className="w-full pl-3 pr-2 py-1.5 border border-gray-300 dark:border-slate-700 rounded text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors duration-300 placeholder:text-gray-400 dark:placeholder:text-white/40"
           />
         </div>
-        <div>
-          <ApnaSelect
-            title=""
-            options={[
-              { value: "", label: "All Status" },
-              { value: "new", label: "New" },
-              { value: "contacted", label: "Contacted" },
-              { value: "eligible", label: "Eligible" },
-              { value: "not_eligible", label: "Not Eligible" },
-              { value: "pending_review", label: "Pending Review" },
-              { value: "converted", label: "Converted" },
-            ]}
-            value={statusFilter}
-            onChange={(value) => setStatusFilter(value)}
-            placeholder="Select status"
-            searchable={false}
-            required={false}
-            buttonClassName="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md text-sm focus:ring-1 focus:ring-primary focus:border-primary bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors duration-300 flex items-center justify-between text-left cursor-pointer"
-          />
-        </div>
+        <ApnaSelect
+          title=""
+          options={[{ value: "", label: "All Status" }, ...STATUS_OPTIONS]}
+          value={statusFilter}
+          onChange={(value) => setStatusFilter(value)}
+          placeholder="Filter by status"
+          searchable={false}
+          required={false}
+          buttonClassName="px-3 py-1.5 border border-gray-300 dark:border-slate-700 rounded text-sm outline-none focus:border-primary bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors duration-300 flex items-center justify-between text-left cursor-pointer"
+        />
       </div>
 
+      {/* Table */}
       <ApnaTable
         data={checks}
         columns={columns}
-        actions={actions}
         loading={loading}
+        showSearch={false}
+        showPagination={true}
+        itemsPerPage={10}
+        maxPageButtons={5}
+        totalItems={totalItems}
+        totalPages={totalPages}
+        currentPage={currentPage}
+        striped={true}
+        hover={true}
+        bordered={false}
+        compact={true}
+        showHeader={true}
+        emptyMessage="No enquiries found"
+        showSerialNumbers={true}
+        showCheckboxes={true}
         selectedItems={selectedItems}
         onSelectionChange={setSelectedItems}
-        currentPage={currentPage}
-        totalPages={totalPages}
+        onSelectAll={(pageIds, allSelected) => {
+          if (allSelected) {
+            setSelectedItems((prev) => prev.filter((id) => !pageIds.includes(id)));
+          } else {
+            setSelectedItems((prev) => [...new Set([...prev, ...pageIds])]);
+          }
+        }}
         onPageChange={handlePageChange}
-        emptyMessage="No eligibility checks found"
       />
 
-      {/* View Modal */}
-      {viewModal.isOpen && viewModal.data && (
-        <ApnaModal
-          isOpen={viewModal.isOpen}
-          onClose={() => setViewModal({ isOpen: false, data: null })}
-          title="Eligibility Check Details"
-          size="md"
-        >
-          <div className="space-y-4">
+      {/* View Modal — all submitted details */}
+      <ApnaModal
+        isOpen={viewModal.isOpen}
+        onClose={() => setViewModal({ isOpen: false, data: null })}
+        title="Enquiry Details"
+        size="lg"
+        showFooter={false}
+      >
+        {viewModal.data && (
+          <div className="p-4 space-y-4">
+            {/* Core info */}
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs font-medium text-gray-500 dark:text-white/60 transition-colors duration-300">
-                  Name
-                </label>
-                <p className="text-sm font-medium text-gray-900 dark:text-white transition-colors duration-300">
-                  {viewModal.data.name}
-                </p>
+              {[
+                { label: "Full Name", value: viewModal.data.name },
+                { label: "Mobile", value: viewModal.data.mobile },
+                { label: "Email", value: viewModal.data.email || "—" },
+                { label: "Course Applied", value: viewModal.data.course?.name || "—" },
+              ].map(({ label, value }) => (
+                <div key={label}>
+                  <p className="text-xs font-medium text-gray-500 dark:text-white/50">{label}</p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white mt-0.5">{value}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* Academic details */}
+            {(viewModal.data.intermediateMarks || viewModal.data.tenthPassingYear) && (
+              <div className="rounded-lg bg-gray-50 dark:bg-slate-800/60 p-3 border border-gray-200 dark:border-slate-700">
+                <p className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-white/50 mb-2">Academic Details</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {viewModal.data.intermediateMarks && (
+                    <div>
+                      <p className="text-xs text-gray-500 dark:text-white/50">12th Marks</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">{viewModal.data.intermediateMarks}%</p>
+                    </div>
+                  )}
+                  {viewModal.data.tenthPassingYear && (
+                    <div>
+                      <p className="text-xs text-gray-500 dark:text-white/50">10th Passing Year</p>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white">{viewModal.data.tenthPassingYear}</p>
+                    </div>
+                  )}
+                </div>
               </div>
+            )}
+
+            {/* Meta */}
+            <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-slate-700">
               <div>
-                <label className="text-xs font-medium text-gray-500 dark:text-white/60 transition-colors duration-300">
-                  Mobile
-                </label>
-                <p className="text-sm text-gray-900 dark:text-white transition-colors duration-300">
-                  {viewModal.data.mobile}
-                </p>
-              </div>
-              <div>
-                <label className="text-xs font-medium text-gray-500 dark:text-white/60 transition-colors duration-300">
-                  Course
-                </label>
-                <p className="text-sm text-gray-900 dark:text-white transition-colors duration-300">
-                  {viewModal.data.course?.name || "N/A"}
-                </p>
-              </div>
-              <div>
-                <label className="text-xs font-medium text-gray-500 dark:text-white/60 transition-colors duration-300">
-                  NEET Score
-                </label>
-                <p className="text-sm font-bold text-primary dark:text-primary-200 transition-colors duration-300">
-                  {viewModal.data.neetScore}/720
-                </p>
-              </div>
-              <div>
-                <label className="text-xs font-medium text-gray-500 dark:text-white/60 transition-colors duration-300">
-                  Category
-                </label>
-                <p className="text-sm text-gray-900 dark:text-white transition-colors duration-300">
-                  {viewModal.data.category}
-                </p>
-              </div>
-              <div>
-                <label className="text-xs font-medium text-gray-500 dark:text-white/60 transition-colors duration-300">
-                  10th Passing Year
-                </label>
-                <p className="text-sm text-gray-900 dark:text-white transition-colors duration-300">
-                  {viewModal.data.tenthPassingYear || "N/A"}
-                </p>
-              </div>
-              <div>
-                <label className="text-xs font-medium text-gray-500 dark:text-white/60 transition-colors duration-300">
-                  Intermediate (+2) Marks
-                </label>
-                <p className="text-sm text-gray-900 dark:text-white transition-colors duration-300">
-                  {viewModal.data.intermediateMarks
-                    ? `${viewModal.data.intermediateMarks}%`
-                    : "N/A"}
-                </p>
-              </div>
-              <div>
-                <label className="text-xs font-medium text-gray-500 dark:text-white/60 transition-colors duration-300">
-                  Status
-                </label>
-                <p className="text-sm text-gray-900 dark:text-white transition-colors duration-300 capitalize">
+                <p className="text-xs text-gray-500 dark:text-white/50">Status</p>
+                <span className={`inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_COLORS[viewModal.data.status] || STATUS_COLORS.new}`}>
                   {viewModal.data.status?.replace("_", " ")}
-                </p>
+                </span>
               </div>
-              <div>
-                <label className="text-xs font-medium text-gray-500 dark:text-white/60 transition-colors duration-300">
-                  Eligibility
-                </label>
-                <p className="text-sm text-gray-900 dark:text-white transition-colors duration-300">
-                  {viewModal.data.isEligible === null
-                    ? "Not Reviewed"
-                    : viewModal.data.isEligible
-                    ? "Eligible"
-                    : "Not Eligible"}
+              <div className="text-right">
+                <p className="text-xs text-gray-500 dark:text-white/50">Submitted On</p>
+                <p className="text-sm text-gray-900 dark:text-white mt-0.5">
+                  {new Date(viewModal.data.createdAt).toLocaleString("en-IN")}
                 </p>
               </div>
             </div>
-            {viewModal.data.eligibilityRemarks && (
-              <div>
-                <label className="text-xs font-medium text-gray-500 dark:text-white/60 transition-colors duration-300">
-                  Eligibility Remarks
-                </label>
-                <p className="text-sm text-gray-900 dark:text-white transition-colors duration-300 mt-1">
-                  {viewModal.data.eligibilityRemarks}
-                </p>
-              </div>
-            )}
+
             {viewModal.data.notes && (
               <div>
-                <label className="text-xs font-medium text-gray-500 dark:text-white/60 transition-colors duration-300">
-                  Notes
-                </label>
-                <p className="text-sm text-gray-900 dark:text-white transition-colors duration-300 mt-1">
-                  {viewModal.data.notes}
-                </p>
+                <p className="text-xs font-medium text-gray-500 dark:text-white/50">Notes</p>
+                <p className="text-sm text-gray-900 dark:text-white mt-1 whitespace-pre-wrap">{viewModal.data.notes}</p>
               </div>
             )}
-            <div>
-              <label className="text-xs font-medium text-gray-500 dark:text-white/60 transition-colors duration-300">
-                Submitted At
-              </label>
-              <p className="text-sm text-gray-900 dark:text-white transition-colors duration-300">
-                {new Date(viewModal.data.createdAt).toLocaleString()}
-              </p>
-            </div>
           </div>
-        </ApnaModal>
-      )}
+        )}
+      </ApnaModal>
 
-      {/* Edit Modal */}
-      {editModal.isOpen && editModal.data && (
-        <ApnaModal
-          isOpen={editModal.isOpen}
-          onClose={() => setEditModal({ isOpen: false, data: null })}
-          title="Update Eligibility Check"
-          size="md"
-        >
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-white/80 mb-2 transition-colors duration-300">
-                Update Status
-              </label>
-              <ApnaSelect
-                title=""
-                options={[
-                  { value: "new", label: "New" },
-                  { value: "contacted", label: "Contacted" },
-                  { value: "eligible", label: "Eligible" },
-                  { value: "not_eligible", label: "Not Eligible" },
-                  { value: "pending_review", label: "Pending Review" },
-                  { value: "converted", label: "Converted" },
-                ]}
-                value={editModal.data.status}
-                onChange={(value) =>
-                  handleStatusUpdate(editModal.data._id, value)
-                }
-                placeholder="Select status"
-                searchable={false}
-                required={false}
-                buttonClassName="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors duration-300 flex items-center justify-between text-left cursor-pointer"
-              />
+      {/* Edit Modal — status + notes only */}
+      <ApnaModal
+        isOpen={editModal.isOpen}
+        onClose={() => setEditModal({ isOpen: false, data: null })}
+        title={editModal.data ? `Edit: ${editModal.data.name}` : "Edit"}
+        size="sm"
+        showFooter={false}
+      >
+        {editModal.data && (
+          <div className="p-4 space-y-4">
+            {/* Quick snapshot */}
+            <div className="rounded-lg bg-gray-50 dark:bg-slate-800 px-3 py-2 text-xs space-y-1">
+              <div className="flex justify-between">
+                <span className="text-gray-500 dark:text-white/50">Mobile</span>
+                <span className="font-medium dark:text-white">{editModal.data.mobile}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500 dark:text-white/50">Course</span>
+                <span className="font-medium dark:text-white">{editModal.data.course?.name || "—"}</span>
+              </div>
             </div>
 
-            <div className="border-t border-gray-200 dark:border-slate-800 pt-4 transition-colors duration-300">
-              <label className="block text-sm font-medium text-gray-700 dark:text-white/80 mb-2 transition-colors duration-300">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-white/80 mb-1.5">
                 Mark Eligibility
               </label>
               <div className="flex gap-2">
                 <button
-                  onClick={() => {
-                    const remarks = prompt(
-                      "Enter eligibility remarks (optional):"
-                    );
-                    handleEligibilityUpdate(
-                      editModal.data._id,
-                      true,
-                      remarks || ""
-                    );
-                  }}
-                  className="flex-1 bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 transition-colors duration-200"
+                  onClick={() => setEditEligible(true)}
+                  className={`flex-1 px-3 py-2 rounded-md text-sm font-medium border transition-colors duration-200 ${
+                    editEligible === true
+                      ? "bg-green-600 text-white border-green-600"
+                      : "border-green-300 text-green-700 dark:border-emerald-500/40 dark:text-emerald-200 hover:bg-green-50 dark:hover:bg-emerald-500/10"
+                  }`}
                 >
-                  Mark as Eligible
+                  ✓ Eligible
                 </button>
                 <button
-                  onClick={() => {
-                    const remarks = prompt("Enter reason for not eligible:");
-                    if (remarks !== null) {
-                      handleEligibilityUpdate(
-                        editModal.data._id,
-                        false,
-                        remarks
-                      );
-                    }
-                  }}
-                  className="flex-1 bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700 dark:bg-rose-600 dark:hover:bg-rose-500 transition-colors duration-200"
+                  onClick={() => setEditEligible(false)}
+                  className={`flex-1 px-3 py-2 rounded-md text-sm font-medium border transition-colors duration-200 ${
+                    editEligible === false
+                      ? "bg-red-600 text-white border-red-600"
+                      : "border-red-300 text-red-700 dark:border-rose-500/40 dark:text-rose-200 hover:bg-red-50 dark:hover:bg-rose-500/10"
+                  }`}
                 >
-                  Mark as Not Eligible
+                  ✗ Not Eligible
                 </button>
               </div>
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-white/80 mb-1.5">
+                Status
+              </label>
+              <ApnaSelect
+                title=""
+                options={STATUS_OPTIONS}
+                value={editStatus}
+                onChange={setEditStatus}
+                placeholder="Select status"
+                searchable={false}
+                required={false}
+                buttonClassName="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors flex items-center justify-between text-left cursor-pointer"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-white/80 mb-1.5">
+                Remarks / Notes
+              </label>
+              <textarea
+                rows={3}
+                value={editRemarks || editNotes}
+                onChange={(e) => {
+                  setEditRemarks(e.target.value);
+                  setEditNotes(e.target.value);
+                }}
+                placeholder="Add notes about this enquiry..."
+                className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded-md text-sm bg-white dark:bg-slate-900 text-gray-900 dark:text-white resize-none focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder:text-gray-400 dark:placeholder:text-white/40 transition-colors"
+              />
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={handleSaveEdit}
+                disabled={saving}
+                className="flex-1 bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {saving ? "Saving..." : "Save Changes"}
+              </button>
+              <button
+                onClick={() => setEditModal({ isOpen: false, data: null })}
+                className="px-4 py-2 border border-gray-300 dark:border-slate-700 rounded-md text-sm text-gray-700 dark:text-white/80 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
-        </ApnaModal>
-      )}
+        )}
+      </ApnaModal>
     </div>
   );
 }

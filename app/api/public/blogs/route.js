@@ -13,6 +13,9 @@ export async function GET(request) {
     const limit = parseInt(searchParams.get("limit")) || 10;
     const category = searchParams.get("category") || "";
     const featured = searchParams.get("featured");
+    const tags = searchParams.get("tags") || "";
+    const readTime = searchParams.get("readTime") || "";
+    const sort = searchParams.get("sort") || "latest";
 
     // Build filter - only published blogs
     const filter = {
@@ -26,6 +29,23 @@ export async function GET(request) {
 
     if (featured === "true") {
       filter.isFeatured = true;
+    }
+
+    if (tags) {
+      const tagsArray = tags.split(",").map(t => t.trim()).filter(Boolean);
+      if (tagsArray.length > 0) {
+        filter.tags = { $in: tagsArray };
+      }
+    }
+
+    if (readTime) {
+      if (readTime === "short") {
+        filter.readTime = { $lt: 5 };
+      } else if (readTime === "medium") {
+        filter.readTime = { $gte: 5, $lte: 10 };
+      } else if (readTime === "long") {
+        filter.readTime = { $gt: 10 };
+      }
     }
 
     // If only count is requested
@@ -42,6 +62,13 @@ export async function GET(request) {
 
     const skip = (page - 1) * limit;
 
+    let sortOption = { publishedAt: -1 };
+    if (sort === "popular") {
+      sortOption = { views: -1, publishedAt: -1 };
+    } else if (sort === "oldest") {
+      sortOption = { publishedAt: 1 };
+    }
+
     // Get blogs with pagination
     const [blogs, totalCount] = await Promise.all([
       Blog.find(filter)
@@ -50,7 +77,7 @@ export async function GET(request) {
         .select(
           "title slug excerpt featuredImage category author publishedAt views readTime isFeatured tags"
         )
-        .sort({ publishedAt: -1 })
+        .sort(sortOption)
         .skip(skip)
         .limit(limit)
         .lean({ virtuals: true }),

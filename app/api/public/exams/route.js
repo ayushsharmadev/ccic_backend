@@ -11,6 +11,7 @@ function transformExam(item) {
     applicationFee: item.applicationFee,
     examDate: item.examDate,
     resultDate: item.resultDate,
+    slug: item.slug,
     stream: {
       id: item.stream?._id,
       name: item.stream?.name,
@@ -63,12 +64,17 @@ export async function GET(request) {
     const limit = parseInt(searchParams.get("limit")) || 6;
     const country = searchParams.get("country") || "";
     const state = searchParams.get("state") || "";
+    const stream = searchParams.get("stream") || "";
+    const examLevel = searchParams.get("examLevel") || "";
 
     const baseFilter = { status: "active" };
     applyDirectLocationFilters(baseFilter, { country, state });
 
+    if (stream) baseFilter.stream = stream;
+    if (examLevel) baseFilter.examLevel = examLevel;
+
     // If only count is requested
-    if (count === "true") {
+    if (count === "true" || count === "True") {
       const totalCount = await Exam.countDocuments(baseFilter);
 
       return NextResponse.json({
@@ -80,14 +86,14 @@ export async function GET(request) {
     }
 
     // If featured exams is requested
-    if (featured === "true") {
+    if (featured === "true" || featured === "True") {
       const exams = await Exam.find({
         ...baseFilter,
         isFeatured: true,
       })
         .populate(examPopulate)
         .select(
-          "title logo applicationFee examDate resultDate status isFeatured displayOrder"
+          "title logo applicationFee examDate resultDate status isFeatured displayOrder slug"
         )
         .sort({ displayOrder: 1, examDate: 1 })
         .limit(limit)
@@ -101,6 +107,8 @@ export async function GET(request) {
             featured: true,
             country: country || null,
             state: state || null,
+            stream: stream || null,
+            examLevel: examLevel || null,
             limit,
           },
         },
@@ -116,7 +124,7 @@ export async function GET(request) {
       Exam.find(baseFilter)
         .populate(examPopulate)
         .select(
-          "title logo applicationFee examDate resultDate status isFeatured displayOrder"
+          "title logo applicationFee examDate resultDate status isFeatured displayOrder slug"
         )
         .sort({ displayOrder: 1, examDate: 1 })
         .skip(skip)
@@ -144,6 +152,8 @@ export async function GET(request) {
         filters: {
           country: country || null,
           state: state || null,
+          stream: stream || null,
+          examLevel: examLevel || null,
         },
       },
     });
