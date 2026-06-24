@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" role="img" aria-labelledby="title">
+  <title>Georgia flag</title>
+  <rect width="900" height="600" fill="#fff"/>
+  <rect x="390" width="120" height="600" fill="#ff0000"/>
+  <rect y="240" width="900" height="120" fill="#ff0000"/>
+  <g fill="#ff0000">
+    <g id="cross">
+      <rect x="-18" y="-70" width="36" height="140" rx="2"/>
+      <rect x="-70" y="-18" width="140" height="36" rx="2"/>
+    </g>
+    <use href="#cross" x="205" y="135"/>
+    <use href="#cross" x="695" y="135"/>
+    <use href="#cross" x="205" y="465"/>
+    <use href="#cross" x="695" y="465"/>
+  </g>
+</svg>

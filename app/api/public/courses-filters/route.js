@@ -12,6 +12,39 @@ export async function GET(request) {
 
     const results = {};
 
+    // Fetch counts using O(1) aggregation if needed
+    let courseCounts = [{ byStream: [], byDegree: [] }];
+    if (["all", "streams", "degrees"].includes(type)) {
+      courseCounts = await Course.aggregate([
+        { $match: { status: "active" } },
+        {
+          $facet: {
+            byStream: [
+              { $match: { streamId: { $exists: true, $ne: null } } },
+              { $group: { _id: "$streamId", count: { $sum: 1 } } }
+            ],
+            byDegree: [
+              { $match: { degreeId: { $exists: true, $ne: null } } },
+              { $group: { _id: "$degreeId", count: { $sum: 1 } } }
+            ]
+          }
+        }
+      ]);
+    }
+
+    const countMaps = {
+      streams: new Map(
+        (courseCounts[0]?.byStream || [])
+          .filter((c) => c._id)
+          .map((c) => [c._id.toString(), c.count])
+      ),
+      degrees: new Map(
+        (courseCounts[0]?.byDegree || [])
+          .filter((c) => c._id)
+          .map((c) => [c._id.toString(), c.count])
+      ),
+    };
+
     // Get Streams with course counts
     if (type === "all" || type === "streams") {
       const streams = await Stream.find({
@@ -21,19 +54,11 @@ export async function GET(request) {
         .select("name")
         .lean();
 
-      const streamsWithCounts = await Promise.all(
-        streams.map(async (stream) => {
-          const count = await Course.countDocuments({
-            streamId: stream._id,
-            status: "active",
-          });
-          return {
-            name: stream.name,
-            count,
-            id: `stream-${stream._id}`,
-          };
-        })
-      );
+      const streamsWithCounts = streams.map((stream) => ({
+        name: stream.name,
+        count: countMaps.streams.get(stream._id.toString()) || 0,
+        id: `stream-${stream._id}`,
+      }));
 
       results.streams = streamsWithCounts
         .filter((stream) => stream.count > 0)
@@ -50,19 +75,11 @@ export async function GET(request) {
         .select("name")
         .lean();
 
-      const degreesWithCounts = await Promise.all(
-        degrees.map(async (degree) => {
-          const count = await Course.countDocuments({
-            degreeId: degree._id,
-            status: "active",
-          });
-          return {
-            name: degree.name,
-            count,
-            id: `degree-${degree._id}`,
-          };
-        })
-      );
+      const degreesWithCounts = degrees.map((degree) => ({
+        name: degree.name,
+        count: countMaps.degrees.get(degree._id.toString()) || 0,
+        id: `degree-${degree._id}`,
+      }));
 
       results.degrees = degreesWithCounts
         .filter((degree) => degree.count > 0)

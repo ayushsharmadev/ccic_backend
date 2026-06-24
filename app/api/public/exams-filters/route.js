@@ -12,6 +12,48 @@ export async function GET(request) {
 
     const results = {};
 
+    // Fetch counts using O(1) aggregation if needed
+    let examCounts = [{ byStream: [], byExamLevel: [], byCountry: [] }];
+    if (["all", "streams", "examLevels", "countries"].includes(type)) {
+      examCounts = await Exam.aggregate([
+        { $match: { status: "active" } },
+        {
+          $facet: {
+            byStream: [
+              { $match: { stream: { $exists: true, $ne: null } } },
+              { $group: { _id: "$stream", count: { $sum: 1 } } }
+            ],
+            byExamLevel: [
+              { $match: { examLevel: { $exists: true, $ne: null } } },
+              { $group: { _id: "$examLevel", count: { $sum: 1 } } }
+            ],
+            byCountry: [
+              { $match: { country: { $exists: true, $ne: null } } },
+              { $group: { _id: "$country", count: { $sum: 1 } } }
+            ]
+          }
+        }
+      ]);
+    }
+
+    const countMaps = {
+      streams: new Map(
+        (examCounts[0]?.byStream || [])
+          .filter((c) => c._id)
+          .map((c) => [c._id.toString(), c.count])
+      ),
+      examLevels: new Map(
+        (examCounts[0]?.byExamLevel || [])
+          .filter((c) => c._id)
+          .map((c) => [c._id.toString(), c.count])
+      ),
+      countries: new Map(
+        (examCounts[0]?.byCountry || [])
+          .filter((c) => c._id)
+          .map((c) => [c._id.toString(), c.count])
+      ),
+    };
+
     // Get Streams with exam counts
     if (type === "all" || type === "streams") {
       const streams = await Stream.find({
@@ -21,21 +63,13 @@ export async function GET(request) {
         .select("name")
         .lean();
 
-      const streamsWithCounts = await Promise.all(
-        streams.map(async (stream) => {
-          const count = await Exam.countDocuments({
-            stream: stream._id,
-            status: "active",
-          });
-          return {
-            name: stream.name,
-            count,
-            id: stream._id.toString(),
-            value: stream._id.toString(),
-            label: stream.name,
-          };
-        })
-      );
+      const streamsWithCounts = streams.map((stream) => ({
+        name: stream.name,
+        count: countMaps.streams.get(stream._id.toString()) || 0,
+        id: stream._id.toString(),
+        value: stream._id.toString(),
+        label: stream.name,
+      }));
 
       results.streams = streamsWithCounts
         .filter((stream) => stream.count > 0)
@@ -51,21 +85,13 @@ export async function GET(request) {
         .select("name")
         .lean();
 
-      const examLevelsWithCounts = await Promise.all(
-        examLevels.map(async (level) => {
-          const count = await Exam.countDocuments({
-            examLevel: level._id,
-            status: "active",
-          });
-          return {
-            name: level.name,
-            count,
-            id: level._id.toString(),
-            value: level._id.toString(),
-            label: level.name,
-          };
-        })
-      );
+      const examLevelsWithCounts = examLevels.map((level) => ({
+        name: level.name,
+        count: countMaps.examLevels.get(level._id.toString()) || 0,
+        id: level._id.toString(),
+        value: level._id.toString(),
+        label: level.name,
+      }));
 
       results.examLevels = examLevelsWithCounts
         .filter((level) => level.count > 0)
@@ -81,22 +107,14 @@ export async function GET(request) {
         .select("name code")
         .lean();
 
-      const countriesWithCounts = await Promise.all(
-        countries.map(async (country) => {
-          const count = await Exam.countDocuments({
-            country: country._id,
-            status: "active",
-          });
-          return {
-            name: country.name,
-            code: country.code,
-            count,
-            id: country._id.toString(),
-            value: country._id.toString(),
-            label: country.name,
-          };
-        })
-      );
+      const countriesWithCounts = countries.map((country) => ({
+        name: country.name,
+        code: country.code,
+        count: countMaps.countries.get(country._id.toString()) || 0,
+        id: country._id.toString(),
+        value: country._id.toString(),
+        label: country.name,
+      }));
 
       results.countries = countriesWithCounts
         .filter((country) => country.count > 0)

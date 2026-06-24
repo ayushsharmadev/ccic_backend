@@ -19,11 +19,114 @@ export async function GET(request) {
     const search = searchParams.get("search") || "";
     const country = searchParams.get("country") || "";
     const state = searchParams.get("state") || "";
-    const type = searchParams.get("type") || "all"; // all, countries, states, cities, ownership, exams, feeRanges
+    const type = searchParams.get("type") || "all";
 
     const results = {};
 
-    // Get Countries with college counts
+    // 1. O(1) Aggregation for Basic Geography & Ownership
+    let collegeCounts = [
+      { byCountry: [], byState: [], byDistrict: [], byOwnership: [] },
+    ];
+    if (["all", "countries", "states", "cities", "ownership"].includes(type)) {
+      collegeCounts = await College.aggregate([
+        { $match: { status: "active" } },
+        {
+          $facet: {
+            byCountry: [{ $group: { _id: "$country", count: { $sum: 1 } } }],
+            byState: [{ $group: { _id: "$state", count: { $sum: 1 } } }],
+            byDistrict: [{ $group: { _id: "$district", count: { $sum: 1 } } }],
+            byOwnership: [
+              { $group: { _id: "$ownership", count: { $sum: 1 } } },
+            ],
+          },
+        },
+      ]);
+    }
+
+    const countMaps = {
+      countries: new Map(
+        collegeCounts[0].byCountry
+          .filter((c) => c._id)
+          .map((c) => [c._id.toString(), c.count]),
+      ),
+      states: new Map(
+        collegeCounts[0].byState
+          .filter((c) => c._id)
+          .map((c) => [c._id.toString(), c.count]),
+      ),
+      districts: new Map(
+        collegeCounts[0].byDistrict
+          .filter((c) => c._id)
+          .map((c) => [c._id.toString(), c.count]),
+      ),
+      ownership: new Map(
+        collegeCounts[0].byOwnership
+          .filter((c) => c._id)
+          .map((c) => [c._id.toString(), c.count]),
+      ),
+    };
+
+    // 2. O(1) Aggregation for Exams and Courses
+    let allocationCounts = [{ byExam: [], byCourse: [] }];
+    if (["all", "exams", "courses"].includes(type)) {
+      allocationCounts = await CollegeCourseAllocation.aggregate([
+        { $unwind: "$assignedCourses" },
+        { $match: { "assignedCourses.isActive": true } },
+        {
+          $facet: {
+            byExam: [
+              {
+                $match: {
+                  "assignedCourses.examType": { $exists: true, $ne: null },
+                },
+              },
+              {
+                $group: {
+                  _id: {
+                    college: "$college",
+                    examType: "$assignedCourses.examType",
+                  },
+                },
+              },
+              { $group: { _id: "$_id.examType", count: { $sum: 1 } } },
+            ],
+            byCourse: [
+              {
+                $match: {
+                  "assignedCourses.course": { $exists: true, $ne: null },
+                },
+              },
+              {
+                $group: {
+                  _id: {
+                    college: "$college",
+                    course: "$assignedCourses.course",
+                  },
+                },
+              },
+              { $group: { _id: "$_id.course", count: { $sum: 1 } } },
+            ],
+          },
+        },
+      ]);
+    }
+
+    const allocMaps = {
+      exams: new Map(
+        allocationCounts[0].byExam
+          .filter((c) => c._id)
+          .map((c) => [c._id.toString(), c.count]),
+      ),
+      courses: new Map(
+        allocationCounts[0].byCourse
+          .filter((c) => c._id)
+          .map((c) => [c._id.toString(), c.count]),
+      ),
+    };
+
+    // --- Build Responses ---
+
+    // Get Countries
     if (type === "all" || type === "countries") {
       const countries = await Country.find({
         status: "active",
@@ -37,28 +140,19 @@ export async function GET(request) {
         .select("name code")
         .lean();
 
-      const countriesWithCounts = await Promise.all(
-        countries.map(async (countryItem) => {
-          const count = await College.countDocuments({
-            country: countryItem._id,
-            status: "active",
-          });
-          return {
-            name: countryItem.name,
-            code: countryItem.code,
-            count,
-            value: countryItem._id.toString(),
-            id: countryItem._id.toString(),
-          };
-        })
-      );
-
-      results.countries = countriesWithCounts
-        .filter((item) => item.count > 0)
+      results.countries = countries
+        .map((c) => ({
+          name: c.name,
+          code: c.code,
+          value: c._id.toString(),
+          id: c._id.toString(),
+          count: countMaps.countries.get(c._id.toString()) || 0,
+        }))
+        .filter((c) => c.count > 0)
         .sort((a, b) => b.count - a.count);
     }
 
-    // Get States with college counts
+    // Get States
     if (type === "all" || type === "states") {
       const stateFilter = {
         status: "active",
@@ -69,57 +163,39 @@ export async function GET(request) {
           ],
         }),
       };
-
-      if (country) {
-        stateFilter.country = country;
-      }
+      if (country) stateFilter.country = country;
 
       const states = await State.find(stateFilter)
-        .populate("country", "name code")
+        .populate("country", "name")
         .select("name code country")
         .lean();
 
-      const statesWithCounts = await Promise.all(
-        states.map(async (stateItem) => {
-          const count = await College.countDocuments({
-            state: stateItem._id,
-            status: "active",
-          });
-          return {
-            name: stateItem.name,
-            code: stateItem.code,
-            count,
-            value: stateItem._id.toString(),
-            id: stateItem._id.toString(),
-            country: stateItem.country?.name,
-          };
-        })
-      );
-
-      results.states = statesWithCounts
-        .filter((item) => item.count > 0)
+      results.states = states
+        .map((s) => ({
+          name: s.name,
+          code: s.code,
+          value: s._id.toString(),
+          id: s._id.toString(),
+          country: s.country?.name,
+          count: countMaps.states.get(s._id.toString()) || 0,
+        }))
+        .filter((s) => s.count > 0)
         .sort((a, b) => b.count - a.count);
     }
 
-    // Get Cities (Districts) with college counts
+    // Get Cities
     if (type === "all" || type === "cities") {
       const districtFilter = {
         status: "active",
         ...(search && { name: { $regex: search, $options: "i" } }),
       };
-
       if (state) {
         districtFilter.state = state;
       } else if (country) {
-        const countryStates = await State.find({
-          country,
-          status: "active",
-        })
+        const countryStates = await State.find({ country, status: "active" })
           .select("_id")
           .lean();
-        districtFilter.state = {
-          $in: countryStates.map((item) => item._id),
-        };
+        districtFilter.state = { $in: countryStates.map((item) => item._id) };
       }
 
       const districts = await District.find(districtFilter)
@@ -131,29 +207,20 @@ export async function GET(request) {
         .select("name state")
         .lean();
 
-      const citiesWithCounts = await Promise.all(
-        districts.map(async (district) => {
-          const count = await College.countDocuments({
-            district: district._id,
-            status: "active",
-          });
-          return {
-            name: district.name,
-            count,
-            id: `city-${district._id}`,
-            state: district.state?.name,
-            country: district.state?.country?.name,
-          };
-        })
-      );
-
-      results.cities = citiesWithCounts
-        .filter((city) => city.count > 0)
+      results.cities = districts
+        .map((d) => ({
+          name: d.name,
+          id: `city-${d._id}`,
+          state: d.state?.name,
+          country: d.state?.country?.name,
+          count: countMaps.districts.get(d._id.toString()) || 0,
+        }))
+        .filter((d) => d.count > 0)
         .sort((a, b) => b.count - a.count)
-        .slice(0, 20); // Limit to top 20 cities
+        .slice(0, 20);
     }
 
-    // Get Ownership Types with college counts
+    // Get Ownership
     if (type === "all" || type === "ownership") {
       const ownershipTypes = await Ownership.find({
         status: "active",
@@ -162,26 +229,17 @@ export async function GET(request) {
         .select("name")
         .lean();
 
-      const ownershipWithCounts = await Promise.all(
-        ownershipTypes.map(async (ownership) => {
-          const count = await College.countDocuments({
-            ownership: ownership._id,
-            status: "active",
-          });
-          return {
-            name: ownership.name,
-            count,
-            id: `ownership-${ownership._id}`,
-          };
-        })
-      );
-
-      results.ownership = ownershipWithCounts
-        .filter((ownership) => ownership.count > 0)
+      results.ownership = ownershipTypes
+        .map((o) => ({
+          name: o.name,
+          id: `ownership-${o._id}`,
+          count: countMaps.ownership.get(o._id.toString()) || 0,
+        }))
+        .filter((o) => o.count > 0)
         .sort((a, b) => b.count - a.count);
     }
 
-    // Get Exam Types with college counts
+    // Get Exams
     if (type === "all" || type === "exams") {
       const examTypes = await ExamType.find({
         status: "active",
@@ -195,37 +253,20 @@ export async function GET(request) {
         .select("name shortName")
         .lean();
 
-      const examWithCounts = await Promise.all(
-        examTypes.map(async (examType) => {
-          // Count colleges that have courses with this exam type
-          const allocations = await CollegeCourseAllocation.find({
-            "assignedCourses.examType": examType._id,
-            "assignedCourses.isActive": true,
-          })
-            .select("college")
-            .lean();
-
-          const uniqueColleges = [
-            ...new Set(allocations.map((a) => a.college.toString())),
-          ];
-
-          return {
-            name: examType.name,
-            shortName: examType.shortName,
-            count: uniqueColleges.length,
-            value: examType._id.toString(),
-            id: examType._id.toString(),
-          };
-        })
-      );
-
-      results.exams = examWithCounts
-        .filter((exam) => exam.count > 0)
+      results.exams = examTypes
+        .map((e) => ({
+          name: e.name,
+          shortName: e.shortName,
+          value: e._id.toString(),
+          id: e._id.toString(),
+          count: allocMaps.exams.get(e._id.toString()) || 0,
+        }))
+        .filter((e) => e.count > 0)
         .sort((a, b) => b.count - a.count)
-        .slice(0, 10); // Limit to top 10 exam types
+        .slice(0, 10);
     }
 
-    // Get Courses with college counts
+    // Get Courses
     if (type === "all" || type === "courses") {
       const courses = await Course.find({
         status: "active",
@@ -235,42 +276,30 @@ export async function GET(request) {
         .select("name streamId")
         .lean();
 
-      const coursesWithCounts = await Promise.all(
-        courses.map(async (course) => {
-          // Count colleges that have this course allocated
-          const allocations = await CollegeCourseAllocation.find({
-            "assignedCourses.course": course._id,
-            "assignedCourses.isActive": true,
-          })
-            .select("college")
-            .lean();
-
-          const uniqueColleges = [
-            ...new Set(allocations.map((a) => a.college.toString())),
-          ];
-
-          return {
-            name: course.name,
-            count: uniqueColleges.length,
-            value: course._id.toString(),
-            id: course._id.toString(),
-            stream: course.streamId?.name,
-          };
-        })
-      );
-
-      results.courses = coursesWithCounts
-        .filter((course) => course.count > 0)
+      results.courses = courses
+        .map((c) => ({
+          name: c.name,
+          value: c._id.toString(),
+          id: c._id.toString(),
+          stream: c.streamId?.name,
+          count: allocMaps.courses.get(c._id.toString()) || 0,
+        }))
+        .filter((c) => c.count > 0)
         .sort((a, b) => b.count - a.count)
-        .slice(0, 15); // Limit to top 15 courses
+        .slice(0, 15);
     }
 
-    // Get Fee Ranges with actual counts based on CollegeCourseAllocation
+    // Get Fee Ranges
     if (type === "all" || type === "feeRanges") {
       const feeRanges = [
         { name: "Upto 3 Lakh", minFee: 0, maxFee: 300000, value: "0-300000" },
         { name: "Upto 5 Lakh", minFee: 0, maxFee: 500000, value: "0-500000" },
-        { name: "Upto 10 Lakh", minFee: 0, maxFee: 1000000, value: "0-1000000" },
+        {
+          name: "Upto 10 Lakh",
+          minFee: 0,
+          maxFee: 1000000,
+          value: "0-1000000",
+        },
         {
           name: "Above 10 Lakh",
           minFee: 1000000,
@@ -284,50 +313,42 @@ export async function GET(request) {
         .select("college assignedCourses")
         .lean();
 
-      const feeRangesWithCounts = feeRanges.map((range) => {
+      results.feeRanges = feeRanges.map((range) => {
         const collegesInRange = new Set();
-
         allAllocations.forEach((allocation) => {
           allocation.assignedCourses?.forEach((assignedCourse) => {
             if (!assignedCourse.isActive) return;
-
-            // Find current year session
             const currentYearStructure = assignedCourse.feeStructures?.find(
               (structure) => {
                 if (!structure.session) return false;
                 const sessionStartYear = parseInt(
                   structure.session.split("-")[0],
-                  10
+                  10,
                 );
                 return sessionStartYear === currentYear;
-              }
+              },
             );
-
             if (currentYearStructure) {
               const totalFee = currentYearStructure.periods?.reduce(
                 (sum, p) => sum + (p.amount || 0),
-                0
+                0,
               );
-
               if (totalFee >= range.minFee && totalFee <= range.maxFee) {
                 collegesInRange.add(allocation.college.toString());
               }
             }
           });
         });
-
         return {
           name: range.name,
           count: collegesInRange.size,
           value: range.value,
-          id: range.value, // Use value as ID for consistency
+          id: range.value,
         };
       });
-
-      results.feeRanges = feeRangesWithCounts;
     }
 
-    // Get Sort Options
+    // Sort Options
     if (type === "all" || type === "sortOptions") {
       results.sortOptions = [
         { name: "Alphabetically", id: "sort-1" },
@@ -336,10 +357,7 @@ export async function GET(request) {
       ];
     }
 
-    return NextResponse.json({
-      success: true,
-      data: results,
-    });
+    return NextResponse.json({ success: true, data: results });
   } catch (error) {
     console.error("Error fetching colleges filters:", error);
     return NextResponse.json(
@@ -348,7 +366,7 @@ export async function GET(request) {
         error: "Failed to fetch colleges filters",
         message: error.message,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

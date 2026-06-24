@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" role="img" aria-labelledby="title">
+  <title>Philippines flag</title>
+  <rect width="900" height="300" fill="#0038a8"/>
+  <rect y="300" width="900" height="300" fill="#ce1126"/>
+  <path d="M0 0 450 300 0 600z" fill="#fff"/>
+  <g fill="#fcd116">
+    <circle cx="150" cy="300" r="44"/>
+    <g id="ray">
+      <path d="M150 206 164 266H136z"/>
+    </g>
+    <use href="#ray" transform="rotate(45 150 300)"/>
+    <use href="#ray" transform="rotate(90 150 300)"/>
+    <use href="#ray" transform="rotate(135 150 300)"/>
+    <use href="#ray" transform="rotate(180 150 300)"/>
+    <use href="#ray" transform="rotate(225 150 300)"/>
+    <use href="#ray" transform="rotate(270 150 300)"/>
+    <use href="#ray" transform="rotate(315 150 300)"/>
+    <path d="M75 75 84 101 112 101 89 118 98 145 75 128 52 145 61 118 38 101 66 101z"/>
+    <path d="M75 525 84 499 112 499 89 482 98 455 75 472 52 455 61 482 38 499 66 499z"/>
+    <path d="M360 300 369 326 397 326 374 343 383 370 360 353 337 370 346 343 323 326 351 326z"/>
+  </g>
+</svg>

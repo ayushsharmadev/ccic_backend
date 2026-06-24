@@ -12,6 +12,26 @@ export async function GET(request) {
 
     const results = {};
 
+    // Get counts using O(1) aggregation if needed
+    let countryCounts = [{ byMedium: [], byDuration: [] }];
+    if (["all", "teachingMediums", "durations"].includes(type)) {
+      countryCounts = await Country.aggregate([
+        { $match: { status: "active" } },
+        {
+          $facet: {
+            byMedium: [
+              { $match: { "studyMetrics.mediumOfTeaching": { $exists: true, $ne: null, $ne: "" } } },
+              { $group: { _id: "$studyMetrics.mediumOfTeaching", count: { $sum: 1 } } }
+            ],
+            byDuration: [
+              { $match: { "studyMetrics.courseDuration": { $exists: true, $ne: null, $ne: "" } } },
+              { $group: { _id: "$studyMetrics.courseDuration", count: { $sum: 1 } } }
+            ]
+          }
+        }
+      ]);
+    }
+
     // Get Fee Ranges
     if (type === "all" || type === "feeRanges") {
       const feeRanges = [
@@ -51,50 +71,24 @@ export async function GET(request) {
 
     // Get Medium of Teaching
     if (type === "all" || type === "teachingMediums") {
-      const allMediums = await Country.distinct("studyMetrics.mediumOfTeaching", {
-        status: "active",
-        "studyMetrics.mediumOfTeaching": { $exists: true, $ne: "" }
-      });
-
-      const mediumsWithCounts = await Promise.all(
-        allMediums.map(async (medium) => {
-          const count = await Country.countDocuments({
-            status: "active",
-            "studyMetrics.mediumOfTeaching": medium
-          });
-          return {
-            name: medium,
-            count,
-            value: medium,
-            id: medium
-          };
-        })
-      );
+      const mediumsWithCounts = (countryCounts[0]?.byMedium || []).map((medium) => ({
+        name: medium._id,
+        count: medium.count,
+        value: medium._id,
+        id: medium._id
+      }));
 
       results.teachingMediums = mediumsWithCounts.sort((a, b) => b.count - a.count);
     }
 
     // Get Durations
     if (type === "all" || type === "durations") {
-      const allDurations = await Country.distinct("studyMetrics.courseDuration", {
-        status: "active",
-        "studyMetrics.courseDuration": { $exists: true, $ne: "" }
-      });
-
-      const durationsWithCounts = await Promise.all(
-        allDurations.map(async (duration) => {
-          const count = await Country.countDocuments({
-            status: "active",
-            "studyMetrics.courseDuration": duration
-          });
-          return {
-            name: duration,
-            count,
-            value: duration,
-            id: duration
-          };
-        })
-      );
+      const durationsWithCounts = (countryCounts[0]?.byDuration || []).map((duration) => ({
+        name: duration._id,
+        count: duration.count,
+        value: duration._id,
+        id: duration._id
+      }));
 
       results.durations = durationsWithCounts.sort((a, b) => b.count - a.count);
     }

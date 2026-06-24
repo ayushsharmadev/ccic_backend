@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" role="img" aria-labelledby="title">
+  <title>Uzbekistan flag</title>
+  <rect width="900" height="600" fill="#1eb5e5"/>
+  <rect y="200" width="900" height="20" fill="#ce1126"/>
+  <rect y="220" width="900" height="160" fill="#fff"/>
+  <rect y="380" width="900" height="20" fill="#ce1126"/>
+  <rect y="400" width="900" height="200" fill="#009b3a"/>
+  <circle cx="125" cy="90" r="46" fill="#fff"/>
+  <circle cx="145" cy="90" r="46" fill="#1eb5e5"/>
+  <g fill="#fff">
+    <g id="star">
+      <path d="M0-10 2.9-3.1 10-3.1 4.2 1.2 6.2 8.1 0 4-6.2 8.1-4.2 1.2-10-3.1-2.9-3.1z"/>
+    </g>
+    <use href="#star" x="230" y="48"/>
+    <use href="#star" x="280" y="48"/>
+    <use href="#star" x="330" y="48"/>
+    <use href="#star" x="205" y="88"/>
+    <use href="#star" x="255" y="88"/>
+    <use href="#star" x="305" y="88"/>
+    <use href="#star" x="355" y="88"/>
+    <use href="#star" x="180" y="128"/>
+    <use href="#star" x="230" y="128"/>
+    <use href="#star" x="280" y="128"/>
+    <use href="#star" x="330" y="128"/>
+    <use href="#star" x="380" y="128"/>
+  </g>
+</svg>

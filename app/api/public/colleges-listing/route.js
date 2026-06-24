@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
-import { College, Ownership } from "@/lib/models";
+import { College, Ownership, Country } from "@/lib/models";
 import CollegeCourseAllocation from "@/lib/models/CollegeCourseAllocation";
 import {
   applyCityDistrictFilter,
@@ -23,6 +23,7 @@ export async function GET(request) {
 
     // Filters
     const country = searchParams.get("country") || "";
+    const countrySlug = searchParams.get("countrySlug") || "";
     const state = searchParams.get("state") || "";
     const district = searchParams.get("district") || "";
     const city = searchParams.get("city") || "";
@@ -48,9 +49,27 @@ export async function GET(request) {
       ];
     }
 
+    let resolvedCountry = country;
+
     // Add location filters
     applyDirectLocationFilters(filter, { country, state, district });
-    await applyCityDistrictFilter(filter, { city, country, state, district });
+    if (countrySlug) {
+      const countryBySlug = await Country.findOne({
+        slug: countrySlug,
+        status: "active",
+      })
+        .select("_id")
+        .lean();
+
+      resolvedCountry = countryBySlug?._id?.toString() || "";
+      filter.country = resolvedCountry || { $in: [] };
+    }
+    await applyCityDistrictFilter(filter, {
+      city,
+      country: resolvedCountry,
+      state,
+      district,
+    });
 
     // Add ownership filter
     if (ownership) {
