@@ -2,10 +2,7 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import { College, Ownership, Country } from "@/lib/models";
 import CollegeCourseAllocation from "@/lib/models/CollegeCourseAllocation";
-import {
-  applyCityDistrictFilter,
-  applyDirectLocationFilters,
-} from "@/lib/locationFilters";
+import { applyDirectLocationFilters } from "@/lib/locationFilters";
 
 export async function GET(request) {
   try {
@@ -26,7 +23,6 @@ export async function GET(request) {
     const countrySlug = searchParams.get("countrySlug") || "";
     const state = searchParams.get("state") || "";
     const district = searchParams.get("district") || "";
-    const city = searchParams.get("city") || "";
     const ownership = searchParams.get("ownership") || "";
     const exam = searchParams.get("exam") || "";
     const course = searchParams.get("course") || "";
@@ -49,8 +45,6 @@ export async function GET(request) {
       ];
     }
 
-    let resolvedCountry = country;
-
     // Add location filters
     applyDirectLocationFilters(filter, { country, state, district });
     if (countrySlug) {
@@ -61,22 +55,15 @@ export async function GET(request) {
         .select("_id")
         .lean();
 
-      resolvedCountry = countryBySlug?._id?.toString() || "";
-      filter.country = resolvedCountry || { $in: [] };
+      filter.country = countryBySlug?._id?.toString() || { $in: [] };
     }
-    await applyCityDistrictFilter(filter, {
-      city,
-      country: resolvedCountry,
-      state,
-      district,
-    });
 
     // Add ownership filter
     if (ownership) {
       const ownershipTypes = await Ownership.find({
         name: { $regex: ownership, $options: "i" },
         status: "active",
-      }).select("_id");
+      }).select("_id").lean();
 
       if (ownershipTypes.length > 0) {
         filter.ownership = { $in: ownershipTypes.map((o) => o._id) };
@@ -136,8 +123,7 @@ export async function GET(request) {
         };
     }
 
-    // Get colleges with populated references
-    const colleges = await College.find(filter)
+    const collegeQuery = College.find(filter)
       .populate("country", "name code")
       .populate("state", "name code")
       .populate("district", "name")
@@ -152,8 +138,10 @@ export async function GET(request) {
       .limit(limit)
       .lean();
 
-    // Get total count for pagination
-    const totalCount = await College.countDocuments(filter);
+    const [colleges, totalCount] = await Promise.all([
+      collegeQuery,
+      College.countDocuments(filter),
+    ]);
 
     // Fetch course allocations for all colleges
     const currentYear = new Date().getFullYear();
@@ -161,6 +149,7 @@ export async function GET(request) {
     const courseAllocations = await CollegeCourseAllocation.find({
       college: { $in: collegeIds },
     })
+      .select("college assignedCourses")
       .populate({
         path: "assignedCourses.course",
         select: "name slug",
@@ -387,7 +376,6 @@ export async function GET(request) {
           country,
           state,
           district,
-          city,
           ownership,
           exam,
           course,
