@@ -283,11 +283,6 @@ export default function AddCountryPage() {
       return false;
     }
 
-    if (!formData.brochure) {
-      showError("Country Brochure is required");
-      return false;
-    }
-
     if (!formData.countryGallery.length) {
       showError("At least one country gallery image is required");
       return false;
@@ -691,7 +686,7 @@ export default function AddCountryPage() {
               </div>
               <div>
                 <ImageUpload
-                  title="Country Brochure"
+                  title="Country Brochure (Optional)"
                   type="document"
                   preview={formData.brochure}
                   onFileChange={(file, preview) => setFormData((prev) => ({ ...prev, brochure: preview }))}

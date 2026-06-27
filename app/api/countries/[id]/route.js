@@ -169,7 +169,6 @@ function getRequiredCountryError(body, payload) {
 
   if (isBlank(body.logo)) return "Country logo is required";
   if (isBlank(body.banner)) return "Country banner is required";
-  if (isBlank(body.brochure)) return "Country brochure is required";
 
   if (body.displayOrder === undefined || body.displayOrder === "" || Number.isNaN(Number(body.displayOrder))) {
     return "Display order is required";
