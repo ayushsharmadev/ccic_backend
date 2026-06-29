@@ -3,6 +3,8 @@ import connectDB from "@/lib/db";
 import { Country, College, News, Blog, Exam } from "@/lib/models";
 import CountrySection from "@/lib/models/CountrySection";
 
+export const dynamic = "force-dynamic";
+
 const deprecatedSectionTabs = new Set(["study"]);
 
 function buildPublicCountryData(country) {

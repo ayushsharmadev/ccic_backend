@@ -8,6 +8,8 @@ import CollegeDistanceMeter from "@/lib/models/CollegeDistanceMeter";
 import CollegeReview from "@/lib/models/CollegeReview";
 import mongoose from "mongoose";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request, { params }) {
   try {
     await connectDB();
