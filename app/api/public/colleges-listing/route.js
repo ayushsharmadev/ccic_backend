@@ -130,8 +130,11 @@ export async function GET(request) {
       .populate("ownership", "name")
       .populate("affiliation", "name")
       .populate("languages", "name")
+      .populate("facilities", "name")
+      .populate("hospitalFacilities", "name")
+      .populate("hostelFacilities", "name")
       .select(
-        "name popularName shortName estdYear campusSize logo banner brochure shortDescription longDescription country state district ownership affiliation isFeatured isPopular isVerified displayOrder slug addressLine1 addressLine2 location landmark pinCode phoneNumber websiteUrl emailAddress hostelFacilities hostelGallery intake languages"
+        "name popularName shortName estdYear campusSize logo banner brochure shortDescription longDescription country state district ownership affiliation isFeatured isPopular isVerified displayOrder slug addressLine1 addressLine2 location landmark pinCode phoneNumber websiteUrl emailAddress facilities hospitalFacilities hostelFacilities haveHostel haveHospital hospitalBeds hostelGallery intake languages"
       )
       .sort(sort)
       .skip(skip)
@@ -249,7 +252,8 @@ export async function GET(request) {
 
       // Seat intake removed - using dynamic courses instead
 
-      // Build fees from CollegeCourseAllocation current year data
+      // Build fees from CollegeCourseAllocation current year data.
+      // If no uploaded fee exists, keep it null instead of sending a fake fallback.
       let totalFeeAmount = 0;
       const fees = (() => {
         if (collegeCoursesWithFees.length > 0) {
@@ -265,14 +269,14 @@ export async function GET(request) {
             }
           }
         }
-        return "₹3.5L"; // Default fallback
+        return null;
       })();
 
-      // Build cutoff (this would need actual cutoff data)
-      const cutoff = "450+"; // Default fallback
+      // No cutoff model/data is wired into this listing API yet.
+      const cutoff = null;
 
-      // Build rating (this would need actual rating data)
-      const rating = "4.6"; // Default fallback
+      // No rating aggregate is wired into this listing API yet.
+      const rating = null;
 
       // Build university name
       const university = college.affiliation?.name || "";
@@ -281,6 +285,26 @@ export async function GET(request) {
         college.district?.name,
         college.state?.name,
         college.country?.name,
+      ].filter(Boolean);
+
+      const collegeFacilities = Array.isArray(college.facilities)
+        ? college.facilities
+        : [];
+      const hospitalFacilities = Array.isArray(college.hospitalFacilities)
+        ? college.hospitalFacilities
+        : [];
+      const hostelFacilities = Array.isArray(college.hostelFacilities)
+        ? college.hostelFacilities
+        : [];
+      const hasCollegeFacilities = collegeFacilities.length > 0;
+      const hasHospitalFacilities =
+        Boolean(college.haveHospital) || hospitalFacilities.length > 0;
+      const hasHostelFacilities =
+        Boolean(college.haveHostel) || hostelFacilities.length > 0;
+      const facilitySummary = [
+        hasHostelFacilities ? "Hostel" : null,
+        hasHospitalFacilities ? "Hospital" : null,
+        hasCollegeFacilities ? "Campus Facilities" : null,
       ].filter(Boolean);
 
       return {
@@ -298,9 +322,10 @@ export async function GET(request) {
         brochure: college.brochure,
         fees: fees,
         cutoff: cutoff,
-        hospital: true, // Default fallback
-        courses_offered: true, // Default fallback
-        facilities: true, // Default fallback
+        hospital: hasHospitalFacilities,
+        courses_offered: collegeCoursesWithFees.length > 0,
+        facilities: hasCollegeFacilities || hasHospitalFacilities || hasHostelFacilities,
+        facilitySummary,
         rating: rating,
         university: university,
         location: locationParts.join(", ") || college.location || "",
@@ -319,7 +344,12 @@ export async function GET(request) {
         isPopular: college.isPopular,
         isVerified: college.isVerified,
         displayOrder: college.displayOrder,
-        hostelFacilities: college.hostelFacilities || [],
+        collegeFacilities,
+        hospitalFacilities,
+        hostelFacilities,
+        haveHostel: Boolean(college.haveHostel),
+        haveHospital: Boolean(college.haveHospital),
+        hospitalBeds: college.hospitalBeds || null,
         hostelGallery: college.hostelGallery || [],
         intake: college.intake || [],
         languages: college.languages || [],

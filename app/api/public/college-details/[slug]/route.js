@@ -10,6 +10,27 @@ import mongoose from "mongoose";
 
 export const dynamic = "force-dynamic";
 
+function getSessionStartYear(session) {
+  const year = parseInt(String(session || "").split("-")[0], 10);
+  return Number.isFinite(year) ? year : 0;
+}
+
+function pickFeeStructure(feeStructures = [], currentYear) {
+  const structures = feeStructures
+    .filter((structure) => structure?.session)
+    .sort(
+      (a, b) => getSessionStartYear(b.session) - getSessionStartYear(a.session),
+    );
+
+  return (
+    structures.find(
+      (structure) => getSessionStartYear(structure.session) === currentYear,
+    ) ||
+    structures[0] ||
+    null
+  );
+}
+
 export async function GET(request, { params }) {
   try {
     await connectDB();
@@ -20,7 +41,7 @@ export async function GET(request, { params }) {
     if (!slug) {
       return NextResponse.json(
         { success: false, error: "College slug is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -50,7 +71,7 @@ export async function GET(request, { params }) {
     if (!college) {
       return NextResponse.json(
         { success: false, error: "College not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -70,7 +91,7 @@ export async function GET(request, { params }) {
     })
       .populate({
         path: "assignedCourses.course",
-        select: "name slug streamId degreeId description status",
+        select: "name slug logo icon streamId degreeId description status",
         populate: [
           { path: "streamId", select: "name" },
           { path: "degreeId", select: "name shortName" },
@@ -86,33 +107,26 @@ export async function GET(request, { params }) {
       })
       .lean();
 
-    // Filter courses by current year session and transform
+    // Prefer current year fees, but fall back to the latest uploaded session.
     const coursesWithFees = [];
     if (courseAllocation && courseAllocation.assignedCourses) {
       for (const assignedCourse of courseAllocation.assignedCourses) {
         if (!assignedCourse.isActive) continue;
 
-        // Find fee structure where session starts with current year
-        const currentYearStructure = assignedCourse.feeStructures?.find(
-          (structure) => {
-            if (!structure.session) return false;
-            // Session format: "2024-2025" or "2025-2029"
-            // Extract first year from session
-            const sessionStartYear = parseInt(structure.session.split("-")[0], 10);
-            // Match if session starts with current year
-            return sessionStartYear === currentYear;
-          }
+        const feeStructure = pickFeeStructure(
+          assignedCourse.feeStructures,
+          currentYear,
         );
 
-        if (currentYearStructure && assignedCourse.course) {
+        if (feeStructure && assignedCourse.course) {
           coursesWithFees.push({
             course: assignedCourse.course,
             courseDuration: assignedCourse.courseDuration,
             examType: assignedCourse.examType || null,
-            session: currentYearStructure.session,
-            feeStructureType: currentYearStructure.structureType,
-            seats: currentYearStructure.seats,
-            periods: currentYearStructure.periods || [],
+            session: feeStructure.session,
+            feeStructureType: feeStructure.structureType,
+            seats: feeStructure.seats,
+            periods: feeStructure.periods || [],
             notes: assignedCourse.notes,
           });
         }
@@ -152,7 +166,7 @@ export async function GET(request, { params }) {
     const reviewsWithApprovedReplies = reviews.map((review) => ({
       ...review,
       replies: (review.replies || []).filter(
-        (reply) => reply.status === "approved"
+        (reply) => reply.status === "approved",
       ),
     }));
 
@@ -267,7 +281,7 @@ export async function GET(request, { params }) {
     console.error("Error fetching college details:", error);
     return NextResponse.json(
       { success: false, error: "Failed to fetch college details" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

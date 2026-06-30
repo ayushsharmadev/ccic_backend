@@ -90,7 +90,7 @@ export async function GET(request, { params }) {
       .limit(10)
       .select("name slug logo banner shortDescription state district averageRating reviewsCount shortName")
       .lean();
-      
+
     // Count total colleges
     const totalCollegesCount = await College.countDocuments({
       country: country._id,
