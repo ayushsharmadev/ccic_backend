@@ -51,11 +51,13 @@ export async function GET(request) {
         status: "Active",
         ...(search && { name: { $regex: search, $options: "i" } }),
       })
-        .select("name")
+        .select("name logo about")
         .lean();
 
       const streamsWithCounts = streams.map((stream) => ({
         name: stream.name,
+        logo: stream.logo,
+        about: stream.about,
         count: countMaps.streams.get(stream._id.toString()) || 0,
         id: `stream-${stream._id}`,
       }));
