@@ -36,6 +36,13 @@ export async function GET(request) {
 
     // If all parameter is present, return all districts without pagination
     if (all) {
+      if (!state && !country && !search) {
+        return NextResponse.json({
+          success: true,
+          data: [],
+        });
+      }
+
       const filter = { status: "active" };
       if (state) {
         filter.state = state;
@@ -55,6 +62,7 @@ export async function GET(request) {
           select: "name code country",
           populate: { path: "country", select: "name code", model: "CountryMaster" },
         })
+        .select("_id name code state status")
         .sort({ name: 1 })
         .lean();
 

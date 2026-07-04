@@ -8,7 +8,7 @@ export async function GET(request) {
     await connectDB();
 
     const { searchParams } = new URL(request.url);
-    const limit = parseInt(searchParams.get("limit")) || 6;
+    const limit = parseInt(searchParams.get("limit")) || 8;
     const featured = searchParams.get("featured") || "";
     const count = searchParams.get("count") || "";
 
@@ -16,7 +16,6 @@ export async function GET(request) {
     if (count === "true") {
       const totalCount = await Testimonial.countDocuments({
         status: "published",
-        isPublished: true,
       });
 
       return NextResponse.json({
@@ -28,7 +27,6 @@ export async function GET(request) {
     // Build filter for published testimonials
     const filter = {
       status: "published",
-      isPublished: true,
     };
 
     // If featured is requested, filter by featured status

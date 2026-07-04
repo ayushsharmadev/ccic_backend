@@ -7,8 +7,23 @@ function compactPath(path) {
   return path || null;
 }
 function buildLocation(college) {
-  return [college.district?.name, college.state?.name, college.country?.name]
+  const parts = [
+    college.location,
+    college.district?.name,
+    college.state?.name,
+    college.country?.name,
+  ]
     .filter(Boolean)
+    .flatMap((part) => String(part).split(","))
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  return parts
+    .filter(
+      (part, index) =>
+        parts.findIndex((item) => item.toLowerCase() === part.toLowerCase()) ===
+        index,
+    )
     .join(", ");
 }
 
@@ -97,7 +112,7 @@ export async function GET(request) {
       .populate("ownership", "name")
       .populate("affiliation", "name")
       .select(
-        "name popularName shortName estdYear logo banner brochure country state district ownership affiliation isFeatured isPopular isVerified displayOrder slug",
+        "name popularName shortName estdYear logo banner brochure location country state district ownership affiliation isFeatured isPopular isVerified displayOrder slug",
       )
       .sort(sort)
       .skip(skip)

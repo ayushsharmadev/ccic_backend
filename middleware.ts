@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 const allowedOrigins = new Set([
   "http://localhost:3000",
   "https://ccic-eight.vercel.app",
+  "http://100.90.206.34:3000"
 ]);
 
 function applyCorsHeaders(response: NextResponse, origin: string | null) {

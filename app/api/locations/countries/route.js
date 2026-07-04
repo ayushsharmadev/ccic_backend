@@ -23,7 +23,10 @@ export async function GET(request) {
         ];
       }
 
-      const countries = await Country.find(filter).sort({ name: 1 }).lean();
+      const countries = await Country.find(filter)
+        .select("_id name code slug status")
+        .sort({ name: 1 })
+        .lean();
 
       return NextResponse.json({
         success: true,
@@ -66,7 +69,7 @@ export async function GET(request) {
     console.error("Error fetching countries:", error);
     return NextResponse.json(
       { success: false, error: "Failed to fetch countries" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -81,7 +84,7 @@ export const POST = withAdminAuth(async (request) => {
       if (!body[field]) {
         return NextResponse.json(
           { success: false, error: `${field} is required` },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
@@ -99,7 +102,7 @@ export const POST = withAdminAuth(async (request) => {
         message: "Country created successfully",
         data: country,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Error creating country:", error);
@@ -108,7 +111,7 @@ export const POST = withAdminAuth(async (request) => {
       const errors = Object.values(error.errors).map((err) => err.message);
       return NextResponse.json(
         { success: false, error: "Validation failed", details: errors },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -118,13 +121,13 @@ export const POST = withAdminAuth(async (request) => {
           success: false,
           error: "Country with this name or code already exists",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     return NextResponse.json(
       { success: false, error: "Failed to create country" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 });

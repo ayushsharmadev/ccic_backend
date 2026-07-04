@@ -484,6 +484,7 @@ export default function ExamList() {
           onStateChange={(value) =>
             setLocationFilters((prev) => ({ ...prev, state: value }))
           }
+          countryApiUrl="/api/locations/countries"
           showDistrict={false}
         />
       </div>

@@ -199,7 +199,6 @@ export const GET = async (request) => {
         News.find({
           $or: [{ title: searchRegex }, { tags: { $in: [searchRegex] } }],
           status: "published",
-          isPublished: true,
         })
           .populate("author", "fullName")
           .populate("category", "name")

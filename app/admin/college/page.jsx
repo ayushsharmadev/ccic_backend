@@ -727,19 +727,20 @@ export default function CollegeList() {
               state={filters.state}
               district={filters.district}
               onCountryChange={(value) =>
-                setFilters({
-                  ...filters,
+                setFilters((prev) => ({
+                  ...prev,
                   country: value,
                   state: "",
                   district: "",
-                })
+                }))
               }
               onStateChange={(value) =>
-                setFilters({ ...filters, state: value, district: "" })
+                setFilters((prev) => ({ ...prev, state: value, district: "" }))
               }
               onDistrictChange={(value) =>
-                setFilters({ ...filters, district: value })
+                setFilters((prev) => ({ ...prev, district: value }))
               }
+              countryApiUrl="/api/locations/countries"
               itemClassName="min-w-40"
             />
 
@@ -752,7 +753,9 @@ export default function CollegeList() {
                 { value: "popular", label: "Popular" },
               ]}
               value={filters.type}
-              onChange={(value) => setFilters({ ...filters, type: value })}
+              onChange={(value) =>
+                setFilters((prev) => ({ ...prev, type: value }))
+              }
               placeholder="Select type"
               searchable={false}
               required={false}
@@ -769,7 +772,9 @@ export default function CollegeList() {
                 { value: "100", label: "100 per page" },
               ]}
               value={filters.limit}
-              onChange={(value) => setFilters({ ...filters, limit: value })}
+              onChange={(value) =>
+                setFilters((prev) => ({ ...prev, limit: value }))
+              }
               placeholder="Select limit"
               searchable={false}
               required={false}

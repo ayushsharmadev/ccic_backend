@@ -25,6 +25,7 @@ export async function GET(request) {
         ];
       }
       const countries = await CountryMaster.find(filter)
+        .select("_id name code status")
         .sort({ name: 1 })
         .lean();
       return NextResponse.json({ success: true, data: countries });
