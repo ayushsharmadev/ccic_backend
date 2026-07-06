@@ -1,9 +1,10 @@
+import { withAdminAuth } from "@/lib/middleware/auth";
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import CollegeFacility from "@/lib/models/CollegeFacility";
 
 // GET /api/master/college-facility - Get all college facilities with pagination and filters
-export async function GET(request) {
+export const GET = withAdminAuth(async (request) => {
   try {
     await connectDB();
 
@@ -67,7 +68,7 @@ export async function GET(request) {
       { status: 500 }
     );
   }
-}
+});
 
 // POST /api/master/college-facility - Create a new college facility
 export async function POST(request) {

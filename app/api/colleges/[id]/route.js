@@ -5,7 +5,7 @@ import "@/lib/models/Language";
 import College from "@/lib/models/College";
 import { withAdminAuth } from "@/lib/middleware/auth";
 
-export async function GET(request, { params }) {
+export const GET = withAdminAuth(async (request, { params }) => {
   try {
     await connectDB();
 
@@ -51,7 +51,7 @@ export async function GET(request, { params }) {
       { status: 500 }
     );
   }
-}
+});
 
 // PUT /api/colleges/[id] - Update a college by ID (Admin only)
 export const PUT = withAdminAuth(async (request, { params }) => {

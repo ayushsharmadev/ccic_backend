@@ -23,7 +23,7 @@ function createDocMap(items) {
   );
 }
 
-export async function GET(request) {
+export const GET = withAdminAuth(async (request) => {
   try {
     await connectDB();
 
@@ -169,7 +169,7 @@ export async function GET(request) {
       { status: 500 }
     );
   }
-}
+});
 
 export const POST = withAdminAuth(async (request) => {
   try {

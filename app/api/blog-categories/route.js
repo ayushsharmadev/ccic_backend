@@ -4,7 +4,7 @@ import BlogCategory from "@/lib/models/BlogCategory";
 import { withAdminAuth } from "@/lib/middleware/auth";
 
 // GET /api/blog-categories - Get all blog categories with pagination and search
-export async function GET(request) {
+export const GET = withAdminAuth(async (request) => {
   try {
     await connectDB();
 
@@ -57,7 +57,7 @@ export async function GET(request) {
       { status: 500 }
     );
   }
-}
+});
 
 // POST /api/blog-categories - Create new blog category
 export const POST = withAdminAuth(async (request) => {

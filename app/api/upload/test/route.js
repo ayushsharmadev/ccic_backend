@@ -1,8 +1,9 @@
+import { withAdminAuth } from "@/lib/middleware/auth";
 import { NextResponse } from "next/server";
 import { existsSync } from "fs";
 import { join } from "path";
 
-export async function GET() {
+export const GET = withAdminAuth(async () => {
   try {
     const uploadsPath = join(process.cwd(), "public", "uploads");
     const avatarsPath = join(uploadsPath, "avatars");
@@ -32,4 +33,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
+});

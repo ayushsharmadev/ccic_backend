@@ -27,7 +27,7 @@ async function resolveCountryMasterId(countryId) {
 }
 
 // GET /api/locations/states - Get all states with pagination and filters
-export async function GET(request) {
+export const GET = withAdminAuth(async (request) => {
   try {
     await connectDB();
 
@@ -108,7 +108,7 @@ export async function GET(request) {
       { status: 500 }
     );
   }
-}
+});
 
 // POST /api/locations/states - Create a new state (Admin only)
 export const POST = withAdminAuth(async (request) => {

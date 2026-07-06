@@ -1,3 +1,4 @@
+import { withAdminAuth } from "@/lib/middleware/auth";
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Contact from "@/lib/models/Contact";
@@ -5,7 +6,7 @@ import { verifyToken } from "@/lib/jwt";
 import mongoose from "mongoose";
 
 // GET - Get single contact (Admin only)
-export async function GET(request, { params }) {
+export const GET = withAdminAuth(async (request, { params }) => {
   try {
     // Verify admin token
     const token = request.headers.get("Authorization")?.replace("Bearer ", "");
@@ -60,7 +61,7 @@ export async function GET(request, { params }) {
       { status: 500 }
     );
   }
-}
+});
 
 // PUT - Update contact (Admin only)
 export async function PUT(request, { params }) {

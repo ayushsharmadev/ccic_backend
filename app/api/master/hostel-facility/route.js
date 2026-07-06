@@ -1,9 +1,10 @@
+import { withAdminAuth } from "@/lib/middleware/auth";
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import HostelFacility from "@/lib/models/HostelFacility";
 
 // GET /api/master/hostel-facility - Get all hostel facilities with pagination and filters
-export async function GET(request) {
+export const GET = withAdminAuth(async (request) => {
   try {
     await connectDB();
 
@@ -67,7 +68,7 @@ export async function GET(request) {
       { status: 500 }
     );
   }
-}
+});
 
 // POST /api/master/hostel-facility - Create a new hostel facility
 export async function POST(request) {

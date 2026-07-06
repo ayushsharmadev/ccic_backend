@@ -4,7 +4,7 @@ import District from "@/lib/models/District";
 import { withAdminAuth } from "@/lib/middleware/auth";
 
 // GET /api/locations/districts/[id] - Get a single district by ID
-export async function GET(request, { params }) {
+export const GET = withAdminAuth(async (request, { params }) => {
   try {
     await connectDB();
 
@@ -43,7 +43,7 @@ export async function GET(request, { params }) {
       { status: 500 }
     );
   }
-}
+});
 
 // PUT /api/locations/districts/[id] - Update a district by ID
 export async function PUT(request, { params }) {

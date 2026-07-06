@@ -4,7 +4,7 @@ import Degree from "@/lib/models/Degree";
 import { withAdminAuth } from "@/lib/middleware/auth";
 
 // GET /api/master/degree - Get all degrees with pagination and filters
-export async function GET(request) {
+export const GET = withAdminAuth(async (request) => {
   try {
     await connectDB();
 
@@ -68,7 +68,7 @@ export async function GET(request) {
       { status: 500 }
     );
   }
-}
+});
 
 // POST /api/master/degree - Create a new degree (Admin only)
 export const POST = withAdminAuth(async (request) => {

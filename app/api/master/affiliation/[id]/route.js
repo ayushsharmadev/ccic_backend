@@ -1,9 +1,10 @@
+import { withAdminAuth } from "@/lib/middleware/auth";
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Affiliation from "@/lib/models/Affiliation";
 
 // GET /api/master/affiliation/[id] - Get a single affiliation by ID
-export async function GET(request, { params }) {
+export const GET = withAdminAuth(async (request, { params }) => {
   try {
     await connectDB();
 
@@ -36,7 +37,7 @@ export async function GET(request, { params }) {
       { status: 500 }
     );
   }
-}
+});
 
 // PUT /api/master/affiliation/[id] - Update an affiliation by ID
 export async function PUT(request, { params }) {

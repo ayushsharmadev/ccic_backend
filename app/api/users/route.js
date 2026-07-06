@@ -4,7 +4,7 @@ import User from "@/lib/models/User";
 import { withAdminAuth } from "@/lib/middleware/auth";
 
 // GET /api/users - Get all users with pagination and filters
-export async function GET(request) {
+export const GET = withAdminAuth(async (request) => {
   try {
     await connectDB();
 
@@ -71,7 +71,7 @@ export async function GET(request) {
       { status: 500 }
     );
   }
-}
+});
 
 // POST /api/users - Create a new user (Admin only)
 export const POST = withAdminAuth(async (request) => {

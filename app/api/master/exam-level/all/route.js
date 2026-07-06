@@ -1,9 +1,10 @@
+import { withAdminAuth } from "@/lib/middleware/auth";
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import ExamLevel from "@/lib/models/ExamLevel";
 
 // GET all exam levels for dropdowns (no pagination)
-export async function GET() {
+export const GET = withAdminAuth(async () => {
   try {
     await dbConnect();
 
@@ -23,4 +24,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
+});

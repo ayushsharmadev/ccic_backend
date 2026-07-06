@@ -4,7 +4,7 @@ import Exam from "@/lib/models/Exam";
 import { withAdminAuth } from "@/lib/middleware/auth";
 
 // GET /api/exams - Get all exams with pagination and filters
-export async function GET(request) {
+export const GET = withAdminAuth(async (request) => {
   try {
     await connectDB();
 
@@ -98,7 +98,7 @@ export async function GET(request) {
       { status: 500 }
     );
   }
-}
+});
 
 // POST /api/exams - Create a new exam
 export const POST = withAdminAuth(async (request) => {

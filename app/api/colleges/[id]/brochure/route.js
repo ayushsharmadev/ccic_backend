@@ -3,13 +3,14 @@ import connectDB from "@/lib/db";
 import College from "@/lib/models/College";
 import { renderToStream } from "@react-pdf/renderer";
 import CollegeBrochurePDFSimple from "@/lib/pdf/CollegeBrochurePDF_Simple";
+import { withAdminAuth } from "@/lib/middleware/auth";
 
 // Disable caching for dynamic PDF
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 // GET /api/colleges/[id]/brochure - Generate and download college brochure PDF
-export async function GET(request, { params }) {
+export const GET = withAdminAuth(async (request, { params }) => {
   try {
     console.log('Starting brochure generation...');
     await connectDB();
@@ -93,4 +94,4 @@ export async function GET(request, { params }) {
       { status: 500 }
     );
   }
-}
+});

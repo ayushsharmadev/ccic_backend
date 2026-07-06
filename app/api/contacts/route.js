@@ -1,10 +1,11 @@
+import { withAdminAuth } from "@/lib/middleware/auth";
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Contact from "@/lib/models/Contact";
 import { verifyToken } from "@/lib/jwt";
 
 // GET - List contacts (Admin only)
-export async function GET(request) {
+export const GET = withAdminAuth(async (request) => {
   try {
     // Verify admin token
     const token = request.headers.get("Authorization")?.replace("Bearer ", "");
@@ -87,5 +88,5 @@ export async function GET(request) {
       { status: 500 }
     );
   }
-}
+});
 

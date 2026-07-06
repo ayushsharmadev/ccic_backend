@@ -21,7 +21,7 @@ async function resolveCountryMasterId(countryId) {
 }
 
 // GET /api/locations/districts - Get all districts with pagination and filters
-export async function GET(request) {
+export const GET = withAdminAuth(async (request) => {
   try {
     await connectDB();
 
@@ -140,7 +140,7 @@ export async function GET(request) {
       { status: 500 }
     );
   }
-}
+});
 
 // POST /api/locations/districts - Create a new district (Admin only)
 export const POST = withAdminAuth(async (request) => {

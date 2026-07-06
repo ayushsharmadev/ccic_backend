@@ -1,9 +1,10 @@
+import { withAdminAuth } from "@/lib/middleware/auth";
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Course from "@/lib/models/Course";
 
 // GET /api/courses/[id] - Get a single course by ID
-export async function GET(request, { params }) {
+export const GET = withAdminAuth(async (request, { params }) => {
   try {
     await connectDB();
 
@@ -39,7 +40,7 @@ export async function GET(request, { params }) {
       { status: 500 }
     );
   }
-}
+});
 
 // PUT /api/courses/[id] - Update a course by ID
 export async function PUT(request, { params }) {

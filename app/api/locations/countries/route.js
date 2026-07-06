@@ -3,7 +3,7 @@ import connectDB from "@/lib/db";
 import Country from "@/lib/models/Country";
 import { withAdminAuth } from "@/lib/middleware/auth";
 
-export async function GET(request) {
+export const GET = withAdminAuth(async (request) => {
   try {
     await connectDB();
 
@@ -72,7 +72,7 @@ export async function GET(request) {
       { status: 500 },
     );
   }
-}
+});
 
 export const POST = withAdminAuth(async (request) => {
   try {

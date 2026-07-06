@@ -4,7 +4,7 @@ import User from "@/lib/models/User";
 import { withAdminAuth } from "@/lib/middleware/auth";
 
 // GET /api/users/[id] - Get user by ID
-export async function GET(request, { params }) {
+export const GET = withAdminAuth(async (request, { params }) => {
   try {
     await connectDB();
 
@@ -46,7 +46,7 @@ export async function GET(request, { params }) {
       { status: 500 }
     );
   }
-}
+});
 
 // PUT /api/users/[id] - Update user (Admin only)
 export const PUT = withAdminAuth(async (request, { params }) => {

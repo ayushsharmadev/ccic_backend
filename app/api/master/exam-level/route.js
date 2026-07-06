@@ -4,7 +4,7 @@ import ExamLevel from "@/lib/models/ExamLevel";
 import { withAdminAuth } from "@/lib/middleware/auth";
 
 // GET all exam levels
-export async function GET(request) {
+export const GET = withAdminAuth(async (request) => {
   try {
     await dbConnect();
 
@@ -53,7 +53,7 @@ export async function GET(request) {
       { status: 500 }
     );
   }
-}
+});
 
 // POST new exam level
 export const POST = withAdminAuth(async (request) => {

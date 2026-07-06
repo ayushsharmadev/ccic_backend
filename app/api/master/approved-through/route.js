@@ -1,9 +1,10 @@
+import { withAdminAuth } from "@/lib/middleware/auth";
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import ApprovedThrough from "@/lib/models/ApprovedThrough";
 
 // GET /api/master/approved-through - Get all approval authorities with pagination and filters
-export async function GET(request) {
+export const GET = withAdminAuth(async (request) => {
   try {
     await connectDB();
 
@@ -69,7 +70,7 @@ export async function GET(request) {
       { status: 500 }
     );
   }
-}
+});
 
 // POST /api/master/approved-through - Create a new approval authority
 export async function POST(request) {
