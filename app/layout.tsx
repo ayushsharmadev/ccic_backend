@@ -25,6 +25,11 @@ const themeInitializerScript = `(function(){try{var stored=localStorage.getItem(
 export const metadata = {
   title: "CCIC Admin Panel",
   description: "CCIC education management admin panel",
+  icons: {
+    icon: "/fav.png",
+    shortcut: "/fav.png",
+    apple: "/fav.png",
+  },
   other: {
     "apple-mobile-web-app-status-bar-style": "black-translucent",
     "mobile-web-app-capable": "yes",
