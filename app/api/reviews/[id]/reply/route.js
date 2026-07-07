@@ -4,7 +4,7 @@ import CollegeReview from "@/lib/models/CollegeReview";
 import { withAdminAuth } from "@/lib/middleware/auth";
 import mongoose from "mongoose";
 
-export const POST = withAdminAuth(async (request, { params }) => {
+export const POST = async (request, { params }) => {
   try {
     await connectDB();
 
@@ -71,5 +71,5 @@ export const POST = withAdminAuth(async (request, { params }) => {
       { status: 500 }
     );
   }
-});
+};
 

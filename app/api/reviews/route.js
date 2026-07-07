@@ -62,7 +62,7 @@ export const GET = withAdminAuth(async (request) => {
   }
 });
 
-export const POST = withAdminAuth(async (request) => {
+export const POST = async (request) => {
   try {
     await connectDB();
 
@@ -135,5 +135,5 @@ export const POST = withAdminAuth(async (request) => {
       { status: 500 }
     );
   }
-});
+};
 
