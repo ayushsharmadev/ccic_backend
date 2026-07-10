@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
-import { College } from "@/lib/models";
+import { College, CollegeCourseAllocation } from "@/lib/models";
 import { applyDirectLocationFilters } from "@/lib/locationFilters";
 
 // Disable caching for popular colleges
@@ -33,10 +33,45 @@ export const GET = async (request) => {
       .limit(limit)
       .lean();
 
+    // Fetch course allocations for these colleges to get actual courses
+    const collegeIds = colleges.map((c) => c._id);
+    const courseAllocations = await CollegeCourseAllocation.find({
+      college: { $in: collegeIds },
+    })
+      .select("college assignedCourses")
+      .populate({
+        path: "assignedCourses.course",
+        select: "name slug",
+      })
+      .lean();
+
+    // Map course allocations by college ID
+    const collegeCourseMap = {};
+    courseAllocations.forEach((alloc) => {
+      const collegeId = alloc.college.toString();
+      const activeCourses = (alloc.assignedCourses || [])
+        .filter((ac) => ac.isActive && ac.course)
+        .map((ac) => ({
+          id: ac.course._id || ac.course.id,
+          name: ac.course.name,
+          slug: ac.course.slug,
+        }));
+      collegeCourseMap[collegeId] = activeCourses;
+    });
+
+    // Attach courses
+    const collegesWithCourses = colleges.map((col) => {
+      const courses = collegeCourseMap[col._id.toString()] || [];
+      return {
+        ...col,
+        courses,
+      };
+    });
+
     const response = NextResponse.json({
       success: true,
       data: {
-        colleges,
+        colleges: collegesWithCourses,
         filters: {
           country: country || null,
           state: state || null,
