@@ -335,7 +335,7 @@ export default function ImageUpload({
       });
 
       // Wait for all uploads to complete
-      const results = await Promise.all(uploadPromises);
+      const results = await   (uploadPromises);
 
       // Count successful uploads
       const successfulUploads = results.filter(

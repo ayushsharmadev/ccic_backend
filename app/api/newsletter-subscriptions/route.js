@@ -1,3 +1,4 @@
+import { withAdminAuth } from "@/lib/middleware/auth";
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import NewsletterSubscription from "@/lib/models/NewsletterSubscription";
@@ -71,7 +72,7 @@ export async function POST(request) {
   }
 }
 
-export async function GET(request) {
+export const GET = withAdminAuth(async (request) => {
   try {
     const token = request.headers.get("Authorization")?.replace("Bearer ", "");
     if (!token) {
@@ -132,4 +133,4 @@ export async function GET(request) {
       { status: 500 }
     );
   }
-}
+});

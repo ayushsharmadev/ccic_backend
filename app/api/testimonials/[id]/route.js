@@ -77,6 +77,20 @@ export const PUT = withAdminAuth(async (request, { params }) => {
       );
     }
 
+    const existingTestimonial = await Testimonial.findById(id)
+      .select("publishedAt")
+      .lean();
+
+    if (!existingTestimonial) {
+      return NextResponse.json(
+        { success: false, error: "Testimonial not found" },
+        { status: 404 }
+      );
+    }
+
+    const status = body.status || "draft";
+    const isPublished = status === "published";
+
     const updatedTestimonial = await Testimonial.findByIdAndUpdate(
       id,
       {
@@ -87,20 +101,16 @@ export const PUT = withAdminAuth(async (request, { params }) => {
         rating: body.rating || 5,
         avatar: body.avatar,
         image: body.image || null,
-        isPublished: body.isPublished || false,
+        isPublished,
         isFeatured: body.isFeatured || false,
-        status: body.status || "draft",
+        status,
+        publishedAt: isPublished
+          ? existingTestimonial.publishedAt || new Date()
+          : null,
         displayOrder: body.displayOrder || 0,
       },
       { new: true, runValidators: true }
     );
-
-    if (!updatedTestimonial) {
-      return NextResponse.json(
-        { success: false, error: "Testimonial not found" },
-        { status: 404 }
-      );
-    }
 
     return NextResponse.json({
       success: true,

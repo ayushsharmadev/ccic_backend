@@ -1,15 +1,17 @@
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import College from "@/lib/models/College";
+import CollegeCourseAllocation from "@/lib/models/CollegeCourseAllocation";
 import { renderToStream } from "@react-pdf/renderer";
-import CollegeBrochurePDFSimple from "@/lib/pdf/CollegeBrochurePDF_Simple";
+import CollegeBrochurePDF from "@/lib/pdf/CollegeBrochurePDF";
+import { withAdminAuth } from "@/lib/middleware/auth";
 
 // Disable caching for dynamic PDF
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 // GET /api/colleges/[id]/brochure - Generate and download college brochure PDF
-export async function GET(request, { params }) {
+export const GET = async (request, { params }) => {
   try {
     console.log('Starting brochure generation...');
     await connectDB();
@@ -27,11 +29,22 @@ export async function GET(request, { params }) {
       .populate("facilities", "name icon")
       .populate("hospitalFacilities", "name icon")
       .populate("hostelFacilities", "name icon")
-      .populate("courses", "name duration")
-      .populate("stream", "name")
-      .populate("degreeType", "name shortName")
-      .populate("courseDuration", "duration")
       .lean();
+
+    // Fetch allocated courses separately to avoid schema population errors
+    const courseAllocation = await CollegeCourseAllocation.findOne({ college: id })
+      .populate("assignedCourses.course", "name")
+      .populate("assignedCourses.courseDuration", "duration")
+      .lean();
+
+    if (courseAllocation && courseAllocation.assignedCourses) {
+      college.courses = courseAllocation.assignedCourses.map(ac => ({
+        name: ac.course?.name,
+        duration: ac.courseDuration?.duration
+      }));
+    } else {
+      college.courses = [];
+    }
 
     if (!college) {
       console.log('College not found');
@@ -44,9 +57,9 @@ export async function GET(request, { params }) {
     console.log('College found:', college.name);
     console.log('Starting PDF generation...');
 
-    // Use simple PDF for testing (switch back to CollegeBrochurePDF once working)
+    // Use the main, detailed PDF generator
     const streamPromise = renderToStream(
-      <CollegeBrochurePDFSimple college={college} />
+      <CollegeBrochurePDF college={college} />
     );
 
     // Add timeout to prevent infinite hanging
@@ -58,25 +71,20 @@ export async function GET(request, { params }) {
 
     console.log('PDF stream created, converting to buffer...');
 
-    // Convert stream to buffer with timeout
-    const chunks = [];
-    let chunkCount = 0;
-    for await (const chunk of stream) {
-      chunks.push(chunk);
-      chunkCount++;
-      console.log(`Received chunk ${chunkCount}, size: ${chunk.length}`);
-    }
-    const buffer = Buffer.concat(chunks);
-    console.log('PDF buffer created, size:', buffer.length, 'from', chunkCount, 'chunks');
+    // Import Readable at the top or use stream directly
+    const { Readable } = require('stream');
+    
+    // Convert Node.js stream to Web ReadableStream for Next.js response
+    const webStream = Readable.toWeb(stream);
 
     // Create filename from college name
     const filename = `${college.name.replace(/[^a-zA-Z0-9]/g, '_')}_Brochure.pdf`;
 
-    // Return PDF response
-    return new NextResponse(buffer, {
+    // Return PDF stream directly to client
+    return new NextResponse(webStream, {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': `attachment; filename="${filename}"`,
+        'Content-Disposition': `inline; filename="${filename}"`,
         'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
         'Pragma': 'no-cache',
       },
@@ -93,4 +101,4 @@ export async function GET(request, { params }) {
       { status: 500 }
     );
   }
-}
+};

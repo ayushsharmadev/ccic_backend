@@ -21,6 +21,7 @@ export default function LocationFilterBar({
   districtLabel = "District",
   className = "flex gap-3 items-end flex-wrap",
   itemClassName = "min-w-48",
+  countryApiUrl = "/api/locations/country-master",
 }) {
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
@@ -95,7 +96,7 @@ export default function LocationFilterBar({
     const fetchCountries = async () => {
       setLoadingCountries(true);
       try {
-        const response = await fetch("/api/locations/country-master?all=true");
+        const response = await fetch(`${countryApiUrl}?all=true`);
         const result = await response.json();
         if (result.success) {
           setCountries(
@@ -113,7 +114,7 @@ export default function LocationFilterBar({
     };
 
     fetchCountries();
-  }, [showCountry]);
+  }, [showCountry, countryApiUrl]);
 
   useEffect(() => {
     if (!showState) return;

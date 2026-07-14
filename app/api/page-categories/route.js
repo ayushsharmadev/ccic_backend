@@ -1,10 +1,11 @@
+import { withAdminAuth } from "@/lib/middleware/auth";
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import PageCategory from "@/lib/models/PageCategory";
 import { verifyToken } from "@/lib/jwt";
 
 // GET - List all page categories
-export async function GET(request) {
+export const GET = withAdminAuth(async (request) => {
   try {
     await connectDB();
 
@@ -55,7 +56,7 @@ export async function GET(request) {
       { status: 500 }
     );
   }
-}
+});
 
 // POST - Create new page category (Admin only)
 export async function POST(request) {

@@ -1,8 +1,31 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import { College, Ownership, Country } from "@/lib/models";
-import CollegeCourseAllocation from "@/lib/models/CollegeCourseAllocation";
 import { applyDirectLocationFilters } from "@/lib/locationFilters";
+
+function compactPath(path) {
+  return path || null;
+}
+function buildLocation(college) {
+  const parts = [
+    college.location,
+    college.district?.name,
+    college.state?.name,
+    college.country?.name,
+  ]
+    .filter(Boolean)
+    .flatMap((part) => String(part).split(","))
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  return parts
+    .filter(
+      (part, index) =>
+        parts.findIndex((item) => item.toLowerCase() === part.toLowerCase()) ===
+        index,
+    )
+    .join(", ");
+}
 
 export async function GET(request) {
   try {
@@ -10,31 +33,20 @@ export async function GET(request) {
 
     const { searchParams } = new URL(request.url);
 
-    // Pagination
-    const page = parseInt(searchParams.get("page")) || 1;
-    const limit = parseInt(searchParams.get("limit")) || 10;
+    const page = parseInt(searchParams.get("page"), 10) || 1;
+    const limit = parseInt(searchParams.get("limit"), 10) || 10;
     const skip = (page - 1) * limit;
 
-    // Search
     const searchQuery = searchParams.get("search") || "";
-
-    // Filters
     const country = searchParams.get("country") || "";
     const countrySlug = searchParams.get("countrySlug") || "";
     const state = searchParams.get("state") || "";
     const district = searchParams.get("district") || "";
     const ownership = searchParams.get("ownership") || "";
-    const exam = searchParams.get("exam") || "";
-    const course = searchParams.get("course") || "";
-    const feeRange = searchParams.get("feeRange") || "";
+    const sortBy = searchParams.get("sortBy") || "alphabetical";
 
-    // Sorting
-    const sortBy = searchParams.get("sortBy") || "alphabetical"; // alphabetical, popularity, fees_low_to_high
-
-    // Build filter object
     const filter = { status: "active" };
 
-    // Add search filter
     if (searchQuery) {
       filter.$or = [
         { name: { $regex: searchQuery, $options: "i" } },
@@ -45,8 +57,8 @@ export async function GET(request) {
       ];
     }
 
-    // Add location filters
     applyDirectLocationFilters(filter, { country, state, district });
+
     if (countrySlug) {
       const countryBySlug = await Country.findOne({
         slug: countrySlug,
@@ -58,45 +70,19 @@ export async function GET(request) {
       filter.country = countryBySlug?._id?.toString() || { $in: [] };
     }
 
-    // Add ownership filter
     if (ownership) {
       const ownershipTypes = await Ownership.find({
         name: { $regex: ownership, $options: "i" },
         status: "active",
-      }).select("_id").lean();
+      })
+        .select("_id")
+        .lean();
 
       if (ownershipTypes.length > 0) {
         filter.ownership = { $in: ownershipTypes.map((o) => o._id) };
       }
     }
 
-    // Exam and Course filters will be applied after fetching course allocations
-    let examTypeFilter = null;
-    let courseFilter = null;
-
-    if (exam) {
-      // Exam parameter should be exam type ID
-      examTypeFilter = [exam];
-    }
-
-    if (course) {
-      // Course parameter should be course ID
-      courseFilter = [course];
-    }
-
-    // Fee range filter will be applied after fetching course allocations
-    // feeRange should be in format: "0-300000" or "1000000-Infinity"
-    let feeRangeFilter = null;
-    if (feeRange) {
-      const [minFeeStr, maxFeeStr] = feeRange.split("-");
-      const minFee = parseInt(minFeeStr, 10) || 0;
-      const maxFee =
-        maxFeeStr === "Infinity" ? Infinity : parseInt(maxFeeStr, 10) || Infinity;
-
-      feeRangeFilter = { minFee, maxFee };
-    }
-
-    // Build sort object
     let sort = {};
     switch (sortBy) {
       case "alphabetical":
@@ -110,10 +96,6 @@ export async function GET(request) {
           createdAt: -1,
         };
         break;
-      case "fees_low_to_high":
-        // This would need actual fee data implementation
-        sort = { displayOrder: 1, createdAt: -1 };
-        break;
       default:
         sort = {
           displayOrder: 1,
@@ -124,17 +106,13 @@ export async function GET(request) {
     }
 
     const collegeQuery = College.find(filter)
-      .populate("country", "name code")
-      .populate("state", "name code")
+      .populate("country", "name")
+      .populate("state", "name")
       .populate("district", "name")
       .populate("ownership", "name")
       .populate("affiliation", "name")
-      .populate("languages", "name")
-      .populate("facilities", "name")
-      .populate("hospitalFacilities", "name")
-      .populate("hostelFacilities", "name")
       .select(
-        "name popularName shortName estdYear campusSize logo banner brochure shortDescription longDescription country state district ownership affiliation isFeatured isPopular isVerified displayOrder slug addressLine1 addressLine2 location landmark pinCode phoneNumber websiteUrl emailAddress facilities hospitalFacilities hostelFacilities haveHostel haveHospital hospitalBeds hostelGallery intake languages"
+        "name popularName shortName estdYear logo banner brochure location country state district ownership affiliation isFeatured isPopular isVerified displayOrder slug",
       )
       .sort(sort)
       .skip(skip)
@@ -146,166 +124,8 @@ export async function GET(request) {
       College.countDocuments(filter),
     ]);
 
-    // Fetch course allocations for all colleges
-    const currentYear = new Date().getFullYear();
-    const collegeIds = colleges.map((c) => c._id);
-    const courseAllocations = await CollegeCourseAllocation.find({
-      college: { $in: collegeIds },
-    })
-      .select("college assignedCourses")
-      .populate({
-        path: "assignedCourses.course",
-        select: "name slug",
-      })
-      .populate({
-        path: "assignedCourses.examType",
-        select: "name shortName",
-      })
-      .lean();
-
-    // Create a map of college ID to courses with current year fees
-    const collegeCourseMap = {};
-
-    courseAllocations.forEach((allocation) => {
-      const collegeId = allocation.college.toString();
-      const coursesWithFees = [];
-
-      allocation.assignedCourses?.forEach((assignedCourse) => {
-        if (!assignedCourse.isActive) return;
-
-        // Apply exam type filter if specified
-        if (examTypeFilter) {
-          const courseExamTypeId = assignedCourse.examType?._id?.toString() ||
-            assignedCourse.examType?.toString() || "";
-
-          if (!examTypeFilter.includes(courseExamTypeId)) {
-            return; // Skip this course if exam type doesn't match
-          }
-        }
-
-        // Apply course filter if specified
-        if (courseFilter) {
-          const courseId = assignedCourse.course?._id?.toString() ||
-            assignedCourse.course?.toString() || "";
-          if (!courseFilter.includes(courseId)) {
-            return; // Skip this course if course doesn't match
-          }
-        }
-
-        // Find fee structure where session starts with current year
-        const currentYearStructure = assignedCourse.feeStructures?.find(
-          (structure) => {
-            if (!structure.session) return false;
-            const sessionStartYear = parseInt(
-              structure.session.split("-")[0],
-              10
-            );
-            return sessionStartYear === currentYear;
-          }
-        );
-
-        if (currentYearStructure && assignedCourse.course) {
-          coursesWithFees.push({
-            name: assignedCourse.course.name,
-            slug: assignedCourse.course.slug,
-            examType: assignedCourse.examType || null,
-            session: currentYearStructure.session,
-            feeStructureType: currentYearStructure.structureType,
-            seats: currentYearStructure.seats,
-            periods: currentYearStructure.periods || [],
-          });
-        }
-      });
-
-      collegeCourseMap[collegeId] = coursesWithFees;
-    });
-
-    // Transform the data for frontend consumption
     const transformedColleges = colleges.map((college) => {
-      const collegeCoursesWithFees =
-        collegeCourseMap[college._id.toString()] || [];
-      // Build address
-      const addressParts = [
-        college.addressLine1,
-        college.addressLine2,
-        college.location,
-        college.landmark,
-        college.district?.name,
-        college.state?.name,
-        college.pinCode,
-      ].filter(Boolean);
-
-      const address = addressParts.join(", ");
-
-      // Build courses string from CollegeCourseAllocation with exam types and seats
-      const coursesString =
-        collegeCoursesWithFees.length > 0
-          ? collegeCoursesWithFees
-            .map((c) => {
-              const examType = c.examType?.shortName || c.examType?.name || "";
-              const seats = c.seats !== undefined && c.seats !== null ? ` (${c.seats} seats)` : "";
-              const examPart = examType ? ` (${examType})` : "";
-              return `${c.name}${examPart}${seats}`;
-            })
-            .join(" | ")
-          : null;
-
-      // Seat intake removed - using dynamic courses instead
-
-      // Build fees from CollegeCourseAllocation current year data.
-      // If no uploaded fee exists, keep it null instead of sending a fake fallback.
-      let totalFeeAmount = 0;
-      const fees = (() => {
-        if (collegeCoursesWithFees.length > 0) {
-          // Calculate total fee from first course's periods
-          const firstCourse = collegeCoursesWithFees[0];
-          if (firstCourse.periods && firstCourse.periods.length > 0) {
-            totalFeeAmount = firstCourse.periods.reduce(
-              (sum, period) => sum + (period.amount || 0),
-              0
-            );
-            if (totalFeeAmount > 0) {
-              return `₹${(totalFeeAmount / 100000).toFixed(1)}L`;
-            }
-          }
-        }
-        return null;
-      })();
-
-      // No cutoff model/data is wired into this listing API yet.
-      const cutoff = null;
-
-      // No rating aggregate is wired into this listing API yet.
-      const rating = null;
-
-      // Build university name
-      const university = college.affiliation?.name || "";
-
-      const locationParts = [
-        college.district?.name,
-        college.state?.name,
-        college.country?.name,
-      ].filter(Boolean);
-
-      const collegeFacilities = Array.isArray(college.facilities)
-        ? college.facilities
-        : [];
-      const hospitalFacilities = Array.isArray(college.hospitalFacilities)
-        ? college.hospitalFacilities
-        : [];
-      const hostelFacilities = Array.isArray(college.hostelFacilities)
-        ? college.hostelFacilities
-        : [];
-      const hasCollegeFacilities = collegeFacilities.length > 0;
-      const hasHospitalFacilities =
-        Boolean(college.haveHospital) || hospitalFacilities.length > 0;
-      const hasHostelFacilities =
-        Boolean(college.haveHostel) || hostelFacilities.length > 0;
-      const facilitySummary = [
-        hasHostelFacilities ? "Hostel" : null,
-        hasHospitalFacilities ? "Hospital" : null,
-        hasCollegeFacilities ? "Campus Facilities" : null,
-      ].filter(Boolean);
+      const location = buildLocation(college);
 
       return {
         id: college._id.toString(),
@@ -313,87 +133,25 @@ export async function GET(request) {
         name: college.name,
         popularName: college.popularName,
         shortName: college.shortName,
-        address: address,
+        logo: compactPath(college.logo || "/no-college-image.png"),
+        banner: compactPath(college.banner),
+        brochure: compactPath(college.brochure),
+        hasBrochure: Boolean(college.brochure),
+        location: location || college.location || "",
         established: college.estdYear,
-        type: college.ownership?.name || "Private",
-        courses: coursesString,
-        logo: college.logo || "/no-college-image.png", // Default fallback
-        banner: college.banner,
-        brochure: college.brochure,
-        fees: fees,
-        cutoff: cutoff,
-        hospital: hasHospitalFacilities,
-        courses_offered: collegeCoursesWithFees.length > 0,
-        facilities: hasCollegeFacilities || hasHospitalFacilities || hasHostelFacilities,
-        facilitySummary,
-        rating: rating,
-        university: university,
-        location: locationParts.join(", ") || college.location || "",
-        year: college.estdYear,
-        // Additional fields for filtering
-        country: college.country?.name,
-        state: college.state?.name,
-        district: college.district?.name,
         ownership: college.ownership?.name,
         affiliation: college.affiliation?.name,
-        stream: college.stream?.name,
-        degree: college.degreeType?.name,
-        ranking: college.ranking?.name,
-        rankValue: college.ranking?.rankValue,
         isFeatured: college.isFeatured,
         isPopular: college.isPopular,
         isVerified: college.isVerified,
         displayOrder: college.displayOrder,
-        collegeFacilities,
-        hospitalFacilities,
-        hostelFacilities,
-        haveHostel: Boolean(college.haveHostel),
-        haveHospital: Boolean(college.haveHospital),
-        hospitalBeds: college.hospitalBeds || null,
-        hostelGallery: college.hostelGallery || [],
-        intake: college.intake || [],
-        languages: college.languages || [],
       };
     });
-
-    // Apply filters: exam, course, and fee range
-    let filteredColleges = transformedColleges;
-
-    // Filter by exam type or course (if no matching courses, exclude college)
-    if (examTypeFilter || courseFilter) {
-      filteredColleges = filteredColleges.filter((college) => {
-        const collegeCoursesWithFees =
-          collegeCourseMap[college.id.toString()] || [];
-        return collegeCoursesWithFees.length > 0;
-      });
-    }
-
-    // Filter by fee range
-    if (feeRangeFilter) {
-      filteredColleges = filteredColleges.filter((college) => {
-        const collegeCoursesWithFees =
-          collegeCourseMap[college.id.toString()] || [];
-        if (collegeCoursesWithFees.length === 0) return false;
-
-        const firstCourse = collegeCoursesWithFees[0];
-        if (!firstCourse.periods || firstCourse.periods.length === 0)
-          return false;
-
-        const totalFee = firstCourse.periods.reduce(
-          (sum, period) => sum + (period.amount || 0),
-          0
-        );
-
-        return (
-          totalFee >= feeRangeFilter.minFee && totalFee <= feeRangeFilter.maxFee
-        );
-      });
-    }
 
     return NextResponse.json({
       success: true,
       data: {
-        colleges: filteredColleges,
+        colleges: transformedColleges,
         pagination: {
           currentPage: page,
           totalPages: Math.ceil(totalCount / limit),
@@ -407,9 +165,6 @@ export async function GET(request) {
           state,
           district,
           ownership,
-          exam,
-          course,
-          feeRange,
           sortBy,
         },
       },
@@ -422,7 +177,8 @@ export async function GET(request) {
         error: "Failed to fetch colleges listing",
         message: error.message,
       },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
+

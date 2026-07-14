@@ -4,7 +4,7 @@ import Degree from "@/lib/models/Degree";
 import { withAdminAuth } from "@/lib/middleware/auth";
 
 // GET /api/master/degree/[id] - Get a single degree by ID
-export async function GET(request, { params }) {
+export const GET = withAdminAuth(async (request, { params }) => {
   try {
     await connectDB();
 
@@ -37,7 +37,7 @@ export async function GET(request, { params }) {
       { status: 500 }
     );
   }
-}
+});
 
 // PUT /api/master/degree/[id] - Update a degree by ID (Admin only)
 export const PUT = withAdminAuth(async (request, { params }) => {

@@ -1,9 +1,10 @@
+import { withAdminAuth } from "@/lib/middleware/auth";
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import CourseDuration from "@/lib/models/CourseDuration";
 
 // GET /api/master/course-duration/[id] - Get a single course duration by ID
-export async function GET(request, { params }) {
+export const GET = withAdminAuth(async (request, { params }) => {
   try {
     await connectDB();
 
@@ -38,7 +39,7 @@ export async function GET(request, { params }) {
       { status: 500 }
     );
   }
-}
+});
 
 // PUT /api/master/course-duration/[id] - Update a course duration by ID
 export async function PUT(request, { params }) {

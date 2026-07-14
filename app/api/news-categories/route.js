@@ -4,7 +4,7 @@ import NewsCategory from "@/lib/models/NewsCategory";
 import { withAdminAuth } from "@/lib/middleware/auth";
 
 // GET /api/news-categories - Get all news categories (Public + Admin)
-export async function GET(request) {
+export const GET = withAdminAuth(async (request) => {
   try {
     await connectDB();
 
@@ -57,7 +57,7 @@ export async function GET(request) {
       { status: 500 }
     );
   }
-}
+});
 
 // POST /api/news-categories - Create new news category
 export const POST = withAdminAuth(async (request) => {

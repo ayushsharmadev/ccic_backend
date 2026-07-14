@@ -11,7 +11,19 @@ import CollegeReview from "@/lib/models/CollegeReview";
 import FacilitySection from "@/lib/models/FacilitySection";
 import { withAdminAuth } from "@/lib/middleware/auth";
 
-export async function GET(request) {
+function createCountMap(items) {
+  return new Map(items.map((item) => [item._id.toString(), item.count]));
+}
+
+function createDocMap(items) {
+  return new Map(
+    items
+      .filter((item) => item.college)
+      .map((item) => [item.college.toString(), item])
+  );
+}
+
+export const GET = withAdminAuth(async (request) => {
   try {
     await connectDB();
 
@@ -76,39 +88,70 @@ export async function GET(request) {
       .populate("languages", "name")
       .populate("approvedThrough", "name")
       .populate("facilities", "name image")
+      .select(
+        "name slug popularName shortName estdYear country state district ownership affiliation location phoneNumber emailAddress status isFeatured isPopular displayOrder brochure collegeGallery hostelGallery campusGallery facilities hospitalFacilities hostelFacilities languages approvedThrough updatedAt"
+      )
       .sort({ displayOrder: 1, createdAt: 1 })
       .skip(skip)
       .limit(limit)
       .lean();
 
-    const collegesWithCounts = await Promise.all(
-      colleges.map(async (college) => {
-        const [noticeCount, courseAllocation, rankingDoc, distanceMeterDoc, reviewsCount, sectionsCount] = await Promise.all([
-          Notice.countDocuments({
-            college: college._id,
-            status: "active",
-          }),
-          CollegeCourseAllocation.findOne({ college: college._id }).lean(),
-          CollegeRanking.findOne({ college: college._id }).lean(),
-          CollegeDistanceMeter.findOne({ college: college._id }).lean(),
-          CollegeReview.countDocuments({ college: college._id }),
-          FacilitySection.countDocuments({
-            college: college._id,
-            status: "active",
-          }),
-        ]);
+    const collegeIds = colleges.map((college) => college._id);
 
-        return {
-          ...college,
-          noticesCount: noticeCount,
-          coursesCount: courseAllocation?.assignedCourses?.length || 0,
-          rankingsCount: rankingDoc?.rankings?.length || 0,
-          distanceMetersCount: distanceMeterDoc?.distanceMeters?.length || 0,
-          reviewsCount: reviewsCount,
-          sectionsCount: sectionsCount,
-        };
-      })
-    );
+    const [
+      noticeCounts,
+      courseAllocations,
+      rankingDocs,
+      distanceMeterDocs,
+      reviewCounts,
+      sectionCounts,
+    ] = await Promise.all([
+      Notice.aggregate([
+        { $match: { college: { $in: collegeIds }, status: "active" } },
+        { $group: { _id: "$college", count: { $sum: 1 } } },
+      ]),
+      CollegeCourseAllocation.find({ college: { $in: collegeIds } })
+        .select("college assignedCourses")
+        .lean(),
+      CollegeRanking.find({ college: { $in: collegeIds } })
+        .select("college rankings")
+        .lean(),
+      CollegeDistanceMeter.find({ college: { $in: collegeIds } })
+        .select("college distanceMeters")
+        .lean(),
+      CollegeReview.aggregate([
+        { $match: { college: { $in: collegeIds } } },
+        { $group: { _id: "$college", count: { $sum: 1 } } },
+      ]),
+      FacilitySection.aggregate([
+        { $match: { college: { $in: collegeIds }, status: "active" } },
+        { $group: { _id: "$college", count: { $sum: 1 } } },
+      ]),
+    ]);
+
+    const noticeCountMap = createCountMap(noticeCounts);
+    const reviewCountMap = createCountMap(reviewCounts);
+    const sectionCountMap = createCountMap(sectionCounts);
+    const courseAllocationMap = createDocMap(courseAllocations);
+    const rankingMap = createDocMap(rankingDocs);
+    const distanceMeterMap = createDocMap(distanceMeterDocs);
+
+    const collegesWithCounts = colleges.map((college) => {
+      const collegeId = college._id.toString();
+      const courseAllocation = courseAllocationMap.get(collegeId);
+      const rankingDoc = rankingMap.get(collegeId);
+      const distanceMeterDoc = distanceMeterMap.get(collegeId);
+
+      return {
+        ...college,
+        noticesCount: noticeCountMap.get(collegeId) || 0,
+        coursesCount: courseAllocation?.assignedCourses?.length || 0,
+        rankingsCount: rankingDoc?.rankings?.length || 0,
+        distanceMetersCount: distanceMeterDoc?.distanceMeters?.length || 0,
+        reviewsCount: reviewCountMap.get(collegeId) || 0,
+        sectionsCount: sectionCountMap.get(collegeId) || 0,
+      };
+    });
 
     return NextResponse.json({
       success: true,
@@ -126,7 +169,7 @@ export async function GET(request) {
       { status: 500 }
     );
   }
-}
+});
 
 export const POST = withAdminAuth(async (request) => {
   try {

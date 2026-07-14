@@ -4,7 +4,7 @@ import Course from "@/lib/models/Course";
 import { withAdminAuth } from "@/lib/middleware/auth";
 
 // GET /api/courses - Get all courses with pagination and filters
-export async function GET(request) {
+export const GET = withAdminAuth(async (request) => {
   try {
     console.log("🔍 Courses API: Connecting to database...");
     await connectDB();
@@ -112,7 +112,7 @@ export async function GET(request) {
       { status: 500 }
     );
   }
-}
+});
 
 // POST /api/courses - Create a new course (Admin only)
 export const POST = withAdminAuth(async (request) => {

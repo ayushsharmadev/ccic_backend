@@ -151,13 +151,13 @@ export default function NewsletterSubscriptionsPage() {
         <div className="flex items-center justify-center gap-2">
           <button
             onClick={() => handleView(item)}
-            className="px-2 py-1 text-xs text-primary border border-primary rounded transition-colors duration-200 hover:bg-primary-50 dark:hover:bg-primary/20 dark:text-primary-200 dark:border-primary/60"
+            className="px-2 py-1 text-xs text-primary dark:text-green-400 border border-primary rounded transition-colors duration-200 hover:bg-primary-50 dark:hover:bg-primary/20 dark:text-primary-200 dark:border-primary/60"
           >
             View
           </button>
           <button
             onClick={() => handleDelete(item.id)}
-            className="px-2 py-1 text-xs text-red-600 dark:text-rose-200 border border-red-200 dark:border-rose-600/40 rounded transition-colors duration-200 hover:bg-red-50 dark:hover:bg-rose-500/20"
+            className="px-2 py-1 text-xs text-red-600 dark:text-red-400 border border-red-200 dark:border-rose-600/40 rounded transition-colors duration-200 hover:bg-red-50 dark:hover:bg-rose-500/20"
           >
             Delete
           </button>

@@ -1,3 +1,4 @@
+import { withAdminAuth } from "@/lib/middleware/auth";
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import NewsletterSubscription from "@/lib/models/NewsletterSubscription";
@@ -17,7 +18,7 @@ async function requireAdmin(request) {
   return { ok: true };
 }
 
-export async function GET(request, { params }) {
+export const GET = withAdminAuth(async (request, { params }) => {
   const auth = await requireAdmin(request);
   if (!auth.ok) {
     return auth.response;
@@ -45,7 +46,7 @@ export async function GET(request, { params }) {
       { status: 500 }
     );
   }
-}
+});
 
 export async function DELETE(request, { params }) {
   const auth = await requireAdmin(request);

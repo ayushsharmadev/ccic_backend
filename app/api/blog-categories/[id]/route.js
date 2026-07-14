@@ -4,7 +4,7 @@ import BlogCategory from "@/lib/models/BlogCategory";
 import { withAdminAuth } from "@/lib/middleware/auth";
 
 // GET /api/blog-categories/[id] - Get single blog category
-export async function GET(request, { params }) {
+export const GET = withAdminAuth(async (request, { params }) => {
   try {
     await connectDB();
 
@@ -30,7 +30,7 @@ export async function GET(request, { params }) {
       { status: 500 }
     );
   }
-}
+});
 
 // PUT /api/blog-categories/[id] - Update blog category
 export const PUT = withAdminAuth(async (request, { params }) => {

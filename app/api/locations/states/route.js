@@ -12,18 +12,22 @@ import { withAdminAuth } from "@/lib/middleware/auth";
  */
 async function resolveCountryMasterId(countryId) {
   if (!countryId) return null;
-  // Check if it directly matches a CountryMaster doc
+
   const cm = await CountryMaster.findById(countryId).select("_id").lean();
   if (cm) return cm._id;
-  // Fallback: treat as Country(abroad) _id → look up by name
+
   const abroad = await Country.findById(countryId).select("name").lean();
-  if (!abroad) return countryId; // unknown id, pass as-is
-  const cmByName = await CountryMaster.findOne({ name: abroad.name }).select("_id").lean();
+  if (!abroad) return countryId;
+
+  const cmByName = await CountryMaster.findOne({ name: abroad.name })
+    .select("_id")
+    .lean();
+
   return cmByName ? cmByName._id : null;
 }
 
 // GET /api/locations/states - Get all states with pagination and filters
-export async function GET(request) {
+export const GET = withAdminAuth(async (request) => {
   try {
     await connectDB();
 
@@ -35,7 +39,6 @@ export async function GET(request) {
     const country = searchParams.get("country") || "";
     const all = searchParams.get("all");
 
-    // If all parameter is present, return all states without pagination
     if (all) {
       const filter = { status: "active" };
       if (country) {
@@ -51,6 +54,7 @@ export async function GET(request) {
 
       const states = await State.find(filter)
         .populate({ path: "country", select: "name code", model: "CountryMaster" })
+        .select("_id name code country status")
         .sort({ name: 1 })
         .lean();
 
@@ -61,12 +65,9 @@ export async function GET(request) {
     }
 
     const skip = (page - 1) * limit;
-
-    // Build filter object
     const filter = {};
 
     if (search) {
-      // Use regex search instead of text search for better compatibility
       filter.$or = [
         { name: { $regex: search, $options: "i" } },
         { code: { $regex: search, $options: "i" } },
@@ -82,10 +83,7 @@ export async function GET(request) {
       if (cmId) filter.country = cmId;
     }
 
-    // Get total count
     const total = await State.countDocuments(filter);
-
-    // Get states with pagination
     const states = await State.find(filter)
       .populate({ path: "country", select: "name code", model: "CountryMaster" })
       .sort({ name: 1 })
@@ -110,20 +108,15 @@ export async function GET(request) {
       { status: 500 }
     );
   }
-}
+});
 
 // POST /api/locations/states - Create a new state (Admin only)
 export const POST = withAdminAuth(async (request) => {
   try {
-    console.log("🔍 Starting state creation...");
-
     await connectDB();
-    console.log("✅ Database connected successfully");
 
     const body = await request.json();
-    console.log("📝 Request body:", body);
 
-    // Validate required fields
     const requiredFields = ["name", "code", "country"];
     for (const field of requiredFields) {
       if (!body[field]) {
@@ -134,12 +127,8 @@ export const POST = withAdminAuth(async (request) => {
       }
     }
 
-    // Create new state
-    console.log("🏗️ Creating state with data:", body);
     const state = new State(body);
-    console.log("💾 Saving state to database...");
     await state.save();
-    console.log("✅ State saved successfully:", state._id);
 
     return NextResponse.json(
       {
@@ -150,10 +139,7 @@ export const POST = withAdminAuth(async (request) => {
       { status: 201 }
     );
   } catch (error) {
-    console.error("❌ Error creating state:", error);
-    console.error("❌ Error name:", error.name);
-    console.error("❌ Error message:", error.message);
-    console.error("❌ Error stack:", error.stack);
+    console.error("Error creating state:", error);
 
     if (error.name === "ValidationError") {
       const errors = Object.values(error.errors).map((err) => err.message);

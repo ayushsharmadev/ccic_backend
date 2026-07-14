@@ -4,7 +4,7 @@ import ExamLevel from "@/lib/models/ExamLevel";
 import { withAdminAuth } from "@/lib/middleware/auth";
 
 // GET single exam level
-export async function GET(request, { params }) {
+export const GET = withAdminAuth(async (request, { params }) => {
   try {
     await dbConnect();
 
@@ -30,7 +30,7 @@ export async function GET(request, { params }) {
       { status: 500 }
     );
   }
-}
+});
 
 // PUT update exam level
 export const PUT = withAdminAuth(async (request, { params }) => {

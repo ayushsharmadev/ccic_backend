@@ -4,7 +4,7 @@ import Stream from "@/lib/models/Stream";
 import { withAdminAuth } from "@/lib/middleware/auth";
 
 // GET /api/streams - Get all streams with pagination and filters
-export async function GET(request) {
+export const GET = withAdminAuth(async (request) => {
   try {
     await connectDB();
 
@@ -82,7 +82,7 @@ export async function GET(request) {
       { status: 500 }
     );
   }
-}
+});
 
 // POST /api/streams - Create a new stream (Admin only)
 export const POST = withAdminAuth(async (request) => {

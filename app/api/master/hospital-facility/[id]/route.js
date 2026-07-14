@@ -1,9 +1,10 @@
+import { withAdminAuth } from "@/lib/middleware/auth";
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import HospitalFacility from "@/lib/models/HospitalFacility";
 
 // GET /api/master/hospital-facility/[id] - Get a single hospital facility by ID
-export async function GET(request, { params }) {
+export const GET = withAdminAuth(async (request, { params }) => {
   try {
     await connectDB();
 
@@ -36,7 +37,7 @@ export async function GET(request, { params }) {
       { status: 500 }
     );
   }
-}
+});
 
 // PUT /api/master/hospital-facility/[id] - Update a hospital facility by ID
 export async function PUT(request, { params }) {

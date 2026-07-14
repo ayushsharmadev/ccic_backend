@@ -4,7 +4,7 @@ import CountryMaster from "@/lib/models/CountryMaster";
 import { withAdminAuth } from "@/lib/middleware/auth";
 
 // GET /api/locations/country-master
-export async function GET(request) {
+export const GET = withAdminAuth(async (request) => {
   try {
     await connectDB();
 
@@ -25,6 +25,7 @@ export async function GET(request) {
         ];
       }
       const countries = await CountryMaster.find(filter)
+        .select("_id name code status")
         .sort({ name: 1 })
         .lean();
       return NextResponse.json({ success: true, data: countries });
@@ -69,7 +70,7 @@ export async function GET(request) {
       { status: 500 }
     );
   }
-}
+});
 
 // POST /api/locations/country-master — Admin only
 export const POST = withAdminAuth(async (request) => {

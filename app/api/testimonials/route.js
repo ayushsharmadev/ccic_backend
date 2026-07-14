@@ -117,6 +117,9 @@ export const POST = withAdminAuth(async (request) => {
       );
     }
 
+    const status = body.status || "draft";
+    const isPublished = status === "published";
+
     // Create new testimonial
     const testimonial = new Testimonial({
       name: body.name,
@@ -126,9 +129,10 @@ export const POST = withAdminAuth(async (request) => {
       rating: body.rating || 5,
       avatar: body.avatar,
       image: body.image || null,
-      isPublished: body.isPublished || false,
+      isPublished,
       isFeatured: body.isFeatured || false,
-      status: body.status || "draft",
+      status,
+      publishedAt: isPublished ? new Date() : null,
       displayOrder: body.displayOrder || 0,
     });
 

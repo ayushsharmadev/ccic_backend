@@ -5,7 +5,7 @@ import College from "@/lib/models/College";
 import { withAdminAuth } from "@/lib/middleware/auth";
 import mongoose from "mongoose";
 
-export async function GET(request) {
+export const GET = withAdminAuth(async (request) => {
   try {
     await connectDB();
 
@@ -60,9 +60,9 @@ export async function GET(request) {
       { status: 500 }
     );
   }
-}
+});
 
-export const POST = withAdminAuth(async (request) => {
+export const POST = async (request) => {
   try {
     await connectDB();
 
@@ -135,5 +135,5 @@ export const POST = withAdminAuth(async (request) => {
       { status: 500 }
     );
   }
-});
+};
 

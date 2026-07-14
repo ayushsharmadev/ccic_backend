@@ -4,7 +4,7 @@ import CountryMaster from "@/lib/models/CountryMaster";
 import { withAdminAuth } from "@/lib/middleware/auth";
 
 // GET /api/locations/country-master/[id]
-export async function GET(request, { params }) {
+export const GET = withAdminAuth(async (request, { params }) => {
   try {
     await connectDB();
     const { id } = await params;
@@ -25,7 +25,7 @@ export async function GET(request, { params }) {
       { status: 500 }
     );
   }
-}
+});
 
 // PUT /api/locations/country-master/[id] — Admin only
 export const PUT = withAdminAuth(async (request, { params }) => {

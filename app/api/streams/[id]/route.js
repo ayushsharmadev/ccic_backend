@@ -4,7 +4,7 @@ import Stream from "@/lib/models/Stream";
 import { withAdminAuth } from "@/lib/middleware/auth";
 
 // GET /api/streams/[id] - Get a single stream by ID
-export async function GET(request, { params }) {
+export const GET = withAdminAuth(async (request, { params }) => {
   try {
     await connectDB();
 
@@ -37,7 +37,7 @@ export async function GET(request, { params }) {
       { status: 500 }
     );
   }
-}
+});
 
 // PUT /api/streams/[id] - Update a stream by ID (Admin only)
 export const PUT = withAdminAuth(async (request, { params }) => {

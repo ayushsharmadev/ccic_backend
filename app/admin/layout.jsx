@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Sidebar from "@/components/admin/Sidebar";
 import Header from "@/components/admin/Header";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
@@ -8,6 +8,38 @@ import ApnaNotify from "@/components/utils/ApnaNotify";
 
 export default function AdminLayout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    
+    const originalFetch = window.fetch;
+    
+    window.fetch = async function (resource, config = {}) {
+      if (typeof resource === 'string' && resource.startsWith('/api/')) {
+        const token = localStorage.getItem('token');
+        if (token) {
+          config.headers = config.headers || {};
+          
+          // Check if Authorization header already exists (case-insensitive)
+          const hasAuth = Object.keys(config.headers).some(
+            key => key.toLowerCase() === 'authorization'
+          );
+          
+          if (!hasAuth) {
+            config.headers = {
+              ...config.headers,
+              Authorization: `Bearer ${token}`
+            };
+          }
+        }
+      }
+      return originalFetch(resource, config);
+    };
+
+    return () => {
+      window.fetch = originalFetch;
+    };
+  }, []);
 
   return (
     <ProtectedRoute requireAdmin={true}>

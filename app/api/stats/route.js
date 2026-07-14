@@ -1,3 +1,4 @@
+import { withAdminAuth } from "@/lib/middleware/auth";
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import College from "@/lib/models/College";
@@ -15,7 +16,7 @@ import Ownership from "@/lib/models/Ownership";
 import CollegeFacility from "@/lib/models/CollegeFacility";
 import Affiliation from "@/lib/models/Affiliation";
 
-export async function GET() {
+export const GET = withAdminAuth(async () => {
   try {
     await connectDB();
 
@@ -80,4 +81,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
+});

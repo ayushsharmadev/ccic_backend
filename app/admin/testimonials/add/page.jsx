@@ -18,7 +18,6 @@ export default function AddTestimonialPage() {
     rating: 5,
     avatar: "",
     image: "",
-    isPublished: false,
     isFeatured: false,
     status: "draft",
     displayOrder: 0,
@@ -123,7 +122,6 @@ export default function AddTestimonialPage() {
         rating: formData.rating,
         avatar: formData.avatar.trim(),
         image: formData.image || null,
-        isPublished: formData.isPublished,
         isFeatured: formData.isFeatured,
         status: formData.status,
         displayOrder: formData.displayOrder,
@@ -155,7 +153,6 @@ export default function AddTestimonialPage() {
           rating: 5,
           avatar: "",
           image: "",
-          isPublished: false,
           isFeatured: false,
           status: "draft",
           displayOrder: 0,
@@ -383,7 +380,7 @@ export default function AddTestimonialPage() {
             />
           </div>
 
-          {/* Featured and Published Checkboxes */}
+          {/* Featured Checkbox */}
           <div className="mb-5">
             <div className="flex items-center space-x-6">
               <label className="flex items-center">
@@ -397,20 +394,6 @@ export default function AddTestimonialPage() {
                 />
                 <span className="ml-2 text-xs text-gray-700 dark:text-white/80 transition-colors duration-300">
                   Featured
-                </span>
-              </label>
-
-              <label className="flex items-center">
-                <input
-                  type="checkbox"
-                  checked={formData.isPublished}
-                  onChange={(e) =>
-                    handleInputChange("isPublished", e.target.checked)
-                  }
-                  className="rounded border-gray-300 dark:border-slate-700 text-primary focus:ring-primary bg-white dark:bg-slate-900 transition-colors duration-300"
-                />
-                <span className="ml-2 text-xs text-gray-700 dark:text-white/80 transition-colors duration-300">
-                  Published
                 </span>
               </label>
             </div>

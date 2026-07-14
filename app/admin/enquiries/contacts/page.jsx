@@ -223,19 +223,19 @@ export default function ContactEnquiriesPage() {
         <div className="flex items-center justify-center gap-2">
           <button
             onClick={() => handleViewClick(item)}
-            className="px-2 py-1 text-xs text-blue-600 dark:text-blue-200 border border-blue-300 dark:border-blue-500/40 rounded bg-transparent hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors duration-200"
+            className="px-2 py-1 text-xs text-blue-600 dark:text-blue-400 border border-blue-300 dark:border-blue-500/40 rounded bg-transparent hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors duration-200"
           >
             View
           </button>
           <button
             onClick={() => handleEditClick(item)}
-            className="px-2 py-1 text-xs text-green-600 dark:text-emerald-200 border border-green-300 dark:border-emerald-500/40 rounded bg-transparent hover:bg-green-50 dark:hover:bg-emerald-500/10 transition-colors duration-200"
+            className="px-2 py-1 text-xs text-green-600 dark:text-green-400 border border-green-300 dark:border-emerald-500/40 rounded bg-transparent hover:bg-green-50 dark:hover:bg-emerald-500/10 transition-colors duration-200"
           >
             Edit
           </button>
           <button
             onClick={() => handleDelete(item)}
-            className="px-2 py-1 text-xs text-red-600 dark:text-rose-200 border border-red-300 dark:border-rose-500/40 rounded bg-transparent hover:bg-red-50 dark:hover:bg-rose-500/10 transition-colors duration-200"
+            className="px-2 py-1 text-xs text-red-600 dark:text-red-400 border border-red-300 dark:border-rose-500/40 rounded bg-transparent hover:bg-red-50 dark:hover:bg-rose-500/10 transition-colors duration-200"
           >
             Delete
           </button>

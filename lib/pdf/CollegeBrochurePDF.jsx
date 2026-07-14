@@ -23,7 +23,7 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
-    minHeight: "842px", // A4 height in points
+    height: "100%", // Fill A4 height dynamically
   },
   siteLogo: {
     width: 80,
@@ -114,7 +114,9 @@ const styles = StyleSheet.create({
     color: "#1e3a8a",
     marginBottom: 15,
     paddingBottom: 8,
-    borderBottom: "3px solid #1e3a8a",
+    borderBottomWidth: 3,
+    borderBottomStyle: "solid",
+    borderBottomColor: "#1e3a8a",
   },
   sectionHeaderAlt: {
     fontSize: 24,
@@ -127,11 +129,12 @@ const styles = StyleSheet.create({
   infoGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 12,
+    justifyContent: "space-between",
     marginBottom: 20,
   },
   infoBox: {
     width: "48%",
+    marginBottom: 12,
     backgroundColor: "#eff6ff",
     padding: 12,
     borderRadius: 6,
@@ -185,10 +188,11 @@ const styles = StyleSheet.create({
   contactGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 12,
+    justifyContent: "space-between",
   },
   contactItem: {
     width: "48%",
+    marginBottom: 12,
   },
   contactLabel: {
     fontSize: 8,
@@ -206,11 +210,12 @@ const styles = StyleSheet.create({
   coursesGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10,
+    justifyContent: "space-between",
     marginBottom: 20,
   },
   courseBox: {
     width: "48%",
+    marginBottom: 10,
     backgroundColor: "#eff6ff",
     padding: 10,
     borderRadius: 6,
@@ -233,11 +238,12 @@ const styles = StyleSheet.create({
   facilitiesGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
+    justifyContent: "space-between",
     marginBottom: 20,
   },
   facilityBox: {
     width: "31%",
+    marginBottom: 8,
     backgroundColor: "#f3f4f6",
     padding: 8,
     borderRadius: 4,
@@ -267,13 +273,14 @@ const styles = StyleSheet.create({
   whyChooseList: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
+    justifyContent: "space-between",
+    marginBottom: 20,
   },
   whyChooseItem: {
     width: "48%",
+    marginBottom: 8,
     flexDirection: "row",
     alignItems: "flex-start",
-    marginBottom: 6,
   },
   checkIcon: {
     fontSize: 12,
@@ -560,29 +567,22 @@ const CollegeBrochurePDF = ({ college }) => {
                     .join(", ")}
                 </Text>
               </View>
+              <View style={styles.contactItem}>
+                <Text style={styles.contactLabel}>Phone Numbers</Text>
+                <Text style={styles.contactValue}>+91-09525664566, +91-9334154407</Text>
+              </View>
 
-              {college.phoneNumber && (
-                <View style={styles.contactItem}>
-                  <Text style={styles.contactLabel}>Phone Number</Text>
-                  <Text style={styles.contactValue}>{college.phoneNumber}</Text>
-                </View>
-              )}
+              <View style={styles.contactItem}>
+                <Text style={styles.contactLabel}>Email Address</Text>
+                <Text style={styles.contactValue}>
+                  ccic.patna@gmail.com
+                </Text>
+              </View>
 
-              {college.emailAddress && (
-                <View style={styles.contactItem}>
-                  <Text style={styles.contactLabel}>Email Address</Text>
-                  <Text style={styles.contactValue}>
-                    {college.emailAddress}
-                  </Text>
-                </View>
-              )}
-
-              {college.websiteUrl && (
-                <View style={styles.contactItem}>
-                  <Text style={styles.contactLabel}>Website</Text>
-                  <Text style={styles.contactValue}>{college.websiteUrl}</Text>
-                </View>
-              )}
+              <View style={styles.contactItem}>
+                <Text style={styles.contactLabel}>Website</Text>
+                <Text style={styles.contactValue}>www.ccic.com</Text>
+              </View>
             </View>
           </View>
 
@@ -817,10 +817,9 @@ const CollegeBrochurePDF = ({ college }) => {
           <View
             style={[styles.pageFooter, { borderTopWidth: 0, marginTop: 20 }]}
           >
-            <Text style={styles.footerWebsite}>Contact Us</Text>
+            <Text style={styles.footerWebsite}>www.ccic.com</Text>
             <Text style={styles.footerContact}>
-              Phone: {college.phoneNumber || "+91-9334154407"} | Email:{" "}
-              {college.emailAddress || "info@ccic.com"}
+              +91-09525664566 | +91-9334154407 | ccic.patna@gmail.com | Patna, Bihar
             </Text>
             <Text style={[styles.footerPage, { marginTop: 8 }]}>
               Page 3 of 3

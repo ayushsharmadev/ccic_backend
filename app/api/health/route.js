@@ -1,4 +1,5 @@
-export async function GET() {
+import { withAdminAuth } from "@/lib/middleware/auth";
+export const GET = withAdminAuth(async () => {
   try {
     return Response.json({
       status: "OK",
@@ -12,4 +13,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-}
+});

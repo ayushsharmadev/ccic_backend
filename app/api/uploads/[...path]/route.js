@@ -3,7 +3,7 @@ import fs from "fs";
 import mime from "mime-types";
 import { NextResponse } from "next/server";
 
-export async function GET(req, { params }) {
+export const GET = async (req, { params }) => {
   try {
     // Next.js 15: params should be awaited
     const resolvedParams = await params;
@@ -29,4 +29,4 @@ export async function GET(req, { params }) {
   } catch (err) {
     return NextResponse.json({ error: "Internal server error", details: err.message }, { status: 500 });
   }
-}
+};
