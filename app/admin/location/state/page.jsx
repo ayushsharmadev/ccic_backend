@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import ApnaTable from "@/components/utils/ApnaTable";
+import ApnaSelect from "@/components/utils/ApnaSelect";
 import LocationFilterBar from "@/components/utils/LocationFilterBar";
 import ApnaModalConfirmation from "@/components/utils/ApnaModalConfirmation";
 import { showSuccess, showError } from "@/components/utils/ApnaNotify";
@@ -13,6 +14,7 @@ export default function StatesPage() {
   const [selectedItems, setSelectedItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCountry, setSelectedCountry] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -137,6 +139,23 @@ export default function StatesPage() {
       },
     },
     {
+      key: "status",
+      header: "Status",
+      headerClassName: "text-center",
+      cellClassName: "text-center",
+      render: (item) => (
+        <span
+          className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium capitalize ${
+            item.status === "active"
+              ? "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-300"
+              : "bg-gray-100 text-gray-600 dark:bg-slate-800 dark:text-white/60"
+          }`}
+        >
+          {item.status}
+        </span>
+      ),
+    },
+    {
       key: "actions",
       header: "Actions",
       headerClassName: "text-center",
@@ -170,7 +189,12 @@ export default function StatesPage() {
   }, [searchTerm]);
 
   // Fetch states data from API
-  const fetchStates = async (page = 1, search = "", country = "") => {
+  const fetchStates = async (
+    page = 1,
+    search = "",
+    country = "",
+    status = ""
+  ) => {
     try {
       setLoading(true);
 
@@ -178,8 +202,9 @@ export default function StatesPage() {
         page: page.toString(),
         limit: "8", // itemsPerPage
         search: search,
-        status: "active", // Only show active states
       });
+
+      if (status) params.set("status", status);
 
       if (country) {
         params.set("country", country);
@@ -222,13 +247,13 @@ export default function StatesPage() {
 
   useEffect(() => {
     setCurrentPage(1); // Reset to page 1 when search changes
-    fetchStates(1, debouncedSearchTerm, selectedCountry);
-  }, [debouncedSearchTerm, selectedCountry]);
+    fetchStates(1, debouncedSearchTerm, selectedCountry, statusFilter);
+  }, [debouncedSearchTerm, selectedCountry, statusFilter]);
 
   // Page change handler
   const handlePageChange = (page) => {
     setCurrentPage(page); // Update current page immediately
-    fetchStates(page, debouncedSearchTerm, selectedCountry);
+    fetchStates(page, debouncedSearchTerm, selectedCountry, statusFilter);
   };
 
   // Selection handlers
@@ -359,7 +384,7 @@ export default function StatesPage() {
           States Management
         </h1>
         <p className="text-xs text-gray-600 dark:text-white/70">
-          Manage state information for CCIC colleges
+          Manage state information for VidyaVidhi colleges
         </p>
       </div>
 
@@ -418,6 +443,19 @@ export default function StatesPage() {
             onCountryChange={setSelectedCountry}
             showState={false}
             showDistrict={false}
+          />
+          <ApnaSelect
+            title="Status"
+            value={statusFilter}
+            onChange={setStatusFilter}
+            placeholder="All"
+            options={[
+              { value: "", label: "All" },
+              { value: "active", label: "Active" },
+              { value: "inactive", label: "Inactive" },
+            ]}
+            className="w-32"
+            buttonClassName="w-full px-3 py-1.5 rounded text-sm text-left flex items-center justify-between outline-none transition-all duration-200 border border-gray-300 dark:border-slate-700 focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30 bg-white dark:bg-slate-900/70 text-gray-700 dark:text-white/80 cursor-pointer"
           />
         </div>
         <Link

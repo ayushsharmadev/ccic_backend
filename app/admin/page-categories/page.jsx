@@ -419,10 +419,6 @@ export default function PageCategoryList() {
     </div>
   );
 
-  if (loading && categories.length === 0) {
-    return <LoadingSkeleton />;
-  }
-
   const pageWrapperClass =
     "h-full p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300";
   const headerTitleClass =

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import LocationFilterBar from "@/components/utils/LocationFilterBar";
 import ApnaTable from "@/components/utils/ApnaTable";
+import ApnaSelect from "@/components/utils/ApnaSelect";
 import ApnaModalConfirmation from "@/components/utils/ApnaModalConfirmation";
 import { showSuccess, showError } from "@/components/utils/ApnaNotify";
 
@@ -12,6 +13,7 @@ export default function DistrictsPage() {
   const [loading, setLoading] = useState(true);
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedState, setSelectedState] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [selectedItems, setSelectedItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
@@ -48,6 +50,23 @@ export default function DistrictsPage() {
         "text-sm text-gray-600 dark:text-white/70 transition-colors",
     },
     {
+      key: "status",
+      header: "Status",
+      headerClassName: "text-center",
+      cellClassName: "text-center",
+      render: (item) => (
+        <span
+          className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium capitalize ${
+            item.status === "active"
+              ? "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-300"
+              : "bg-gray-100 text-gray-600 dark:bg-slate-800 dark:text-white/60"
+          }`}
+        >
+          {item.status}
+        </span>
+      ),
+    },
+    {
       key: "actions",
       header: "Actions",
       headerClassName: "text-center",
@@ -76,7 +95,8 @@ export default function DistrictsPage() {
     page = 1,
     search = "",
     country = "",
-    state = ""
+    state = "",
+    status = ""
   ) => {
     try {
       setLoading(true);
@@ -84,8 +104,9 @@ export default function DistrictsPage() {
         page: page.toString(),
         limit: "8", // itemsPerPage
         search: search,
-        status: "active", // Only show active districts
       });
+
+      if (status) params.set("status", status);
 
       if (state) {
         params.set("state", state);
@@ -104,6 +125,7 @@ export default function DistrictsPage() {
           stateCode: district.state?._id,
           stateName: district.state?.name || "Unknown State",
           countryName: district.state?.country?.name || "—",
+          status: district.status,
         }));
         setDistricts(transformedDistricts);
         setTotalPages(data.pagination.pages);
@@ -136,13 +158,25 @@ export default function DistrictsPage() {
 
   useEffect(() => {
     setCurrentPage(1); // Reset to page 1 when search or filters change
-    fetchDistricts(1, debouncedSearchTerm, selectedCountry, selectedState);
-  }, [debouncedSearchTerm, selectedCountry, selectedState]);
+    fetchDistricts(
+      1,
+      debouncedSearchTerm,
+      selectedCountry,
+      selectedState,
+      statusFilter
+    );
+  }, [debouncedSearchTerm, selectedCountry, selectedState, statusFilter]);
 
   // Page change handler
   const handlePageChange = (page) => {
     setCurrentPage(page); // Update current page immediately
-    fetchDistricts(page, debouncedSearchTerm, selectedCountry, selectedState);
+    fetchDistricts(
+      page,
+      debouncedSearchTerm,
+      selectedCountry,
+      selectedState,
+      statusFilter
+    );
   };
 
   // Selection handlers
@@ -265,7 +299,7 @@ export default function DistrictsPage() {
           Districts Management
         </h1>
         <p className="text-xs text-gray-600 dark:text-white/70">
-          Manage district information for CCIC colleges
+          Manage district information for VidyaVidhi colleges
         </p>
       </div>
 
@@ -325,6 +359,19 @@ export default function DistrictsPage() {
             onCountryChange={setSelectedCountry}
             onStateChange={setSelectedState}
             showDistrict={false}
+          />
+          <ApnaSelect
+            title="Status"
+            value={statusFilter}
+            onChange={setStatusFilter}
+            placeholder="All"
+            options={[
+              { value: "", label: "All" },
+              { value: "active", label: "Active" },
+              { value: "inactive", label: "Inactive" },
+            ]}
+            className="w-32"
+            buttonClassName="w-full px-3 py-1.5 rounded text-sm text-left flex items-center justify-between outline-none transition-all duration-200 border border-gray-300 dark:border-slate-700 focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30 bg-white dark:bg-slate-900/70 text-gray-700 dark:text-white/80 cursor-pointer"
           />
         </div>
 

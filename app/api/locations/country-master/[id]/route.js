@@ -46,6 +46,9 @@ export const PUT = withAdminAuth(async (request, { params }) => {
       {
         name: body.name.trim(),
         ...(body.code ? { code: body.code.trim().toUpperCase() } : {}),
+        ...(Object.prototype.hasOwnProperty.call(body, "logo")
+          ? { logo: body.logo ? body.logo.trim() : null }
+          : {}),
         ...(body.status ? { status: body.status } : {}),
       },
       { new: true, runValidators: true }

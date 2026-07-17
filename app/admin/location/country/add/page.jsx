@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ImageUpload from "@/components/utils/ImageUpload";
+import ApnaSelect from "@/components/utils/ApnaSelect";
 import { showSuccess, showError } from "@/components/utils/ApnaNotify";
 
 export default function AddCountryPage() {
@@ -14,6 +15,7 @@ export default function AddCountryPage() {
     name: "",
     code: "",
     logo: null,
+    status: "active",
   });
   const [logoPreview, setLogoPreview] = useState(null);
 
@@ -68,7 +70,7 @@ export default function AddCountryPage() {
       const apiData = {
         name: formData.name.trim(),
         code: formData.code.trim().toUpperCase(),
-        status: "active",
+        status: formData.status,
       };
 
       if (formData.logo) {
@@ -99,7 +101,7 @@ export default function AddCountryPage() {
         }
       }
 
-      const response = await fetch("/api/locations/countries", {
+      const response = await fetch("/api/locations/country-master", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -117,6 +119,7 @@ export default function AddCountryPage() {
           name: "",
           code: "",
           logo: null,
+          status: "active",
         });
         setLogoPreview(null);
 
@@ -194,7 +197,7 @@ export default function AddCountryPage() {
           Add New Country
         </h1>
         <p className="text-xs text-gray-600 dark:text-white/70">
-          Create a new country entry for CCIC colleges
+          Create a new country entry for VidyaVidhi colleges
         </p>
       </div>
 
@@ -249,6 +252,21 @@ export default function AddCountryPage() {
                 showError(`Logo upload failed: ${error}`)
               }
             />
+            <div>
+              <ApnaSelect
+                title="Status"
+                value={formData.status}
+                onChange={(status) =>
+                  setFormData((prev) => ({ ...prev, status }))
+                }
+                options={[
+                  { value: "active", label: "Active" },
+                  { value: "inactive", label: "Inactive" },
+                ]}
+                required
+                buttonClassName="w-full px-2 py-1.5 rounded text-xs text-left flex items-center justify-between outline-none transition-all duration-200 border border-gray-300 dark:border-slate-700 focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30 bg-white dark:bg-slate-900/70 text-gray-700 dark:text-white/80 cursor-pointer"
+              />
+            </div>
           </div>
 
           <div className="flex justify-end gap-2 border-t border-gray-200 dark:border-slate-800 pt-4">

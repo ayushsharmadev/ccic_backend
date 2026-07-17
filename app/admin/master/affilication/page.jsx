@@ -440,10 +440,6 @@ export default function AffiliationNameList() {
     </div>
   );
 
-  if (loading) {
-    return <LoadingSkeleton />;
-  }
-
   return (
     <div className="h-full p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
       {/* Page Header */}

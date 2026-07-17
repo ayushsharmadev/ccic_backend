@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import LocationSelects from "@/components/utils/LocationSelects";
+import ApnaSelect from "@/components/utils/ApnaSelect";
 import { showSuccess, showError } from "@/components/utils/ApnaNotify";
 
 export default function AddDistrictPage() {
@@ -14,6 +15,7 @@ export default function AddDistrictPage() {
     name: "",
     country: "",
     state: "",
+    status: "active",
   });
 
   useEffect(() => {
@@ -49,7 +51,7 @@ export default function AddDistrictPage() {
       const apiData = {
         name: formData.name.trim(),
         state: formData.state,
-        status: "active",
+        status: formData.status,
       };
 
       const response = await fetch("/api/locations/districts", {
@@ -65,7 +67,7 @@ export default function AddDistrictPage() {
 
       if (result.success) {
         showSuccess("District added successfully!");
-        setFormData({ name: "", country: "", state: "" });
+        setFormData({ name: "", country: "", state: "", status: "active" });
         setTimeout(() => {
           router.push("/admin/location/district");
         }, 2000);
@@ -150,6 +152,21 @@ export default function AddDistrictPage() {
             gridClassName="grid grid-cols-2 gap-4 mb-5"
             countryApiUrl="/api/locations/country-master"
           />
+
+          <div className="grid grid-cols-2 gap-4 mb-5">
+            <ApnaSelect
+              title="Status"
+              value={formData.status}
+              onChange={(status) =>
+                setFormData((prev) => ({ ...prev, status }))
+              }
+              options={[
+                { value: "active", label: "Active" },
+                { value: "inactive", label: "Inactive" },
+              ]}
+              required
+            />
+          </div>
 
           <div className="border-t border-gray-200 dark:border-slate-800 pt-4 flex justify-end gap-2">
             <Link

@@ -246,35 +246,6 @@ export default function ContactEnquiriesPage() {
 
   const actions = [];
 
-  if (loading && enquiries.length === 0) {
-    return (
-      <div className="h-full p-4 sm:p-5 md:p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <div className="h-7 w-44 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-            <div className="h-4 w-64 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-          </div>
-          <div className="flex gap-3">
-            <div className="h-10 flex-1 max-w-xs rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-            <div className="h-10 w-44 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-          </div>
-          <div className="border border-gray-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-sm">
-            <div className="divide-y divide-gray-200 dark:divide-slate-800">
-              {[...Array(6)].map((_, idx) => (
-                <div key={idx} className="flex gap-4 px-4 py-4 bg-white dark:bg-slate-900">
-                  <div className="h-4 w-32 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-                  <div className="h-4 w-28 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-                  <div className="h-4 w-40 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-                  <div className="h-4 w-20 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="h-full p-4 sm:p-5 md:p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
       {/* Page Header */}

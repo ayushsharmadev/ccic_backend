@@ -340,10 +340,6 @@ export default function TestimonialsPage() {
     </div>
   );
 
-  if (loading) {
-    return <LoadingSkeleton />;
-  }
-
   return (
     <div className="h-full p-4 sm:p-5 md:p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
       {/* Page Header */}

@@ -271,10 +271,6 @@ export default function LanguageList() {
     </div>
   );
 
-  if (loading && languages.length === 0) {
-    return <LoadingSkeleton />;
-  }
-
   return (
     <div className="h-full p-4 sm:p-5 md:p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
       {/* Header */}

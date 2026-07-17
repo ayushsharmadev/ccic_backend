@@ -651,10 +651,6 @@ export default function CollegeList() {
     </div>
   );
 
-  if (loading) {
-    return <LoadingSkeleton />;
-  }
-
   return (
     <div className="h-full p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
       {/* Page Header */}
@@ -741,7 +737,10 @@ export default function CollegeList() {
                 setFilters((prev) => ({ ...prev, district: value }))
               }
               countryApiUrl="/api/locations/countries"
+              showLabels={false}
+              className="flex items-center gap-2 flex-wrap"
               itemClassName="min-w-40"
+              buttonClassName="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30 bg-white dark:bg-slate-900/70 text-gray-900 dark:text-white transition-colors flex items-center justify-between text-left cursor-pointer"
             />
 
             {/* Type Filter (Featured/Popular) */}

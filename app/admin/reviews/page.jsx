@@ -426,30 +426,6 @@ export default function ReviewsList() {
     );
   };
 
-  if (loading && reviews.length === 0) {
-    return (
-      <div className="p-4 space-y-4">
-        <div className="h-8 bg-gray-200 dark:bg-slate-700 rounded w-48 animate-pulse"></div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
-            <div
-              key={i}
-              className="h-20 bg-gray-200 dark:bg-slate-700 rounded animate-pulse"
-            ></div>
-          ))}
-        </div>
-        <div className="space-y-4">
-          {[...Array(5)].map((_, i) => (
-            <div
-              key={i}
-              className="h-32 bg-gray-200 dark:bg-slate-700 rounded-lg animate-pulse"
-            ></div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="p-4 space-y-4">
       <div className="flex items-center justify-between">
@@ -526,7 +502,16 @@ export default function ReviewsList() {
 
       {/* Reviews List */}
       <div className="bg-white dark:bg-slate-900 rounded-lg p-4 border border-gray-200 dark:border-slate-700">
-        {reviews && reviews.length > 0 ? (
+        {loading ? (
+          <div className="space-y-3 py-2" aria-busy="true" aria-label="Loading reviews">
+            {[...Array(5)].map((_, index) => (
+              <div
+                key={index}
+                className="h-32 animate-pulse rounded-lg bg-gray-200 dark:bg-slate-700"
+              />
+            ))}
+          </div>
+        ) : reviews && reviews.length > 0 ? (
           <div className="space-y-4">
             {reviews.map((review, index) => (
               <div

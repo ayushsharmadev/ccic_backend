@@ -88,6 +88,7 @@ export const POST = withAdminAuth(async (request) => {
     const country = new CountryMaster({
       name: body.name.trim(),
       code: body.code.trim().toUpperCase(),
+      ...(body.logo ? { logo: body.logo.trim() } : {}),
       status: body.status || "active",
     });
     await country.save();

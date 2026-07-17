@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import ApnaTable from "@/components/utils/ApnaTable";
+import ApnaSelect from "@/components/utils/ApnaSelect";
 import ApnaModalConfirmation from "@/components/utils/ApnaModalConfirmation";
 import { showSuccess, showError } from "@/components/utils/ApnaNotify";
 
@@ -12,6 +13,7 @@ export default function CountriesPage() {
   const [selectedItems, setSelectedItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
@@ -82,6 +84,23 @@ export default function CountriesPage() {
       },
     },
     {
+      key: "status",
+      header: "Status",
+      headerClassName: "text-center",
+      cellClassName: "text-center",
+      render: (item) => (
+        <span
+          className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium capitalize ${
+            item.status === "active"
+              ? "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-300"
+              : "bg-gray-100 text-gray-600 dark:bg-slate-800 dark:text-white/60"
+          }`}
+        >
+          {item.status}
+        </span>
+      ),
+    },
+    {
       key: "actions",
       header: "Actions",
       headerClassName: "text-center",
@@ -113,7 +132,7 @@ export default function CountriesPage() {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  const fetchCountries = async (page = 1, search = "") => {
+  const fetchCountries = async (page = 1, search = "", status = "") => {
     try {
       setLoading(true);
 
@@ -121,8 +140,8 @@ export default function CountriesPage() {
         page: page.toString(),
         limit: "8",
         search: search,
-        status: "active",
       });
+      if (status) params.set("status", status);
 
       const response = await fetch(`/api/locations/country-master?${params}`);
       const data = await response.json();
@@ -158,12 +177,12 @@ export default function CountriesPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-    fetchCountries(1, debouncedSearchTerm);
-  }, [debouncedSearchTerm]);
+    fetchCountries(1, debouncedSearchTerm, statusFilter);
+  }, [debouncedSearchTerm, statusFilter]);
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
-    fetchCountries(page, debouncedSearchTerm);
+    fetchCountries(page, debouncedSearchTerm, statusFilter);
   };
 
   const handleSelectionChange = (newSelectedItems) => {
@@ -272,10 +291,6 @@ export default function CountriesPage() {
     </div>
   );
 
-  if (loading) {
-    return <LoadingSkeleton />;
-  }
-
   return (
     <div className="h-full p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
       <div className="mb-4">
@@ -283,12 +298,13 @@ export default function CountriesPage() {
           Countries Management
         </h1>
         <p className="text-xs text-gray-600 dark:text-white/70">
-          Manage country information for CCIC colleges
+          Manage country information for VidyaVidhi colleges
         </p>
       </div>
 
       <div className="flex justify-between items-center mb-4">
-        <div className="relative w-60">
+        <div className="flex items-center gap-3">
+          <div className="relative w-60">
           <svg
             className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-white/40"
             fill="none"
@@ -334,6 +350,20 @@ export default function CountriesPage() {
               </svg>
             </button>
           )}
+          </div>
+          <ApnaSelect
+            title=""
+            value={statusFilter}
+            onChange={setStatusFilter}
+            placeholder="All"
+            options={[
+              { value: "", label: "All" },
+              { value: "active", label: "Active" },
+              { value: "inactive", label: "Inactive" },
+            ]}
+            className="w-32"
+            buttonClassName="w-full px-3 py-1.5 rounded text-sm text-left flex items-center justify-between outline-none transition-all duration-200 border border-gray-300 dark:border-slate-700 focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30 bg-white dark:bg-slate-900/70 text-gray-700 dark:text-white/80 cursor-pointer"
+          />
         </div>
         <Link
           href="/admin/location/country/add"

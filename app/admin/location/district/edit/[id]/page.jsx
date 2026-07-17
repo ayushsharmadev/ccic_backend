@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import LocationSelects from "@/components/utils/LocationSelects";
+import ApnaSelect from "@/components/utils/ApnaSelect";
 import { showSuccess, showError } from "@/components/utils/ApnaNotify";
 
 export default function EditDistrictPage() {
@@ -15,6 +16,7 @@ export default function EditDistrictPage() {
     name: "",
     country: "",
     state: "",
+    status: "active",
   });
 
   useEffect(() => {
@@ -44,6 +46,7 @@ export default function EditDistrictPage() {
               districtData.state?.country ||
               "",
             state: districtData.state?._id || districtData.state || "",
+            status: districtData.status || "active",
           });
         } else {
           showError(districtResult.error || "Failed to fetch district data");
@@ -94,6 +97,7 @@ export default function EditDistrictPage() {
         body: JSON.stringify({
           name: formData.name.trim(),
           state: formData.state,
+          status: formData.status,
         }),
       });
 
@@ -182,6 +186,21 @@ export default function EditDistrictPage() {
             gridClassName="grid grid-cols-2 gap-4 mb-5"
             countryApiUrl="/api/locations/country-master"
           />
+
+          <div className="grid grid-cols-2 gap-4 mb-5">
+            <ApnaSelect
+              title="Status"
+              value={formData.status}
+              onChange={(status) =>
+                setFormData((prev) => ({ ...prev, status }))
+              }
+              options={[
+                { value: "active", label: "Active" },
+                { value: "inactive", label: "Inactive" },
+              ]}
+              required
+            />
+          </div>
 
           <div className="border-t border-gray-200 dark:border-slate-800 pt-4 flex justify-end gap-2">
             <Link
