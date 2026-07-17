@@ -1,6 +1,12 @@
 "use client";
 
 import { useState, useEffect, useRef, useId } from "react";
+import { createPortal } from "react-dom";
+
+function OptionalPortal({ enabled, children }) {
+  if (enabled && typeof document !== "undefined") return createPortal(children, document.body);
+  return children;
+}
 
 export default function ApnaSelect({
   title = "Select Option",
@@ -17,6 +23,7 @@ export default function ApnaSelect({
   buttonClassName = "",
   labelClassName = "",
   textClassName = "",
+  portal = false,
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -25,6 +32,8 @@ export default function ApnaSelect({
   );
   const dropdownRef = useRef(null);
   const searchInputRef = useRef(null);
+  const portalDropdownRef = useRef(null);
+  const [portalStyle, setPortalStyle] = useState({});
   const id = useId();
 
   useEffect(() => {
@@ -33,7 +42,11 @@ export default function ApnaSelect({
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target) &&
+        !portalDropdownRef.current?.contains(event.target)
+      ) {
         setIsOpen(false);
         setSearchTerm("");
       }
@@ -98,6 +111,10 @@ export default function ApnaSelect({
 
   const handleToggle = () => {
     if (!disabled) {
+      if (!isOpen && portal && dropdownRef.current) {
+        const rect = dropdownRef.current.getBoundingClientRect();
+        setPortalStyle({ top: rect.bottom + 2, left: rect.left, width: rect.width });
+      }
       setIsOpen(!isOpen);
       if (!isOpen && searchable) {
         setTimeout(() => {
@@ -173,7 +190,8 @@ export default function ApnaSelect({
 
         {/* Dropdown */}
         {isOpen && (
-          <div className="absolute top-full left-0 right-0 z-50 bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded mt-0.5 shadow-lg max-h-48 overflow-y-auto">
+          <OptionalPortal enabled={portal}>
+          <div ref={portal ? portalDropdownRef : null} style={portal ? portalStyle : undefined} className={`${portal ? "fixed z-[100]" : "absolute top-full left-0 right-0 z-50 mt-0.5"} bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded shadow-lg max-h-48 overflow-y-auto`}>
             {/* Search Input */}
             {searchable && (
               <div className="p-2">
@@ -237,6 +255,7 @@ export default function ApnaSelect({
               )}
             </div>
           </div>
+          </OptionalPortal>
         )}
       </div>
 
