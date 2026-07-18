@@ -12,14 +12,14 @@ import {
   HiAcademicCap,
 } from "react-icons/hi";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, user, loading: authLoading, isAuthenticated } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -29,6 +29,14 @@ export default function LoginPage() {
   });
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
+
+  useEffect(() => {
+    if (authLoading || !isAuthenticated) return;
+
+    router.replace(
+      user?.role === "admin" ? "/admin/dashboard" : "/unauthorized"
+    );
+  }, [authLoading, isAuthenticated, router, user?.role]);
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({
@@ -79,9 +87,9 @@ export default function LoginPage() {
         // Redirect based on role
         setTimeout(() => {
           if (result.user.role === "admin") {
-            router.push("/admin/dashboard");
+            router.replace("/admin/dashboard");
           } else {
-            router.push("/dashboard");
+            router.replace("/unauthorized");
           }
         }, 1000);
       } else {
@@ -101,6 +109,14 @@ export default function LoginPage() {
     }
   };
 
+  if (authLoading || isAuthenticated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="h-10 w-10 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex bg-gray-50 dark:bg-slate-900 transition-colors duration-300">
       {/* Left Side - Branding & Features */}
@@ -118,13 +134,22 @@ export default function LoginPage() {
           <div>
             <div className="mb-8">
               <div className="relative w-32 h-16 mb-6">
-                <Image
-                  src="/mainLogo.png"
-                  alt="CCIC Logo"
-                  fill
-                  sizes="128px"
-                  className="object-contain brightness-0 invert"
-                  priority
+                <div
+                  role="img"
+                  aria-label="CCIC Logo"
+                  className="h-full w-full"
+                  style={{
+                    background:
+                      "linear-gradient(90deg, #ffffff 0%, color-mix(in srgb, var(--accent) 55%, #ffffff) 100%)",
+                    WebkitMaskImage: "url(/mainLogo.png)",
+                    maskImage: "url(/mainLogo.png)",
+                    WebkitMaskRepeat: "no-repeat",
+                    maskRepeat: "no-repeat",
+                    WebkitMaskPosition: "center",
+                    maskPosition: "center",
+                    WebkitMaskSize: "contain",
+                    maskSize: "contain",
+                  }}
                 />
               </div>
               <h1 className="text-4xl font-bold mb-3">Welcome Back</h1>
@@ -186,14 +211,23 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           {/* Mobile Logo */}
           <div className="lg:hidden mb-8 text-center">
-            <div className="relative w-32 h-16 mx-auto mb-4">
-              <Image
-                src="/mainLogo.png"
-                alt="CCIC Logo"
-                fill
-                sizes="128px"
-                className="object-contain"
-                priority
+            <div className="relative w-36 h-16 mx-auto mb-1">
+              <div
+                role="img"
+                aria-label="CCIC Logo"
+                className="h-full w-full"
+                style={{
+                  background:
+                    "linear-gradient(90deg, var(--primary-800), var(--primary) 62%, var(--accent))",
+                  WebkitMaskImage: "url(/mainLogo.png)",
+                  maskImage: "url(/mainLogo.png)",
+                  WebkitMaskRepeat: "no-repeat",
+                  maskRepeat: "no-repeat",
+                  WebkitMaskPosition: "center",
+                  maskPosition: "center",
+                  WebkitMaskSize: "contain",
+                  maskSize: "contain",
+                }}
               />
             </div>
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">

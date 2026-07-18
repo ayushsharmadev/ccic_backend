@@ -338,8 +338,8 @@ export default function ProfilePage() {
     return {
       status: "inactive",
       text: "Inactive",
-      color: "text-gray-600",
-      bgColor: "bg-gray-100",
+      color: "text-muted-foreground",
+      bgColor: "bg-muted",
       icon: <HiClock className="w-4 h-4" />,
     };
   };
@@ -351,61 +351,61 @@ export default function ProfilePage() {
     <div className="h-full p-6">
       {/* Page Header Skeleton */}
       <div className="mb-6">
-        <div className="h-8 bg-gray-200 rounded w-48 animate-pulse mb-2"></div>
-        <div className="h-4 bg-gray-200 rounded w-80 animate-pulse"></div>
+        <div className="h-8 bg-muted rounded w-48 animate-pulse mb-2"></div>
+        <div className="h-4 bg-muted rounded w-80 animate-pulse"></div>
       </div>
 
       {/* Main Content Grid Skeleton */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Side - Profile Information Skeleton */}
         <div className="lg:col-span-2">
-          <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+          <div className="bg-surface border border-border rounded-lg p-6 shadow-sm">
             {/* Profile Information Header */}
             <div className="flex items-center gap-2 mb-6">
-              <div className="h-5 w-5 bg-gray-200 rounded animate-pulse"></div>
-              <div className="h-6 bg-gray-200 rounded w-40 animate-pulse"></div>
+              <div className="h-5 w-5 bg-muted rounded animate-pulse"></div>
+              <div className="h-6 bg-muted rounded w-40 animate-pulse"></div>
             </div>
 
             {/* Profile Form Skeleton */}
             <div className="space-y-6">
               {/* Username Field */}
               <div>
-                <div className="h-4 bg-gray-200 rounded w-20 animate-pulse mb-2"></div>
-                <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-4 bg-muted rounded w-20 animate-pulse mb-2"></div>
+                <div className="h-10 bg-muted rounded animate-pulse"></div>
               </div>
 
               {/* Name Fields Row */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <div className="h-4 bg-gray-200 rounded w-16 animate-pulse mb-2"></div>
-                  <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-4 bg-muted rounded w-16 animate-pulse mb-2"></div>
+                  <div className="h-10 bg-muted rounded animate-pulse"></div>
                 </div>
                 <div>
-                  <div className="h-4 bg-gray-200 rounded w-16 animate-pulse mb-2"></div>
-                  <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
+                  <div className="h-4 bg-muted rounded w-16 animate-pulse mb-2"></div>
+                  <div className="h-10 bg-muted rounded animate-pulse"></div>
                 </div>
               </div>
 
               {/* Phone Number Field */}
               <div>
-                <div className="h-4 bg-gray-200 rounded w-24 animate-pulse mb-2"></div>
-                <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-4 bg-muted rounded w-24 animate-pulse mb-2"></div>
+                <div className="h-10 bg-muted rounded animate-pulse"></div>
               </div>
 
               {/* Submit Button */}
               <div className="flex justify-end">
-                <div className="h-10 bg-gray-200 rounded w-24 animate-pulse"></div>
+                <div className="h-10 bg-muted rounded w-24 animate-pulse"></div>
               </div>
             </div>
           </div>
 
           {/* Security Tips Skeleton */}
-          <div className="mt-6 bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-            <div className="h-6 bg-gray-200 rounded w-32 animate-pulse mb-4"></div>
+          <div className="mt-6 bg-surface border border-border rounded-lg p-6 shadow-sm">
+            <div className="h-6 bg-muted rounded w-32 animate-pulse mb-4"></div>
             <div className="space-y-3">
-              <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
-              <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse"></div>
-              <div className="h-4 bg-gray-200 rounded w-1/2 animate-pulse"></div>
+              <div className="h-4 bg-muted rounded w-full animate-pulse"></div>
+              <div className="h-4 bg-muted rounded w-3/4 animate-pulse"></div>
+              <div className="h-4 bg-muted rounded w-1/2 animate-pulse"></div>
             </div>
           </div>
         </div>
@@ -413,64 +413,64 @@ export default function ProfilePage() {
         {/* Right Side Skeleton */}
         <div className="space-y-6">
           {/* Avatar Upload Skeleton */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+          <div className="bg-surface border border-border rounded-lg p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-4">
-              <div className="h-5 w-5 bg-gray-200 rounded animate-pulse"></div>
-              <div className="h-6 bg-gray-200 rounded w-32 animate-pulse"></div>
+              <div className="h-5 w-5 bg-muted rounded animate-pulse"></div>
+              <div className="h-6 bg-muted rounded w-32 animate-pulse"></div>
             </div>
 
             {/* Avatar Upload Area */}
             <div className="flex flex-col items-center space-y-4">
-              <div className="h-24 w-24 bg-gray-200 rounded-full animate-pulse"></div>
-              <div className="h-8 bg-gray-200 rounded w-32 animate-pulse"></div>
+              <div className="h-24 w-24 bg-muted rounded-full animate-pulse"></div>
+              <div className="h-8 bg-muted rounded w-32 animate-pulse"></div>
             </div>
           </div>
 
           {/* Password Change Skeleton */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+          <div className="bg-surface border border-border rounded-lg p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-4">
-              <div className="h-5 w-5 bg-gray-200 rounded animate-pulse"></div>
-              <div className="h-6 bg-gray-200 rounded w-36 animate-pulse"></div>
+              <div className="h-5 w-5 bg-muted rounded animate-pulse"></div>
+              <div className="h-6 bg-muted rounded w-36 animate-pulse"></div>
             </div>
 
             <div className="space-y-4">
               {/* Current Password */}
               <div>
-                <div className="h-4 bg-gray-200 rounded w-28 animate-pulse mb-2"></div>
-                <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-4 bg-muted rounded w-28 animate-pulse mb-2"></div>
+                <div className="h-10 bg-muted rounded animate-pulse"></div>
               </div>
 
               {/* New Password */}
               <div>
-                <div className="h-4 bg-gray-200 rounded w-24 animate-pulse mb-2"></div>
-                <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-4 bg-muted rounded w-24 animate-pulse mb-2"></div>
+                <div className="h-10 bg-muted rounded animate-pulse"></div>
               </div>
 
               {/* Confirm Password */}
               <div>
-                <div className="h-4 bg-gray-200 rounded w-32 animate-pulse mb-2"></div>
-                <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
+                <div className="h-4 bg-muted rounded w-32 animate-pulse mb-2"></div>
+                <div className="h-10 bg-muted rounded animate-pulse"></div>
               </div>
 
               {/* Submit Button */}
               <div className="flex justify-end">
-                <div className="h-10 bg-gray-200 rounded w-28 animate-pulse"></div>
+                <div className="h-10 bg-muted rounded w-28 animate-pulse"></div>
               </div>
             </div>
           </div>
 
           {/* Account Information Skeleton */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+          <div className="bg-surface border border-border rounded-lg p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-4">
-              <div className="h-5 w-5 bg-gray-200 rounded animate-pulse"></div>
-              <div className="h-6 bg-gray-200 rounded w-40 animate-pulse"></div>
+              <div className="h-5 w-5 bg-muted rounded animate-pulse"></div>
+              <div className="h-6 bg-muted rounded w-40 animate-pulse"></div>
             </div>
 
             <div className="space-y-3">
               {[...Array(6)].map((_, i) => (
                 <div key={i} className="flex justify-between">
-                  <div className="h-4 bg-gray-200 rounded w-20 animate-pulse"></div>
-                  <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
+                  <div className="h-4 bg-muted rounded w-20 animate-pulse"></div>
+                  <div className="h-4 bg-muted rounded w-32 animate-pulse"></div>
                 </div>
               ))}
             </div>
@@ -489,10 +489,10 @@ export default function ProfilePage() {
     <div className="h-full p-6">
       {/* Page Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-2">
+        <h1 className="text-2xl font-bold text-foreground mb-2">
           Profile Settings
         </h1>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-muted-foreground">
           Manage your profile information and account security
         </p>
       </div>
@@ -509,8 +509,8 @@ export default function ProfilePage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left Side - Profile Information */}
         <div className="lg:col-span-2">
-          <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-            <h2 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+          <div className="bg-surface border border-border rounded-lg p-6 shadow-sm">
+            <h2 className="text-lg font-semibold text-foreground mb-6 flex items-center gap-2">
               <HiUser className="h-5 w-5 text-primary" />
               Profile Information
             </h2>
@@ -519,7 +519,7 @@ export default function ProfilePage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 {/* Username */}
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-foreground/80 mb-2">
                     Username *
                   </label>
                   <input
@@ -528,8 +528,8 @@ export default function ProfilePage() {
                     onChange={(e) =>
                       handleProfileChange("username", e.target.value)
                     }
-                    className={`w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
-                      errors.username ? "border-red-300" : "border-gray-300"
+                    className={`w-full bg-surface-elevated text-foreground placeholder:text-muted-foreground px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
+                      errors.username ? "border-red-300" : "border-input"
                     }`}
                     placeholder="Enter username"
                     minLength={3}
@@ -540,14 +540,14 @@ export default function ProfilePage() {
                       {errors.username}
                     </p>
                   )}
-                  <p className="mt-1 text-xs text-gray-500">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     Username must be 3-30 characters long and unique
                   </p>
                 </div>
 
                 {/* First Name */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-foreground/80 mb-2">
                     First Name *
                   </label>
                   <input
@@ -556,8 +556,8 @@ export default function ProfilePage() {
                     onChange={(e) =>
                       handleProfileChange("firstName", e.target.value)
                     }
-                    className={`w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
-                      errors.firstName ? "border-red-300" : "border-gray-300"
+                    className={`w-full bg-surface-elevated text-foreground placeholder:text-muted-foreground px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
+                      errors.firstName ? "border-red-300" : "border-input"
                     }`}
                     placeholder="Enter first name"
                     maxLength={50}
@@ -571,7 +571,7 @@ export default function ProfilePage() {
 
                 {/* Last Name */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-foreground/80 mb-2">
                     Last Name *
                   </label>
                   <input
@@ -580,8 +580,8 @@ export default function ProfilePage() {
                     onChange={(e) =>
                       handleProfileChange("lastName", e.target.value)
                     }
-                    className={`w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
-                      errors.lastName ? "border-red-300" : "border-gray-300"
+                    className={`w-full bg-surface-elevated text-foreground placeholder:text-muted-foreground px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
+                      errors.lastName ? "border-red-300" : "border-input"
                     }`}
                     placeholder="Enter last name"
                     maxLength={50}
@@ -595,7 +595,7 @@ export default function ProfilePage() {
 
                 {/* Phone Number */}
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-foreground/80 mb-2">
                     Phone Number
                   </label>
                   <input
@@ -604,8 +604,8 @@ export default function ProfilePage() {
                     onChange={(e) =>
                       handleProfileChange("phoneNumber", e.target.value)
                     }
-                    className={`w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
-                      errors.phoneNumber ? "border-red-300" : "border-gray-300"
+                    className={`w-full bg-surface-elevated text-foreground placeholder:text-muted-foreground px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
+                      errors.phoneNumber ? "border-red-300" : "border-input"
                     }`}
                     placeholder="Enter phone number"
                     maxLength={20}
@@ -619,7 +619,7 @@ export default function ProfilePage() {
               </div>
 
               {/* Submit Button */}
-              <div className="flex justify-end pt-4 border-t border-gray-100">
+              <div className="flex justify-end pt-4 border-t border-border">
                 <button
                   type="submit"
                   disabled={profileLoading}
@@ -652,31 +652,31 @@ export default function ProfilePage() {
           </div>
 
           {/* Additional Info Card */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm mt-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <div className="bg-surface border border-border rounded-lg p-6 shadow-sm mt-6">
+            <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
               <HiShieldCheck className="h-5 w-5 text-primary" />
               Quick Actions
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 bg-primary-50 rounded-lg border border-primary-100">
-                <h4 className="font-medium text-primary-900 mb-2">
+              <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
+                <h4 className="font-medium text-primary mb-2">
                   Profile Picture
                 </h4>
-                <p className="text-sm text-primary-700 mb-3">
+                <p className="text-sm text-primary/80 mb-3">
                   Upload a new profile picture to personalize your account
                 </p>
                 <button
                   onClick={() =>
                     document.querySelector('input[type="file"]').click()
                   }
-                  className="text-primary hover:text-primary-700 text-sm font-medium"
+                  className="text-primary hover:text-primary/80 text-sm font-medium"
                 >
                   Upload Now →
                 </button>
               </div>
-              <div className="p-4 bg-green-50 rounded-lg border border-green-100">
-                <h4 className="font-medium text-green-900 mb-2">Security</h4>
-                <p className="text-sm text-green-700 mb-3">
+              <div className="p-4 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+                <h4 className="font-medium text-emerald-400 mb-2">Security</h4>
+                <p className="text-sm text-emerald-500/90 mb-3">
                   Change your password regularly to keep your account secure
                 </p>
                 <span className="text-primary text-sm font-medium">
@@ -690,8 +690,8 @@ export default function ProfilePage() {
         {/* Right Side - Avatar Upload and Password Change */}
         <div className="space-y-6">
           {/* Top - Avatar Upload */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <div className="bg-surface border border-border rounded-lg p-6 shadow-sm">
+            <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
               <HiUser className="h-5 w-5 text-primary" />
               Profile Picture
             </h3>
@@ -732,8 +732,8 @@ export default function ProfilePage() {
           </div>
 
           {/* Bottom - Password Change */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <div className="bg-surface border border-border rounded-lg p-6 shadow-sm">
+            <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
               <HiKey className="h-5 w-5 text-primary" />
               Change Password
             </h3>
@@ -742,7 +742,7 @@ export default function ProfilePage() {
               <div className="space-y-4">
                 {/* Current Password */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-foreground/80 mb-2">
                     Current Password *
                   </label>
                   <div className="relative">
@@ -752,10 +752,10 @@ export default function ProfilePage() {
                       onChange={(e) =>
                         handlePasswordChange("currentPassword", e.target.value)
                       }
-                      className={`w-full px-3 py-2 pr-10 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
+                      className={`w-full bg-surface-elevated text-foreground placeholder:text-muted-foreground px-3 py-2 pr-10 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
                         errors.currentPassword
                           ? "border-red-300"
-                          : "border-gray-300"
+                          : "border-input"
                       }`}
                       placeholder="Enter current password"
                     />
@@ -782,7 +782,7 @@ export default function ProfilePage() {
 
                 {/* New Password */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-foreground/80 mb-2">
                     New Password *
                   </label>
                   <div className="relative">
@@ -792,10 +792,10 @@ export default function ProfilePage() {
                       onChange={(e) =>
                         handlePasswordChange("newPassword", e.target.value)
                       }
-                      className={`w-full px-3 py-2 pr-10 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
+                      className={`w-full bg-surface-elevated text-foreground placeholder:text-muted-foreground px-3 py-2 pr-10 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
                         errors.newPassword
                           ? "border-red-300"
-                          : "border-gray-300"
+                          : "border-input"
                       }`}
                       placeholder="Enter new password"
                       minLength={6}
@@ -817,14 +817,14 @@ export default function ProfilePage() {
                       {errors.newPassword}
                     </p>
                   )}
-                  <p className="mt-1 text-xs text-gray-500">
+                  <p className="mt-1 text-xs text-muted-foreground">
                     Password must be at least 6 characters long
                   </p>
                 </div>
 
                 {/* Confirm New Password */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-foreground/80 mb-2">
                     Confirm New Password *
                   </label>
                   <div className="relative">
@@ -834,10 +834,10 @@ export default function ProfilePage() {
                       onChange={(e) =>
                         handlePasswordChange("confirmPassword", e.target.value)
                       }
-                      className={`w-full px-3 py-2 pr-10 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
+                      className={`w-full bg-surface-elevated text-foreground placeholder:text-muted-foreground px-3 py-2 pr-10 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary ${
                         errors.confirmPassword
                           ? "border-red-300"
-                          : "border-gray-300"
+                          : "border-input"
                       }`}
                       placeholder="Confirm new password"
                       minLength={6}
@@ -898,42 +898,42 @@ export default function ProfilePage() {
           </div>
 
           {/* Account Information */}
-          <div className="bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <div className="bg-surface border border-border rounded-lg p-6 shadow-sm">
+            <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center gap-2">
               <HiShieldCheck className="h-5 w-5 text-primary" />
               Account Information
             </h3>
             <div className="space-y-3 text-sm">
               <div>
-                <span className="font-medium text-gray-700">Email:</span>
-                <span className="ml-2 text-gray-900">{user?.email}</span>
+                <span className="font-medium text-foreground/80">Email:</span>
+                <span className="ml-2 text-foreground">{user?.email}</span>
               </div>
               <div>
-                <span className="font-medium text-gray-700">Role:</span>
-                <span className="ml-2 text-gray-900 capitalize">
+                <span className="font-medium text-foreground/80">Role:</span>
+                <span className="ml-2 text-foreground capitalize">
                   {user?.role}
                 </span>
               </div>
               <div>
-                <span className="font-medium text-gray-700">Member Since:</span>
-                <span className="ml-2 text-gray-900">
+                <span className="font-medium text-foreground/80">Member Since:</span>
+                <span className="ml-2 text-foreground">
                   {formatDate(user?.createdAt)}
                 </span>
               </div>
               <div>
-                <span className="font-medium text-gray-700">Last Login:</span>
-                <span className="ml-2 text-gray-900">
+                <span className="font-medium text-foreground/80">Last Login:</span>
+                <span className="ml-2 text-foreground">
                   {formatDate(user?.lastLogin)}
                 </span>
               </div>
               <div>
-                <span className="font-medium text-gray-700">Last Updated:</span>
-                <span className="ml-2 text-gray-900">
+                <span className="font-medium text-foreground/80">Last Updated:</span>
+                <span className="ml-2 text-foreground">
                   {formatDate(user?.updatedAt)}
                 </span>
               </div>
               <div>
-                <span className="font-medium text-gray-700">
+                <span className="font-medium text-foreground/80">
                   Account Status:
                 </span>
                 <span className={`ml-2 ${accountStatus.color}`}>

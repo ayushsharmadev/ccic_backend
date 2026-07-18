@@ -212,7 +212,7 @@ export default function Header({ onMenuClick }) {
   };
 
   return (
-    <div className="flex h-16 shrink-0 items-center gap-x-2 sm:gap-x-4 border-b border-gray-200/50 dark:border-slate-800 bg-linear-to-r from-white via-white to-gray-50/30 dark:from-slate-950 dark:via-slate-900/95 dark:to-slate-900/80 px-4 sm:px-6 shadow-sm backdrop-blur-sm transition-colors duration-300">
+    <div className="relative z-[100] flex h-16 shrink-0 items-center gap-x-2 sm:gap-x-4 border-b border-gray-200/50 dark:border-slate-800 bg-linear-to-r from-white via-white to-gray-50/30 dark:from-slate-950 dark:via-slate-900/95 dark:to-slate-900/80 px-4 sm:px-6 shadow-sm backdrop-blur-sm transition-colors duration-300">
       {/* Mobile menu button */}
       <button
         type="button"
@@ -276,7 +276,7 @@ export default function Header({ onMenuClick }) {
 
           {/* Search Results Dropdown */}
           {isSearchOpen && (
-            <div className="absolute left-0 right-0 top-full mt-2 z-50 max-h-96 overflow-y-auto rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl ring-1 ring-black/5 dark:ring-white/5 backdrop-blur-sm">
+            <div className="absolute left-0 right-0 top-full mt-2 z-[120] max-h-96 overflow-y-auto rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl ring-1 ring-black/5 dark:ring-white/5 backdrop-blur-sm">
               {searchResults.length > 0 ? (
                 <div className="py-2">
                   {searchResults.map((result) => (
@@ -318,7 +318,7 @@ export default function Header({ onMenuClick }) {
           className="hidden sm:inline-flex bg-transparent shadow-none text-gray-600 dark:text-white/80 hover:bg-gray-100/60 dark:hover:bg-slate-800/70 focus:ring-primary/30"
         />
         {/* Profile dropdown */}
-        <div className="relative" ref={dropdownRef}>
+        <div className="relative z-[110]" ref={dropdownRef}>
           <button
             type="button"
             className="flex items-center p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 transition-all"
@@ -357,7 +357,7 @@ export default function Header({ onMenuClick }) {
           </button>
 
           {profileOpen && (
-            <div className="absolute right-0 z-10 mt-3 w-56 origin-top-right rounded-xl bg-white dark:bg-slate-900/95 py-2 shadow-xl ring-1 ring-black/5 dark:ring-white/5 backdrop-blur-sm transition-all duration-200 ease-out opacity-100 scale-100">
+            <div className="absolute right-0 z-[130] mt-3 w-56 origin-top-right rounded-xl bg-white dark:bg-slate-900/95 py-2 shadow-xl ring-1 ring-black/5 dark:ring-white/5 backdrop-blur-sm transition-all duration-200 ease-out opacity-100 scale-100">
               <div className="px-4 py-3 border-b border-gray-100 dark:border-slate-800/80">
                 <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                   {getUserDisplayName()}

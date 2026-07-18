@@ -227,7 +227,7 @@ export default function ThemeToggle({
       {isOpen && (
         <>
           {/* Dropdown Menu */}
-          <div className="absolute right-0 top-full mt-1 z-20 w-40 rounded-md border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg focus:outline-none">
+          <div className="absolute right-0 top-full mt-1 z-[140] w-40 rounded-md border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-lg focus:outline-none">
             <div className="py-1" role="menu" aria-orientation="vertical">
               {availableOptions.map((option) => (
                 <button
