@@ -177,7 +177,7 @@ export default function LocationFilterBar({
             onChange={handleStateChange}
             placeholder={
               showCountry && !country
-                ? "Select country first"
+                ? stateLabel
                 : loadingStates
                   ? "Loading..."
                   : `All ${stateLabel}s`

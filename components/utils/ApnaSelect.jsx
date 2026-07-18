@@ -161,7 +161,7 @@ export default function ApnaSelect({
           <span
             className={
               textClassName ||
-              `overflow-hidden text-ellipsis whitespace-nowrap ${
+              `min-w-0 overflow-hidden text-ellipsis whitespace-nowrap ${
                 (!multiple && !selectedValues) ||
                 (multiple && (!selectedValues || selectedValues.length === 0))
                   ? "text-gray-400 dark:text-slate-400"

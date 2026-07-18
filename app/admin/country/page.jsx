@@ -19,12 +19,19 @@ export default function CountryList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [limitInitialized, setLimitInitialized] = useState(false);
 
   // Filter states
   const [filters, setFilters] = useState({
     type: "all", // all / featured / popular
     limit: "100",
   });
+
+  useEffect(() => {
+    const isCompact = window.matchMedia("(max-width: 767px)").matches;
+    setFilters((prev) => ({ ...prev, limit: isCompact ? "10" : "100" }));
+    setLimitInitialized(true);
+  }, []);
 
   // Debounce search term
   useEffect(() => {
@@ -104,9 +111,10 @@ export default function CountryList() {
   };
 
   useEffect(() => {
+    if (!limitInitialized) return;
     setCurrentPage(1);
     fetchCountries(1, debouncedSearchTerm);
-  }, [debouncedSearchTerm, filters]);
+  }, [debouncedSearchTerm, filters, limitInitialized]);
 
   const handlePageChange = (page) => {
     setCurrentPage(page);
@@ -412,8 +420,8 @@ export default function CountryList() {
       </div>
 
       <div className="mb-4">
-        <div className="flex justify-between items-center gap-3 flex-wrap">
-          <div className="relative w-60">
+        <div className="grid grid-cols-6 gap-3 md:grid-cols-12 xl:flex xl:items-center xl:justify-between">
+          <div className="relative col-span-4 min-w-0 w-full md:col-span-4 xl:col-auto xl:w-72 xl:shrink-0">
             <svg
               className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-white/40"
               fill="none"
@@ -446,7 +454,7 @@ export default function CountryList() {
             )}
           </div>
 
-          <div className="flex items-center gap-2 flex-1 flex-wrap">
+          <div className="contents xl:flex xl:flex-1 xl:items-center xl:gap-2 xl:flex-nowrap">
             <ApnaSelect
               title=""
               options={[
@@ -459,7 +467,8 @@ export default function CountryList() {
               placeholder="Select type"
               searchable={false}
               required={false}
-              buttonClassName="px-3 py-2 border border-gray-300 dark:border-slate-700 rounded text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30 bg-white dark:bg-slate-900/70 text-gray-900 dark:text-white transition-colors flex items-center justify-between text-left cursor-pointer"
+              className="col-span-3 col-start-1 row-start-2 min-w-0 w-full md:col-span-3 md:row-start-auto xl:col-auto xl:w-40"
+              buttonClassName="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30 bg-white dark:bg-slate-900/70 text-gray-900 dark:text-white transition-colors flex items-center justify-between text-left cursor-pointer"
             />
 
             <ApnaSelect
@@ -475,13 +484,14 @@ export default function CountryList() {
               placeholder="Select limit"
               searchable={false}
               required={false}
-              buttonClassName="px-3 py-2 border border-gray-300 dark:border-slate-700 rounded text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30 bg-white dark:bg-slate-900/70 text-gray-900 dark:text-white transition-colors flex items-center justify-between text-left cursor-pointer"
+              className="col-span-3 col-start-4 row-start-2 min-w-0 w-full md:col-span-2 md:col-start-auto md:row-start-auto xl:col-auto xl:w-auto"
+              buttonClassName="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30 bg-white dark:bg-slate-900/70 text-gray-900 dark:text-white transition-colors flex items-center justify-between text-left cursor-pointer"
             />
           </div>
 
           <Link
             href="/admin/country/add"
-            className="bg-primary hover:bg-primary-700 text-white px-3 py-1.5 rounded text-xs font-medium flex items-center gap-1 transition-colors no-underline"
+            className="col-span-2 col-start-5 row-start-1 flex w-auto shrink-0 justify-self-end items-center gap-1 whitespace-nowrap bg-primary hover:bg-primary-700 text-white px-3 py-2 rounded text-xs font-medium transition-colors no-underline md:col-span-2 md:col-start-11 md:row-start-auto xl:col-auto xl:justify-self-auto xl:py-1.5"
           >
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

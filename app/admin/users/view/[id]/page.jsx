@@ -59,18 +59,18 @@ export default function ViewUserPage() {
   };
 
   const LoadingSkeleton = () => (
-    <div className="h-full p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
+    <div className="min-h-full p-4 sm:p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
       {/* Header Skeleton */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-4">
           <div className="h-5 bg-gray-200 dark:bg-slate-800 rounded w-24 animate-pulse"></div>
         </div>
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="grid grid-cols-2 gap-3 sm:flex sm:items-center sm:justify-between">
+          <div className="col-span-2 min-w-0 sm:col-auto">
             <div className="h-8 bg-gray-200 dark:bg-slate-800 rounded w-32 mb-2 animate-pulse"></div>
             <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded w-64 animate-pulse"></div>
           </div>
-          <div className="h-10 bg-gray-200 dark:bg-slate-800 rounded w-24 animate-pulse"></div>
+          <div className="col-start-2 h-10 w-24 justify-self-end rounded bg-gray-200 animate-pulse dark:bg-slate-800 sm:col-auto sm:justify-self-auto"></div>
         </div>
       </div>
 
@@ -226,7 +226,7 @@ export default function ViewUserPage() {
 
   if (!user) {
     return (
-      <div className="h-full p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
+      <div className="min-h-full p-4 sm:p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
             User Not Found
@@ -247,7 +247,7 @@ export default function ViewUserPage() {
   }
 
   return (
-    <div className="h-full p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
+    <div className="min-h-full p-4 sm:p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
       {/* Page Header */}
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-4">
@@ -259,8 +259,8 @@ export default function ViewUserPage() {
             Back to Users
           </Link>
         </div>
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="grid grid-cols-2 gap-3 sm:flex sm:items-center sm:justify-between">
+          <div className="col-span-2 min-w-0 sm:col-auto">
             <h1 className="text-xl font-semibold text-gray-900 dark:text-white mb-0.5">
               User Details
             </h1>
@@ -271,10 +271,10 @@ export default function ViewUserPage() {
                 : user.username}
             </p>
           </div>
-          <div className="flex gap-3">
+          <div className="col-start-2 flex justify-self-end sm:col-auto sm:justify-self-auto">
             <Link
               href={`/admin/users/edit/${user._id}`}
-              className="inline-flex items-center px-3 py-1.5 bg-primary text-white rounded text-xs font-medium hover:bg-primary-700 transition-colors"
+              className="inline-flex w-auto shrink-0 items-center whitespace-nowrap px-3 py-1.5 bg-primary text-white rounded text-xs font-medium hover:bg-primary-700 transition-colors"
             >
               <HiPencil className="w-3.5 h-3.5 mr-1" />
               Edit User
@@ -286,7 +286,7 @@ export default function ViewUserPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* User Profile Card */}
         <div className="lg:col-span-1">
-          <div className="bg-white dark:bg-slate-900/70 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 p-5 transition-colors duration-300">
+          <div className="bg-white dark:bg-slate-900/70 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 p-4 sm:p-5 transition-colors duration-300">
             <div className="text-center">
               <div className="mx-auto mb-4">
                 {user.avatar ? (
@@ -309,7 +309,7 @@ export default function ViewUserPage() {
               <p className="text-sm text-gray-500 dark:text-white/60 mb-4">
                 @{user.username}
               </p>
-              <div className="space-y-2">
+              <div className="flex flex-wrap items-center justify-center gap-2">
                 {getRoleBadge(user.role)}
                 {getStatusBadge(user.isActive)}
               </div>
@@ -319,7 +319,7 @@ export default function ViewUserPage() {
 
         {/* User Details */}
         <div className="lg:col-span-2">
-          <div className="bg-white dark:bg-slate-900/70 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 p-5 transition-colors duration-300">
+          <div className="bg-white dark:bg-slate-900/70 rounded-lg shadow-sm border border-gray-200 dark:border-slate-800 p-4 sm:p-5 transition-colors duration-300">
             <h3 className="text-base font-medium text-gray-900 dark:text-white mb-5">
               User Information
             </h3>
@@ -345,9 +345,9 @@ export default function ViewUserPage() {
                     <label className="block text-xs font-medium text-gray-500 dark:text-white/60 mb-1">
                       Email Address
                     </label>
-                    <div className="flex items-center">
+                    <div className="flex min-w-0 items-center">
                       <HiMail className="w-3 h-3 text-gray-400 dark:text-white/50 mr-2" />
-                      <p className="text-sm text-gray-900 dark:text-white">
+                      <p className="min-w-0 break-words text-sm text-gray-900 dark:text-white">
                         {user.email}
                       </p>
                     </div>

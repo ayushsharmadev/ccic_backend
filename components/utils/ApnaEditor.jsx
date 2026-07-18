@@ -98,6 +98,7 @@ export default function ApnaEditor({
   const [showStyles, setShowStyles] = useState(false);
   const [showFormats, setShowFormats] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showMobileToolbar, setShowMobileToolbar] = useState(false);
 
   // Helper function to manage dropdown state
   const toggleDropdown = (dropdownName) => {
@@ -610,8 +611,26 @@ export default function ApnaEditor({
 
     return (
       <div className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700 shadow-sm dark:shadow-none">
+        <div className="flex items-center justify-start border-b border-gray-100 p-1.5 dark:border-slate-700 sm:hidden">
+          <button
+            type="button"
+            onClick={() => setShowMobileToolbar((prev) => !prev)}
+            className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1.5 text-xs font-medium transition-colors ${
+              showMobileToolbar
+                ? "border-primary/60 bg-primary/10 text-primary dark:bg-primary/15"
+                : "border-gray-200 bg-gray-50 text-gray-600 hover:border-primary/40 hover:text-primary dark:border-slate-700 dark:bg-slate-800 dark:text-white/70"
+            }`}
+            aria-expanded={showMobileToolbar}
+          >
+            Toolbar
+            <span className="text-[10px] leading-none">
+              {showMobileToolbar ? "-" : "+"}
+            </span>
+          </button>
+        </div>
+
         {/* Main Toolbar - Row 1 */}
-        <div className="flex flex-wrap items-center gap-1 p-3 border-b border-gray-100 dark:border-slate-700">
+        <div className={`${showMobileToolbar ? "flex" : "hidden"} flex-wrap items-center gap-1 p-2 border-b border-gray-100 dark:border-slate-700 sm:flex sm:p-3`}>
           {/* Clipboard Group */}
           <div className="flex items-center gap-1 p-1 bg-gray-50 dark:bg-slate-800 rounded-lg">
             <button
@@ -1276,7 +1295,7 @@ export default function ApnaEditor({
         </div>
 
         {/* Main Toolbar - Row 2 */}
-        <div className="flex flex-wrap items-center gap-1 p-3 bg-gray-50 dark:bg-slate-900">
+        <div className={`${showMobileToolbar ? "flex" : "hidden"} flex-wrap items-center gap-1 p-2 bg-gray-50 dark:bg-slate-900 sm:flex sm:p-3`}>
           {/* Styles Dropdown */}
           <div className="relative">
             <button
@@ -1522,15 +1541,17 @@ export default function ApnaEditor({
 
         {/* Enhanced Status Bar */}
         {isReady && editor && (
-          <div className="bg-gray-50 dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 px-4 py-2 text-xs text-gray-500 dark:text-white/60">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-4">
-                <span className="flex items-center gap-2">
-                  <span className="w-2 h-2 bg-primary rounded-full"></span>
-                  {editor.getText().length} characters
+          <div className="bg-gray-50 dark:bg-slate-800 border-t border-gray-200 dark:border-slate-700 px-2.5 py-2 text-xs text-gray-500 dark:text-white/60 sm:px-4">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex min-w-0 items-center gap-2 sm:gap-4">
+                <span className="flex items-center gap-1 sm:gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary sm:h-2 sm:w-2"></span>
+                  {editor.getText().length}
+                  <span className="sm:hidden">ch</span>
+                  <span className="hidden sm:inline">characters</span>
                 </span>
-                <span className="flex items-center gap-2">
-                  <span className="w-2 h-2 bg-primary rounded-full"></span>
+                <span className="flex items-center gap-1 sm:gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary sm:h-2 sm:w-2"></span>
                   {
                     editor
                       .getText()
@@ -1538,25 +1559,32 @@ export default function ApnaEditor({
                       .split(/\s+/)
                       .filter((word) => word.length > 0).length
                   }{" "}
-                  words
+                  <span className="sm:hidden">wd</span>
+                  <span className="hidden sm:inline">words</span>
                 </span>
-                <span className="flex items-center gap-2">
-                  <span className="w-2 h-2 bg-secondary rounded-full"></span>
+                <span className="flex items-center gap-1 sm:gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-secondary sm:h-2 sm:w-2"></span>
                   {
                     editor
                       .getText()
                       .split("\n")
                       .filter((line) => line.trim().length > 0).length
                   }{" "}
-                  lines
+                  <span className="sm:hidden">ln</span>
+                  <span className="hidden sm:inline">lines</span>
                 </span>
               </div>
 
-              <div className="flex items-center gap-2">
-                <span className="text-gray-400">|</span>
+              <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+                <span className="hidden text-gray-400 sm:inline">|</span>
                 <span className="flex items-center gap-1">
-                  <span className="w-2 h-2 bg-secondary rounded-full"></span>
-                  {editor.isActive("table") ? "Table Mode" : "Text Mode"}
+                  <span className="h-1.5 w-1.5 rounded-full bg-secondary sm:h-2 sm:w-2"></span>
+                  <span className="sm:hidden">
+                    {editor.isActive("table") ? "Table" : "Text"}
+                  </span>
+                  <span className="hidden sm:inline">
+                    {editor.isActive("table") ? "Table Mode" : "Text Mode"}
+                  </span>
                 </span>
               </div>
             </div>

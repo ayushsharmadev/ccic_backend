@@ -237,9 +237,9 @@ export default function LanguageList() {
           <div className="h-7 w-48 rounded bg-gray-200 dark:bg-slate-800 animate-pulse"></div>
           <div className="h-4 w-64 rounded bg-gray-200 dark:bg-slate-800 animate-pulse"></div>
         </div>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="h-10 w-full sm:w-72 rounded bg-gray-200 dark:bg-slate-800 animate-pulse"></div>
-          <div className="h-10 w-36 rounded bg-gray-200 dark:bg-slate-800 animate-pulse"></div>
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:justify-between">
+          <div className="h-10 w-full rounded bg-gray-200 dark:bg-slate-800 animate-pulse sm:w-72"></div>
+          <div className="h-10 w-36 shrink-0 rounded bg-gray-200 dark:bg-slate-800 animate-pulse"></div>
         </div>
         <div className="border border-gray-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-sm">
           <div className="hidden md:grid grid-cols-[1.5fr_2fr_1fr_1fr_1.2fr] gap-4 px-4 py-3 bg-gray-100 dark:bg-slate-900">
@@ -284,8 +284,8 @@ export default function LanguageList() {
       </div>
 
       {/* Search & Add Button */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
-        <div className="flex-1 max-w-md">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 mb-4 sm:flex sm:justify-between">
+        <div className="min-w-0 w-full sm:flex-1 sm:max-w-md">
           <input
             type="text"
             placeholder="Search languages by name or description..."
@@ -296,7 +296,7 @@ export default function LanguageList() {
         </div>
         <Link
           href="/admin/languages/add"
-          className="px-4 py-2 text-sm bg-primary text-white rounded hover:bg-primary-600 transition-colors no-underline focus:outline-none focus:ring-2 focus:ring-primary/40"
+          className="w-auto shrink-0 whitespace-nowrap px-4 py-2 text-sm bg-primary text-white rounded hover:bg-primary-600 transition-colors no-underline focus:outline-none focus:ring-2 focus:ring-primary/40"
         >
           Add New Language
         </Link>

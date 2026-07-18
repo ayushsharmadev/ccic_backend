@@ -152,23 +152,74 @@ export default function ApnaTable({
       return loadingSkeleton;
     }
 
+    const skeletonRows = Math.min(Math.max(itemsPerPage || 5, 5), 10);
+
     return (
       <div
         className={`bg-white dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg overflow-hidden shadow-sm dark:shadow-none ${tableClassName}`}
       >
-        <div className="p-4">
-          <div className="animate-pulse space-y-3">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="flex space-x-4">
-                {[...Array(columns.length)].map((_, j) => (
-                  <div
-                    key={j}
-                    className="h-4 bg-gray-200 dark:bg-slate-700 rounded flex-1"
-                  ></div>
-                ))}
-              </div>
-            ))}
-          </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-slate-700">
+            {showHeader && (
+              <thead className="bg-gray-50 dark:bg-slate-800">
+                <tr>
+                  {showCheckboxes && (
+                    <th className="px-3 py-2 text-left w-10">
+                      <div className="h-4 w-4 animate-pulse rounded bg-gray-200 dark:bg-slate-700"></div>
+                    </th>
+                  )}
+                  {showSerialNumbers && (
+                    <th className="px-3 py-2 text-left w-16">
+                      <div className="h-4 w-10 animate-pulse rounded bg-gray-200 dark:bg-slate-700"></div>
+                    </th>
+                  )}
+                  {columns.map((column, index) => (
+                    <th
+                      key={index}
+                      className="px-3 py-2"
+                      style={column.width ? { width: column.width } : {}}
+                    >
+                      <div className="h-4 w-20 max-w-full animate-pulse rounded bg-gray-200 dark:bg-slate-700"></div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+            )}
+
+            <tbody className="divide-y divide-gray-200 bg-white dark:divide-slate-700 dark:bg-slate-900">
+              {[...Array(skeletonRows)].map((_, rowIndex) => (
+                <tr key={rowIndex}>
+                  {showCheckboxes && (
+                    <td className="px-3 py-2">
+                      <div className="h-4 w-4 animate-pulse rounded bg-gray-200 dark:bg-slate-700"></div>
+                    </td>
+                  )}
+                  {showSerialNumbers && (
+                    <td className="px-3 py-2">
+                      <div className="h-4 w-8 animate-pulse rounded bg-gray-200 dark:bg-slate-700"></div>
+                    </td>
+                  )}
+                  {columns.map((column, colIndex) => (
+                    <td
+                      key={colIndex}
+                      className="px-3 py-2"
+                      style={column.width ? { width: column.width } : {}}
+                    >
+                      <div
+                        className={`h-4 animate-pulse rounded bg-gray-200 dark:bg-slate-700 ${
+                          colIndex === 0
+                            ? "w-44"
+                            : colIndex === 1
+                            ? "w-32"
+                            : "w-20"
+                        } max-w-full`}
+                      ></div>
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     );
@@ -345,16 +396,28 @@ export default function ApnaTable({
           className={`flex justify-between items-center mt-4 py-2 ${paginationClassName}`}
         >
           {/* Results Info */}
-          <div className="text-xs text-gray-600 dark:text-white/70">
-            Showing{" "}
-            <span className="font-semibold text-gray-900 dark:text-white">
-              {startItem}
-            </span>{" "}
-            to <span className="font-semibold text-gray-900 dark:text-white">{endItem}</span> of{" "}
-            <span className="font-semibold text-gray-900 dark:text-white">
-              {totalItems}
-            </span>{" "}
-            results
+          <div className="shrink-0 text-xs text-gray-600 dark:text-white/70">
+            <span className="sm:hidden">
+              <span className="font-semibold text-gray-900 dark:text-white">
+                {startItem}-{endItem}
+              </span>{" "}
+              / {totalItems}
+            </span>
+            <span className="hidden sm:inline">
+              Showing{" "}
+              <span className="font-semibold text-gray-900 dark:text-white">
+                {startItem}
+              </span>{" "}
+              to{" "}
+              <span className="font-semibold text-gray-900 dark:text-white">
+                {endItem}
+              </span>{" "}
+              of{" "}
+              <span className="font-semibold text-gray-900 dark:text-white">
+                {totalItems}
+              </span>{" "}
+              results
+            </span>
           </div>
 
           {/* Pagination Controls */}

@@ -72,15 +72,15 @@ export default function DistrictsPage() {
       headerClassName: "text-center",
       cellClassName: "text-center",
       render: (item) => (
-        <div className="flex gap-2 justify-center">
+        <div className="flex items-center justify-center gap-2 whitespace-nowrap">
           <Link
             href={`/admin/location/district/edit/${item.id}`}
-            className="px-2 py-1 text-xs text-primary border border-primary rounded bg-transparent no-underline hover:bg-primary-50 dark:hover:bg-primary/20 transition-colors"
+            className="w-auto shrink-0 whitespace-nowrap px-2 py-1 text-xs text-primary border border-primary rounded bg-transparent no-underline hover:bg-primary-50 dark:hover:bg-primary/20 transition-colors"
           >
             Edit
           </Link>
           <button
-            className="px-2 py-1 text-xs text-secondary border border-secondary rounded bg-transparent cursor-pointer hover:bg-secondary-50 dark:hover:bg-secondary/20 transition-colors"
+            className="w-auto shrink-0 whitespace-nowrap px-2 py-1 text-xs text-secondary border border-secondary rounded bg-transparent cursor-pointer hover:bg-secondary-50 dark:hover:bg-secondary/20 transition-colors"
             onClick={() => handleDeleteClick(item.id, item.name)}
           >
             Delete
@@ -245,7 +245,7 @@ export default function DistrictsPage() {
   };
 
   const LoadingSkeleton = () => (
-    <div className="h-full p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
+    <div className="min-h-full p-4 sm:p-5 md:p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
       {/* Header skeleton */}
       <div className="mb-4">
         <div className="h-6 bg-gray-200 dark:bg-slate-800 rounded w-48 mb-1 animate-pulse"></div>
@@ -253,8 +253,8 @@ export default function DistrictsPage() {
       </div>
 
       {/* Controls skeleton */}
-      <div className="flex justify-between items-end mb-4 gap-3">
-        <div className="flex gap-3 items-end">
+      <div className="grid grid-cols-4 gap-3 mb-4 lg:flex lg:items-end lg:justify-between">
+        <div className="contents lg:flex lg:items-end lg:gap-3">
           <div className="h-8 bg-gray-200 dark:bg-slate-800 rounded w-60 animate-pulse"></div>
           <div className="h-8 bg-gray-200 dark:bg-slate-800 rounded w-48 animate-pulse"></div>
         </div>
@@ -292,7 +292,7 @@ export default function DistrictsPage() {
 
   // Removed early return for LoadingSkeleton so that the filter bar doesn't unmount and reset its internal state on every table fetch.
   return (
-    <div className="h-full p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
+    <div className="min-h-full p-4 sm:p-5 md:p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
       {/* Page Header */}
       <div className="mb-4">
         <h1 className="text-xl font-semibold text-gray-900 dark:text-white mb-0.5">
@@ -304,9 +304,9 @@ export default function DistrictsPage() {
       </div>
 
       {/* Controls */}
-      <div className="flex justify-between items-end mb-4 gap-3">
-        <div className="flex gap-3 items-end">
-          <div className="relative w-60">
+      <div className="grid grid-cols-4 gap-3 mb-4 lg:flex lg:items-end lg:justify-between">
+        <div className="contents lg:flex lg:items-end lg:gap-3">
+          <div className="relative col-span-3 col-start-1 row-start-1 min-w-0 w-full self-end lg:col-auto lg:row-auto lg:w-60 lg:self-auto">
             <svg
               className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-white/40"
               fill="none"
@@ -359,6 +359,8 @@ export default function DistrictsPage() {
             onCountryChange={setSelectedCountry}
             onStateChange={setSelectedState}
             showDistrict={false}
+            className="contents lg:flex lg:items-end lg:gap-3"
+            itemClassName="col-span-2 min-w-0 w-full lg:col-auto lg:min-w-48"
           />
           <ApnaSelect
             title="Status"
@@ -370,14 +372,14 @@ export default function DistrictsPage() {
               { value: "active", label: "Active" },
               { value: "inactive", label: "Inactive" },
             ]}
-            className="w-32"
+            className="col-start-4 row-start-1 w-full lg:col-auto lg:row-auto lg:w-32"
             buttonClassName="w-full px-3 py-1.5 rounded text-sm text-left flex items-center justify-between outline-none transition-all duration-200 border border-gray-300 dark:border-slate-700 focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30 bg-white dark:bg-slate-900/70 text-gray-700 dark:text-white/80 cursor-pointer"
           />
         </div>
 
         <Link
           href="/admin/location/district/add"
-          className="bg-primary hover:bg-primary-700 text-white px-3 py-1.5 rounded text-xs font-medium flex items-center gap-1 transition-colors no-underline"
+          className="col-start-4 row-start-3 flex w-auto shrink-0 justify-self-end self-end items-center gap-1 whitespace-nowrap bg-primary hover:bg-primary-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors no-underline lg:col-auto lg:row-auto lg:justify-self-auto lg:self-auto"
         >
           <svg
             className="w-3.5 h-3.5"

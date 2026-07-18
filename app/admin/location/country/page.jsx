@@ -106,15 +106,15 @@ export default function CountriesPage() {
       headerClassName: "text-center",
       cellClassName: "text-center",
       render: (item) => (
-        <div className="flex gap-2 justify-center">
+        <div className="flex items-center justify-center gap-2 whitespace-nowrap">
           <Link
             href={`/admin/location/country/edit/${item.id}`}
-            className="px-2 py-1 text-xs text-primary border border-primary rounded bg-transparent no-underline hover:bg-primary-50 dark:hover:bg-primary/20 transition-colors"
+            className="w-auto shrink-0 whitespace-nowrap px-2 py-1 text-xs text-primary border border-primary rounded bg-transparent no-underline hover:bg-primary-50 dark:hover:bg-primary/20 transition-colors"
           >
             Edit
           </Link>
           <button
-            className="px-2 py-1 text-xs text-secondary border border-secondary rounded bg-transparent cursor-pointer hover:bg-secondary-50 dark:hover:bg-secondary/20 transition-colors"
+            className="w-auto shrink-0 whitespace-nowrap px-2 py-1 text-xs text-secondary border border-secondary rounded bg-transparent cursor-pointer hover:bg-secondary-50 dark:hover:bg-secondary/20 transition-colors"
             onClick={() => handleDeleteClick(item.id, item.name)}
           >
             Delete
@@ -249,17 +249,18 @@ export default function CountriesPage() {
   };
 
   const LoadingSkeleton = () => (
-    <div className="h-full p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
+    <div className="min-h-full p-4 sm:p-5 md:p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
       <div className="mb-4">
         <div className="h-6 bg-gray-200 dark:bg-slate-800 rounded w-44 mb-1 animate-pulse"></div>
         <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded w-70 animate-pulse"></div>
       </div>
 
-      <div className="flex justify-between items-end mb-4 gap-3">
-        <div className="flex gap-3 items-end">
-          <div className="h-8 bg-gray-200 dark:bg-slate-800 rounded w-60 animate-pulse"></div>
+      <div className="grid grid-cols-[3fr_1fr] gap-3 mb-4 lg:flex lg:items-end lg:justify-between">
+        <div className="contents lg:flex lg:items-end lg:gap-3">
+          <div className="h-8 w-full rounded bg-gray-200 animate-pulse dark:bg-slate-800 lg:w-60"></div>
+          <div className="h-8 w-full rounded bg-gray-200 animate-pulse dark:bg-slate-800 lg:w-32"></div>
         </div>
-        <div className="h-8 bg-gray-200 dark:bg-slate-800 rounded w-25 animate-pulse"></div>
+        <div className="col-start-2 h-8 w-25 justify-self-end rounded bg-gray-200 animate-pulse dark:bg-slate-800 lg:col-auto lg:justify-self-auto"></div>
       </div>
 
       <div className="bg-white dark:bg-slate-900/70 border border-gray-200 dark:border-slate-800 rounded-lg overflow-hidden transition-colors duration-300">
@@ -292,7 +293,7 @@ export default function CountriesPage() {
   );
 
   return (
-    <div className="h-full p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
+    <div className="min-h-full p-4 sm:p-5 md:p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
       <div className="mb-4">
         <h1 className="text-xl font-semibold text-gray-900 dark:text-white mb-0.5">
           Countries Management
@@ -302,9 +303,9 @@ export default function CountriesPage() {
         </p>
       </div>
 
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex items-center gap-3">
-          <div className="relative w-60">
+      <div className="grid grid-cols-[3fr_1fr] gap-3 mb-4 lg:flex lg:items-center lg:justify-between">
+        <div className="contents lg:flex lg:shrink-0 lg:items-center lg:gap-3">
+          <div className="relative min-w-0 w-full lg:w-60 lg:min-w-60 lg:shrink-0">
           <svg
             className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-white/40"
             fill="none"
@@ -361,13 +362,13 @@ export default function CountriesPage() {
               { value: "active", label: "Active" },
               { value: "inactive", label: "Inactive" },
             ]}
-            className="w-32"
+            className="w-full lg:w-32 lg:min-w-32 lg:shrink-0"
             buttonClassName="w-full px-3 py-1.5 rounded text-sm text-left flex items-center justify-between outline-none transition-all duration-200 border border-gray-300 dark:border-slate-700 focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30 bg-white dark:bg-slate-900/70 text-gray-700 dark:text-white/80 cursor-pointer"
           />
         </div>
         <Link
           href="/admin/location/country/add"
-          className="bg-primary hover:bg-primary-700 text-white px-3 py-1.5 rounded text-xs font-medium flex items-center gap-1 transition-colors no-underline"
+          className="col-start-2 flex w-auto shrink-0 justify-self-end items-center gap-1 whitespace-nowrap bg-primary hover:bg-primary-700 text-white px-3 py-1.5 rounded text-xs font-medium transition-colors no-underline lg:col-auto lg:justify-self-auto"
         >
           <svg
             className="w-3.5 h-3.5"

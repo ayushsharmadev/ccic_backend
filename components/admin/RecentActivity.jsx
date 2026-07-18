@@ -141,8 +141,8 @@ export default function RecentActivity() {
                       aria-hidden="true"
                     />
                   ) : null}
-                  <div className="relative flex space-x-2">
-                    <div>
+                  <div className="relative flex gap-2 sm:gap-3">
+                    <div className="shrink-0">
                       <span
                         className={`h-5 w-5 sm:h-6 sm:w-6 rounded-full ${
                           activity.color === "green"
@@ -155,30 +155,30 @@ export default function RecentActivity() {
                         {getActivityIcon(activity.icon, activity.color)}
                       </span>
                     </div>
-                    <div className="flex min-w-0 flex-1 justify-between space-x-2 sm:space-x-4 pt-0.5">
+                    <div className="flex min-w-0 flex-1 flex-col gap-1 pt-0.5 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
                       {activity.href ? (
                         <Link
                           href={activity.href}
                           className="min-w-0 flex-1 hover:opacity-80 transition-opacity"
                         >
-                          <p className="text-xs font-medium text-gray-900 dark:text-white truncate">
+                          <p className="text-xs font-medium text-gray-900 dark:text-white break-words">
                             {activity.title}
                           </p>
-                          <p className="text-xs text-gray-500 dark:text-white/60 truncate">
+                          <p className="text-xs text-gray-500 dark:text-white/60 break-words">
                             {activity.description}
                           </p>
                         </Link>
                       ) : (
                         <div className="min-w-0 flex-1">
-                          <p className="text-xs font-medium text-gray-900 dark:text-white truncate">
+                          <p className="text-xs font-medium text-gray-900 dark:text-white break-words">
                             {activity.title}
                           </p>
-                          <p className="text-xs text-gray-500 dark:text-white/60 truncate">
+                          <p className="text-xs text-gray-500 dark:text-white/60 break-words">
                             {activity.description}
                           </p>
                         </div>
                       )}
-                      <div className="whitespace-nowrap text-right text-xs text-gray-500 dark:text-white/60 flex-shrink-0">
+                      <div className="whitespace-nowrap text-left text-[11px] text-gray-500 dark:text-white/60 sm:shrink-0 sm:text-right sm:text-xs">
                         <time>{activity.time}</time>
                       </div>
                     </div>

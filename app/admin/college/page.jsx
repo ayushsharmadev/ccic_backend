@@ -26,7 +26,7 @@ export default function CollegeList() {
   // Filter states
   const [filters, setFilters] = useState({
     type: "all", // all / featured / popular
-    limit: "100",
+    limit: "10",
     country: "",
     state: "",
     district: "",
@@ -339,7 +339,7 @@ export default function CollegeList() {
       cellClassName: "text-left",
       width: "320px",
       render: (item) => (
-        <div className="flex gap-1 justify-start items-center flex-nowrap">
+        <div className="flex gap-1 justify-start items-center flex-nowrap whitespace-nowrap [&>*]:shrink-0">
           <Link
             href={`/admin/college/edit/${item.id}`}
             className="px-2 py-1 text-xs text-primary border border-primary rounded bg-transparent no-underline hover:bg-blue-50"
@@ -576,83 +576,39 @@ export default function CollegeList() {
   ];
 
   const LoadingSkeleton = () => (
-    <div className="h-full p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
-      {/* Header Skeleton */}
-      <div className="mb-4">
-        <div className="h-6 bg-gray-200 dark:bg-slate-800 rounded w-48 mb-1 animate-pulse"></div>
-        <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded w-96 animate-pulse"></div>
-      </div>
-
-      {/* Search & Add Button Skeleton */}
-      <div className="flex justify-between items-center mb-4">
-        <div className="h-7 bg-gray-200 dark:bg-slate-800 rounded w-60 animate-pulse"></div>
-        <div className="h-7 bg-gray-200 dark:bg-slate-800 rounded w-25 animate-pulse"></div>
-      </div>
-
-      {/* Table Skeleton */}
-      <div className="bg-white dark:bg-slate-900/70 border border-gray-200 dark:border-slate-800 rounded-lg overflow-hidden transition-colors duration-300">
-        {/* Table Header Skeleton */}
-        <div className="bg-gray-50 dark:bg-slate-900/60 p-3 border-b border-gray-200 dark:border-slate-800">
-          <div className="grid grid-cols-[60px_320px_250px_100px_80px_120px_120px_100px_100px_80px_80px_80px_70px] gap-4">
-            <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded animate-pulse"></div>
-            <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded animate-pulse"></div>
-            <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded animate-pulse"></div>
-            <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded animate-pulse"></div>
-            <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded animate-pulse"></div>
-            <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded animate-pulse"></div>
-            <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded animate-pulse"></div>
-            <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded animate-pulse"></div>
-            <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded animate-pulse"></div>
-            <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded animate-pulse"></div>
-            <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded animate-pulse"></div>
-            <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded animate-pulse"></div>
-            <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded animate-pulse"></div>
-          </div>
-        </div>
-
-        {/* Table Rows Skeleton */}
-        {[...Array(8)].map((_, i) => (
-          <div
-            key={i}
-            className={`p-3 ${i < 7 ? "border-b border-gray-200 dark:border-slate-800" : ""
-              }`}
-          >
-            <div className="grid grid-cols-[60px_320px_250px_100px_80px_120px_120px_100px_100px_80px_80px_80px_70px] gap-4 items-center">
-              <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded animate-pulse"></div>
-              <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded animate-pulse"></div>
-              <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded animate-pulse"></div>
-              <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded animate-pulse"></div>
-              <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded animate-pulse"></div>
-              <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded animate-pulse"></div>
-              <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded animate-pulse"></div>
-              <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded animate-pulse"></div>
-              <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded animate-pulse"></div>
-              <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded animate-pulse"></div>
-              <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded animate-pulse"></div>
-              <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded animate-pulse"></div>
-              <div className="h-6 bg-gray-200 dark:bg-slate-800 rounded animate-pulse"></div>
+    <div className="overflow-x-auto rounded-lg border border-gray-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:shadow-none">
+      <div className="min-w-max animate-pulse">
+        <div className="grid grid-cols-[44px_56px_320px_250px_100px_80px_120px_120px_100px_100px_100px_80px_80px_80px_70px] gap-0 border-b border-gray-200 bg-gray-50 dark:border-slate-700 dark:bg-slate-900/80">
+          {[...Array(15)].map((_, index) => (
+            <div key={index} className="px-3 py-2">
+              <div className="h-4 rounded bg-gray-200 dark:bg-slate-700"></div>
             </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Pagination Skeleton */}
-      <div className="mt-4 flex justify-between items-center">
-        <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded w-32 animate-pulse"></div>
-        <div className="flex gap-2">
-          {[...Array(5)].map((_, i) => (
-            <div
-              key={i}
-              className="h-8 bg-gray-200 dark:bg-slate-800 rounded w-8 animate-pulse"
-            ></div>
           ))}
         </div>
+        {[...Array(10)].map((_, rowIndex) => (
+          <div
+            key={rowIndex}
+            className="grid grid-cols-[44px_56px_320px_250px_100px_80px_120px_120px_100px_100px_100px_80px_80px_80px_70px] gap-0 border-b border-gray-200 last:border-b-0 dark:border-slate-700"
+          >
+            {[...Array(15)].map((_, columnIndex) => (
+              <div key={columnIndex} className="px-3 py-3">
+                <div
+                  className={
+                    columnIndex === 2
+                      ? "h-4 w-64 rounded bg-gray-200 dark:bg-slate-700"
+                      : "h-4 w-full rounded bg-gray-200 dark:bg-slate-700"
+                  }
+                ></div>
+              </div>
+            ))}
+          </div>
+        ))}
       </div>
     </div>
   );
 
   return (
-    <div className="h-full p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
+    <div className="min-h-full p-4 sm:p-5 md:p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
       {/* Page Header */}
       <div className="mb-4">
         <h1 className="text-xl font-semibold text-gray-900 dark:text-white mb-0.5">
@@ -666,9 +622,9 @@ export default function CollegeList() {
 
       {/* Search, Filters, and Add Button */}
       <div className="mb-4">
-        <div className="flex justify-between items-center gap-3 flex-wrap">
+        <div className="grid grid-cols-6 gap-3 md:grid-cols-12 xl:flex xl:items-center xl:justify-between">
           {/* Search Box */}
-          <div className="relative w-60">
+          <div className="relative col-span-4 col-start-1 row-start-1 min-w-0 w-full md:col-span-4 md:col-start-1 xl:col-auto xl:row-auto xl:w-72 xl:shrink-0">
             <svg
               className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-white/40"
               fill="none"
@@ -717,7 +673,7 @@ export default function CollegeList() {
           </div>
 
           {/* Filters */}
-          <div className="flex items-center gap-2 flex-1 flex-wrap">
+          <div className="contents xl:flex xl:flex-1 xl:items-center xl:gap-2 xl:flex-nowrap">
             <LocationFilterBar
               country={filters.country}
               state={filters.state}
@@ -738,8 +694,8 @@ export default function CollegeList() {
               }
               countryApiUrl="/api/locations/countries"
               showLabels={false}
-              className="flex items-center gap-2 flex-wrap"
-              itemClassName="min-w-40"
+              className="contents xl:flex xl:items-center xl:gap-2 xl:flex-nowrap"
+              itemClassName="col-span-3 min-w-0 w-full md:col-span-3 xl:col-auto xl:w-auto xl:min-w-40"
               buttonClassName="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30 bg-white dark:bg-slate-900/70 text-gray-900 dark:text-white transition-colors flex items-center justify-between text-left cursor-pointer"
             />
 
@@ -747,7 +703,7 @@ export default function CollegeList() {
             <ApnaSelect
               title=""
               options={[
-                { value: "all", label: "All Colleges" },
+                { value: "all", label: "All" },
                 { value: "featured", label: "Featured" },
                 { value: "popular", label: "Popular" },
               ]}
@@ -758,7 +714,8 @@ export default function CollegeList() {
               placeholder="Select type"
               searchable={false}
               required={false}
-              buttonClassName="px-3 py-2 border border-gray-300 dark:border-slate-700 rounded text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30 bg-white dark:bg-slate-900/70 text-gray-900 dark:text-white transition-colors flex items-center justify-between text-left cursor-pointer"
+              className="col-span-2 col-start-5 row-start-1 min-w-0 w-full md:col-start-10 md:col-span-3 md:row-start-1 xl:col-auto xl:row-auto xl:w-32"
+              buttonClassName="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30 bg-white dark:bg-slate-900/70 text-gray-900 dark:text-white transition-colors flex items-center justify-between text-left cursor-pointer"
             />
 
             {/* Limit Filter */}
@@ -777,14 +734,15 @@ export default function CollegeList() {
               placeholder="Select limit"
               searchable={false}
               required={false}
-              buttonClassName="px-3 py-2 border border-gray-300 dark:border-slate-700 rounded text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30 bg-white dark:bg-slate-900/70 text-gray-900 dark:text-white transition-colors flex items-center justify-between text-left cursor-pointer"
+              className="col-span-2 col-start-1 row-start-3 min-w-0 w-full md:col-start-1 md:row-start-2 xl:col-auto xl:row-auto xl:w-auto"
+              buttonClassName="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30 bg-white dark:bg-slate-900/70 text-gray-900 dark:text-white transition-colors flex items-center justify-between text-left cursor-pointer"
             />
           </div>
 
           {/* Add Button */}
           <Link
             href="/admin/college/add"
-            className="bg-primary hover:bg-primary-700 text-white px-3 py-1.5 rounded text-xs font-medium flex items-center gap-1 transition-colors no-underline"
+            className="col-span-2 col-start-5 row-start-3 flex w-auto shrink-0 justify-self-end self-end items-center gap-1 whitespace-nowrap bg-primary hover:bg-primary-700 text-white px-3 py-2 rounded text-xs font-medium transition-colors no-underline md:col-start-11 md:row-start-2 xl:col-auto xl:row-auto xl:justify-self-auto xl:self-auto xl:py-1.5"
           >
             <svg
               className="w-3.5 h-3.5"
@@ -825,6 +783,7 @@ export default function CollegeList() {
         data={colleges}
         columns={columns}
         loading={loading}
+        loadingSkeleton={<LoadingSkeleton />}
         showSearch={false}
         showPagination={true}
         itemsPerPage={parseInt(filters.limit, 10) || 10}
