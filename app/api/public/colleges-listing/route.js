@@ -1,6 +1,8 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import mongoose from "mongoose";
 import connectDB from "@/lib/db";
-import { College, Ownership, Country } from "@/lib/models";
+import { College, Ownership, Country, Exam } from "@/lib/models";
+import CollegeCourseAllocation from "@/lib/models/CollegeCourseAllocation";
 import { applyDirectLocationFilters } from "@/lib/locationFilters";
 
 function compactPath(path) {
@@ -44,6 +46,8 @@ export async function GET(request) {
     const district = searchParams.get("district") || "";
     const ownership = searchParams.get("ownership") || "";
     const sortBy = searchParams.get("sortBy") || "alphabetical";
+    const course = searchParams.get("course") || "";
+    const exam = searchParams.get("exam") || "";
 
     const filter = { status: "active" };
 
@@ -80,6 +84,41 @@ export async function GET(request) {
 
       if (ownershipTypes.length > 0) {
         filter.ownership = { $in: ownershipTypes.map((o) => o._id) };
+      }
+    }
+
+    if (course || exam) {
+      const allocationMatch = { "assignedCourses.isActive": true };
+      if (course) {
+        try {
+          allocationMatch["assignedCourses.course"] = new mongoose.Types.ObjectId(course);
+        } catch(e) { }
+      }
+      if (exam) {
+        try {
+          const actualExam = await Exam.findById(exam).select("courseName").lean();
+          if (actualExam && actualExam.courseName) {
+             allocationMatch["assignedCourses.course"] = actualExam.courseName;
+          } else {
+             allocationMatch["assignedCourses.course"] = null;
+          }
+        } catch(e) { }
+      }
+
+      const allocations = await CollegeCourseAllocation.aggregate([
+        { $match: allocationMatch },
+        { $unwind: "$assignedCourses" },
+        { $match: allocationMatch },
+        { $group: { _id: "$college" } }
+      ]);
+
+      const matchedCollegeIds = allocations.map(a => a._id);
+      
+      if (filter._id) {
+        // In case _id is already being filtered (rare but safe)
+        filter._id = { $in: matchedCollegeIds.filter(id => filter._id.$in?.includes(id)) };
+      } else {
+        filter._id = { $in: matchedCollegeIds };
       }
     }
 

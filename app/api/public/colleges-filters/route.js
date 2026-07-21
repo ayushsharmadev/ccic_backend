@@ -5,7 +5,7 @@ import {
   Country,
   State,
   Ownership,
-  ExamType,
+  Exam,
   Course,
 } from "@/lib/models";
 import CollegeCourseAllocation from "@/lib/models/CollegeCourseAllocation";
@@ -25,19 +25,20 @@ export async function GET(request) {
     let collegeCounts = [
       { byCountry: [], byState: [], byOwnership: [] },
     ];
-    if (["all", "countries", "states", "ownership"].includes(type)) {
-      const match = { status: "active" };
-      if (country && type === "states") {
-        match.country = country;
-      }
+    
+    const baseCollegeMatch = { status: "active" };
+    const scopedCollegeMatch = { ...baseCollegeMatch };
+    if (country) {
+      scopedCollegeMatch.country = country;
+    }
 
+    if (["all", "countries", "states", "ownership"].includes(type)) {
       collegeCounts = await College.aggregate([
-        { $match: match },
         {
           $facet: {
-            byCountry: [{ $group: { _id: "$country", count: { $sum: 1 } } }],
-            byState: [{ $group: { _id: "$state", count: { $sum: 1 } } }],
-            byOwnership: [{ $group: { _id: "$ownership", count: { $sum: 1 } } }],
+            byCountry: [{ $match: baseCollegeMatch }, { $group: { _id: "$country", count: { $sum: 1 } } }],
+            byState: [{ $match: scopedCollegeMatch }, { $group: { _id: "$state", count: { $sum: 1 } } }],
+            byOwnership: [{ $match: scopedCollegeMatch }, { $group: { _id: "$ownership", count: { $sum: 1 } } }],
           },
         },
       ]);
@@ -49,19 +50,18 @@ export async function GET(request) {
       ownership: new Map((collegeCounts[0]?.byOwnership || []).filter((c) => c._id).map((c) => [c._id.toString(), c.count])),
     };
 
-    // 2. O(1) Aggregation for Exams and Courses. Fee ranges stay static.
-    let allocationCounts = [{ byExam: [], byCourse: [] }];
+    // 2. O(1) Aggregation for Courses. Fee ranges stay static.
+    let allocationCounts = [{ byCourse: [] }];
     if (["all", "exams", "courses"].includes(type)) {
+      const validColleges = await College.find(scopedCollegeMatch).select("_id").lean();
+      const validCollegeIds = validColleges.map((c) => c._id);
+
       allocationCounts = await CollegeCourseAllocation.aggregate([
+        { $match: { college: { $in: validCollegeIds }, "assignedCourses.isActive": true } },
         { $unwind: "$assignedCourses" },
         { $match: { "assignedCourses.isActive": true } },
         {
           $facet: {
-            byExam: [
-              { $match: { "assignedCourses.examType": { $exists: true, $ne: null } } },
-              { $group: { _id: { college: "$college", examType: "$assignedCourses.examType" } } },
-              { $group: { _id: "$_id.examType", count: { $sum: 1 } } },
-            ],
             byCourse: [
               { $match: { "assignedCourses.course": { $exists: true, $ne: null } } },
               { $group: { _id: { college: "$college", course: "$assignedCourses.course" } } },
@@ -73,7 +73,6 @@ export async function GET(request) {
     }
 
     const allocMaps = {
-      exams: new Map((allocationCounts[0]?.byExam || []).filter((c) => c._id).map((c) => [c._id.toString(), c.count])),
       courses: new Map((allocationCounts[0]?.byCourse || []).filter((c) => c._id).map((c) => [c._id.toString(), c.count])),
     };
 
@@ -121,17 +120,32 @@ export async function GET(request) {
       })).filter((o) => o.count > 0).sort((a, b) => b.count - a.count);
     }
 
-    // Get Exams
+    // Get Exams (Mapped via Course)
     if (type === "all" || type === "exams") {
-      const examTypes = await ExamType.find({
-        status: "active",
-        ...(search && { $or: [{ name: { $regex: search, $options: "i" } }, { shortName: { $regex: search, $options: "i" } }] }),
-      }).select("name shortName").lean();
+      const activeCourseIds = Array.from(allocMaps.courses.keys());
+      const activeCourseObjectIds = activeCourseIds.map((id) => {
+        try {
+          return new mongoose.Types.ObjectId(id);
+        } catch (e) {
+          return null;
+        }
+      }).filter(Boolean);
 
-      results.exams = examTypes.map((e) => ({
-        name: e.name, shortName: e.shortName, value: e._id.toString(), id: e._id.toString(),
-        count: allocMaps.exams.get(e._id.toString()) || 0,
-      })).filter((e) => e.count > 0).sort((a, b) => b.count - a.count).slice(0, 10);
+      const exams = await Exam.find({
+        status: "active",
+        courseName: { $in: activeCourseObjectIds },
+        ...(search && { title: { $regex: search, $options: "i" } }),
+      }).select("title courseName").lean();
+
+      results.exams = exams.map((e) => {
+        const count = e.courseName ? (allocMaps.courses.get(e.courseName.toString()) || 0) : 0;
+        return {
+          name: e.title,
+          value: e._id.toString(),
+          id: e._id.toString(),
+          count: count,
+        };
+      }).filter(e => e.count > 0).sort((a, b) => b.count - a.count).slice(0, 10);
     }
 
     // Get Courses

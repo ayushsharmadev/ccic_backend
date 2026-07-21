@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import { Country, College } from "@/lib/models";
 
@@ -46,14 +46,8 @@ export async function GET(request) {
         const max = maxStr === "Infinity" ? Infinity : parseInt(maxStr);
 
         return {
-          $or: [
-            {
-              "studyMetrics.tuitionFeeMin": { $lte: max, $gte: min },
-            },
-            {
-              "studyMetrics.tuitionFeeMax": { $lte: max, $gte: min },
-            },
-          ],
+          "studyMetrics.tuitionFeeMin": { $lte: max },
+          "studyMetrics.tuitionFeeMax": { $gte: min },
         };
       });
 
