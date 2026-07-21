@@ -2,9 +2,10 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const allowedOrigins = new Set([
   "http://localhost:3000",
+  "http://localhost:3002",
   "https://ccic-eight.vercel.app",
   "http://100.90.206.34:3000",
-  "ccic.in"
+  "https://ccic.in"
 ]);
 
 function applyCorsHeaders(response: NextResponse, origin: string | null) {

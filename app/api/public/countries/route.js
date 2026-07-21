@@ -20,8 +20,9 @@ export async function GET(request) {
     }
 
     const countries = await Country.find(query)
-      .select("name code logo status")
+      .select("name code logo status currency")
       .sort({ name: 1 })
+      .populate({ path: "currency", match: { status: "active" }, select: "name code symbol status" })
       .lean();
 
     const transformedCountries = countries.map((country) => ({
@@ -31,6 +32,7 @@ export async function GET(request) {
       code: country.code,
       logo: country.logo,
       status: country.status,
+      currency: country.currency || null,
     }));
 
     return NextResponse.json({

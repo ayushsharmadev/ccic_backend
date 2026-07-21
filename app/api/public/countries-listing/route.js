@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import { Country, College } from "@/lib/models";
 
@@ -84,6 +84,7 @@ export async function GET(request) {
       .sort(sortOption)
       .skip(skip)
       .limit(limit)
+      .populate({ path: "currency", match: { status: "active" }, select: "name code symbol status" })
       .lean();
 
     const total = await Country.countDocuments(query);

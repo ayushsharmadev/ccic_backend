@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -6,6 +6,20 @@ import ApnaTable from "@/components/utils/ApnaTable";
 import ApnaModalConfirmation from "@/components/utils/ApnaModalConfirmation";
 import { showSuccess, showError } from "@/components/utils/ApnaNotify";
 
+const formatAverageFee = (amount, currency) => {
+  if (amount === null || amount === undefined || amount === "") return "N/A";
+  const numeric = Number(amount);
+  if (!Number.isFinite(numeric)) return String(amount);
+  if (!currency?.code) return numeric.toLocaleString("en-IN");
+  try {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: currency.code,
+    }).format(numeric);
+  } catch {
+    return `${currency.symbol || currency.code} ${numeric.toLocaleString("en-IN")}`;
+  }
+};
 export default function CourseList() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -131,7 +145,10 @@ export default function CourseList() {
           streamName: course.streamId?.name || "N/A",
           degreeType: course.degreeId?.name || "N/A",
           status: course.status || "N/A",
-          averageFee: course.averageFee || "N/A",
+          averageFee: formatAverageFee(
+            course.averageFee,
+            course.averageFeeCurrency
+          ),
         }));
         setCourses(transformedCourses);
         setTotalPages(data.pagination.pages);

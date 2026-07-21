@@ -75,7 +75,10 @@ export default function CountryList() {
           shortName: country.shortName || country.name.substring(0, 5),
           code: country.code || "N/A",
           capital: country.capital || "N/A",
-          currency: country.currency || "N/A",
+          currency:
+            country.currency && typeof country.currency === "object"
+              ? `${country.currency.code}${country.currency.symbol ? ` (${country.currency.symbol})` : ""}`
+              : country.currency || "N/A",
           language: country.language || "N/A",
           population: country.population || "N/A",
           timeZone: country.timeZone || "N/A",

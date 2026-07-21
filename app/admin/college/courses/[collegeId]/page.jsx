@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
@@ -49,6 +49,20 @@ const buildDurationLabel = (duration) => {
   return `${formattedValue} ${unit}`;
 };
 
+const formatAmountWithCurrency = (amount, currency) => {
+  const numeric = Number(amount);
+  if (!Number.isFinite(numeric)) return "--";
+  if (!currency?.code) return numeric.toLocaleString("en-IN");
+
+  try {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: currency.code,
+    }).format(numeric);
+  } catch {
+    return `${currency.symbol || currency.code} ${numeric.toLocaleString("en-IN")}`;
+  }
+};
 export default function CollegeCoursesAllocationPage() {
   const params = useParams();
   const router = useRouter();
@@ -65,6 +79,8 @@ export default function CollegeCoursesAllocationPage() {
   const [courseDurationOptions, setCourseDurationOptions] = useState([]);
   const [courseDurationMap, setCourseDurationMap] = useState({});
   const [examTypeOptions, setExamTypeOptions] = useState([]);
+  const [currencyOptions, setCurrencyOptions] = useState([]);
+  const [suggestedCurrencyId, setSuggestedCurrencyId] = useState("");
 
   const [selectedCourseIds, setSelectedCourseIds] = useState([]);
   const [assignedCourses, setAssignedCourses] = useState([]);
@@ -255,6 +271,7 @@ export default function CollegeCoursesAllocationPage() {
         const labels = computePeriodLabels(courseDurationId, structureType);
 
         feeStructures.push({
+          currency: suggestedCurrencyId,
           session: "",
           structureType,
           seats: undefined,
@@ -268,7 +285,7 @@ export default function CollegeCoursesAllocationPage() {
         feeStructures,
       };
     },
-    [computePeriodLabels, syncPeriodsWithLabels]
+    [computePeriodLabels, suggestedCurrencyId, syncPeriodsWithLabels]
   );
 
   const updateCourseEntry = useCallback((courseId, updater) => {
@@ -290,12 +307,14 @@ export default function CollegeCoursesAllocationPage() {
           coursesRes,
           durationRes,
           examTypeRes,
+          currencyRes,
           allocationRes,
         ] = await Promise.all([
           fetch(`/api/colleges/${collegeId}`),
           fetch("/api/courses?all=true"),
           fetch("/api/master/course-duration?all=true"),
           fetch("/api/master/exam-type?all=true"),
+          fetch("/api/currencies?status=active&limit=200"),
           fetch(`/api/colleges/${collegeId}/course-allocations`),
         ]);
 
@@ -303,6 +322,7 @@ export default function CollegeCoursesAllocationPage() {
         const coursesData = await coursesRes.json();
         const durationData = await durationRes.json();
         const examTypeData = await examTypeRes.json();
+        const currencyData = await currencyRes.json();
         const allocationData = await allocationRes.json();
 
         if (!collegeData.success) {
@@ -351,8 +371,23 @@ export default function CollegeCoursesAllocationPage() {
           setExamTypeOptions(options);
         }
 
+        if (!currencyData.success) {
+          showError(currencyData.error || "Failed to load currencies.");
+        } else {
+          setCurrencyOptions(
+            (currencyData.data || []).map((currency) => ({
+              value: currency._id,
+              label: `${currency.code} - ${currency.name}${currency.symbol ? ` (${currency.symbol})` : ""}`,
+              meta: currency,
+            }))
+          );
+        }
+
         // Process allocation data separately
         if (allocationData.success && allocationData.data) {
+          const defaultCurrencyId =
+            allocationData.data.suggestedCurrency?._id || "";
+          setSuggestedCurrencyId(defaultCurrencyId);
           const normalized = (allocationData.data.assignedCourses || []).map(
             (item) => {
               // API se directly courseId, courseName, courseDurationId, examTypeId aur defaultStructureType milte hain
@@ -365,6 +400,10 @@ export default function CollegeCoursesAllocationPage() {
 
               const feeStructures = (item.feeStructures || []).map(
                 (structure) => ({
+                  currency:
+                    structure.currency?._id ||
+                    structure.currency ||
+                    defaultCurrencyId,
                   session: structure.session || "",
                   structureType: structure.structureType || "annual",
                   seats:
@@ -565,6 +604,15 @@ export default function CollegeCoursesAllocationPage() {
     [assignedCourses, feeModalState.courseId]
   );
 
+  const handleCurrencyChange = (courseId, index, currency) => {
+    updateCourseEntry(courseId, (entry) => ({
+      ...entry,
+      feeStructures: entry.feeStructures.map((structure, idx) =>
+        idx === index ? { ...structure, currency } : structure
+      ),
+    }));
+  };
+
   const handleSessionChange = (courseId, index, value) => {
     updateCourseEntry(courseId, (entry) => {
       const feeStructures = entry.feeStructures.map((structure, idx) =>
@@ -635,6 +683,9 @@ export default function CollegeCoursesAllocationPage() {
     }
 
     const newStructure = {
+      currency:
+        entry.feeStructures[entry.feeStructures.length - 1]?.currency ||
+        suggestedCurrencyId,
       session: "",
       structureType,
       seats: undefined,
@@ -686,6 +737,8 @@ export default function CollegeCoursesAllocationPage() {
     }
 
     const hasMissing = entry.feeStructures.some((structure) => {
+      if (!structure.currency) return true;
+
       const session = structure.session?.trim();
       if (!session || !SESSION_REGEX.test(session)) {
         return true;
@@ -706,7 +759,7 @@ export default function CollegeCoursesAllocationPage() {
 
     if (hasMissing) {
       showWarning(
-        "Please provide session (e.g., 2024-2025) and fee amount for every period before saving."
+        "Please select a currency and provide session (e.g., 2024-2025) and fee amount for every period before saving."
       );
       return;
     }
@@ -730,6 +783,8 @@ export default function CollegeCoursesAllocationPage() {
       }
 
       return entry.feeStructures.some((structure) => {
+        if (!structure.currency) return true;
+
         const session = structure.session?.trim();
         if (!session || !SESSION_REGEX.test(session)) {
           return true;
@@ -752,7 +807,7 @@ export default function CollegeCoursesAllocationPage() {
 
     if (invalidEntries.length) {
       showError(
-        "Please ensure every selected course has duration, fee type, and session formatted like 2024-2025 with fees filled for each period."
+        "Please ensure every selected course has duration, currency, fee type, session formatted like 2024-2025, and all fee amounts filled."
       );
       return;
     }
@@ -774,6 +829,7 @@ export default function CollegeCoursesAllocationPage() {
             : undefined;
 
         return {
+          currency: structure.currency?._id || structure.currency,
           session: structure.session.trim(),
           structureType:
             structure.structureType || entry.defaultStructureType || "annual",
@@ -817,6 +873,7 @@ export default function CollegeCoursesAllocationPage() {
               : item.examTypeId || item.examType || "";
 
           const feeStructures = (item.feeStructures || []).map((structure) => ({
+            currency: structure.currency?._id || structure.currency || "",
             session: structure.session || "",
             structureType: structure.structureType || "annual",
             seats:
@@ -1057,10 +1114,16 @@ export default function CollegeCoursesAllocationPage() {
                               >
                                 <span>{period.label}</span>
                                 <span className="font-semibold">
-                                  {period.amount
-                                    ? `₹${Number(period.amount).toLocaleString(
-                                        "en-IN"
-                                      )}`
+                                  {period.amount !== "" && period.amount !== null
+                                    ? formatAmountWithCurrency(
+                                        period.amount,
+                                        currencyOptions.find(
+                                          (option) =>
+                                            option.value ===
+                                            (structure.currency?._id ||
+                                              structure.currency)
+                                        )?.meta
+                                      )
                                     : "--"}
                                 </span>
                               </div>
@@ -1083,7 +1146,7 @@ export default function CollegeCoursesAllocationPage() {
         onSubmit={handleFeeModalSubmit}
         title={
           activeCourseEntry
-            ? `Configure Fees • ${activeCourseEntry.courseName}`
+            ? `Configure Fees â€¢ ${activeCourseEntry.courseName}`
             : "Configure Fees"
         }
         submitText="Save Fees"
@@ -1171,7 +1234,7 @@ export default function CollegeCoursesAllocationPage() {
                       <label className="block text-sm font-semibold text-gray-700 dark:text-white/90 mb-3">
                         Fee Structure
                       </label>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pb-4 border-b border-gray-200 dark:border-slate-700">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pb-4 border-b border-gray-200 dark:border-slate-700">
                         <div>
                           <label className="block text-xs font-medium text-gray-600 dark:text-white/70 mb-1.5">
                             Session *
@@ -1211,6 +1274,27 @@ export default function CollegeCoursesAllocationPage() {
                             }
                             placeholder="Enter seats"
                             className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded text-xs bg-white dark:bg-slate-900/70 text-gray-700 dark:text-white/80 focus:outline-none focus:ring-2 focus:ring-primary/20 dark:focus:ring-primary/30"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-medium text-gray-600 dark:text-white/70 mb-1.5">
+                            Currency *
+                          </label>
+                          <ApnaSelect
+                            title=""
+                            options={currencyOptions}
+                            value={structure.currency || ""}
+                            onChange={(value) =>
+                              handleCurrencyChange(
+                                activeCourseEntry.courseId,
+                                idx,
+                                value
+                              )
+                            }
+                            placeholder="Select currency"
+                            searchable={true}
+                            buttonClassName="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded text-xs bg-white dark:bg-slate-900/70 text-gray-700 dark:text-white/80 transition focus:border-primary focus:ring-2 focus:ring-primary/20 flex items-center justify-between"
+                            textClassName="overflow-hidden text-ellipsis whitespace-nowrap text-gray-700 dark:text-white/80 text-xs"
                           />
                         </div>
                         <div>

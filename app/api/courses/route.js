@@ -1,14 +1,15 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Course from "@/lib/models/Course";
 import { withAdminAuth } from "@/lib/middleware/auth";
+import { resolveAverageFeeFields } from "@/lib/money";
 
 // GET /api/courses - Get all courses with pagination and filters
 export const GET = withAdminAuth(async (request) => {
   try {
-    console.log("🔍 Courses API: Connecting to database...");
+    console.log("ðŸ” Courses API: Connecting to database...");
     await connectDB();
-    console.log("🔍 Courses API: Database connected successfully");
+    console.log("ðŸ” Courses API: Database connected successfully");
 
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page")) || 1;
@@ -22,26 +23,27 @@ export const GET = withAdminAuth(async (request) => {
 
     // If all parameter is present, return all courses without pagination
     if (all) {
-      console.log("🔍 Fetching all courses with status: active");
+      console.log("ðŸ” Fetching all courses with status: active");
 
       // First check if there are any courses at all
       const totalCourses = await Course.countDocuments({});
-      console.log("🔍 Total courses in DB:", totalCourses);
+      console.log("ðŸ” Total courses in DB:", totalCourses);
 
       // Check courses with any status
       const allCourses = await Course.find({}).lean();
       console.log(
-        "🔍 All courses statuses:",
+        "ðŸ” All courses statuses:",
         allCourses.map((c) => ({ name: c.name, status: c.status }))
       );
 
       const courses = await Course.find({ status: "active" })
         .populate("streamId", "name")
         .populate("degreeId", "name")
+        .populate("averageFeeCurrency", "name code symbol status")
         .sort({ name: 1 })
         .lean();
 
-      console.log("🔍 Active courses found:", courses.length);
+      console.log("ðŸ” Active courses found:", courses.length);
 
       return NextResponse.json({
         success: true,
@@ -86,6 +88,7 @@ export const GET = withAdminAuth(async (request) => {
     const courses = await Course.find(filter)
       .populate("streamId", "name")
       .populate("degreeId", "name")
+        .populate("averageFeeCurrency", "name code symbol status")
       .sort({ displayOrder: 1, createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -102,10 +105,10 @@ export const GET = withAdminAuth(async (request) => {
       },
     });
   } catch (error) {
-    console.error("❌ Courses API Error:", error);
-    console.error("❌ Error name:", error.name);
-    console.error("❌ Error message:", error.message);
-    console.error("❌ Error stack:", error.stack);
+    console.error("âŒ Courses API Error:", error);
+    console.error("âŒ Error name:", error.name);
+    console.error("âŒ Error message:", error.message);
+    console.error("âŒ Error stack:", error.stack);
 
     return NextResponse.json(
       { success: false, error: "Failed to fetch courses" },
@@ -159,6 +162,7 @@ export const POST = withAdminAuth(async (request) => {
     const populatedCourse = await Course.findById(course._id)
       .populate("streamId", "name")
       .populate("degreeId", "name")
+        .populate("averageFeeCurrency", "name code symbol status")
       .lean();
 
     return NextResponse.json(

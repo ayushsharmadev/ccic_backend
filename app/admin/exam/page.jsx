@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -8,6 +8,21 @@ import LocationFilterBar from "@/components/utils/LocationFilterBar";
 import ApnaModalConfirmation from "@/components/utils/ApnaModalConfirmation";
 import { showSuccess, showError } from "@/components/utils/ApnaNotify";
 
+const formatExamFee = (amount, currency) => {
+  if (amount === null || amount === undefined || amount === "") return "Not listed";
+  const numeric = Number(amount);
+  if (!Number.isFinite(numeric)) return String(amount);
+  if (!currency?.code) return numeric.toLocaleString("en-IN");
+
+  try {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: currency.code,
+    }).format(numeric);
+  } catch {
+    return `${currency.symbol || currency.code} ${numeric.toLocaleString("en-IN")}`;
+  }
+};
 export default function ExamList() {
   const router = useRouter();
   const [exams, setExams] = useState([]);
@@ -77,7 +92,10 @@ export default function ExamList() {
           examDate: exam.examDate
             ? new Date(exam.examDate).toISOString().split("T")[0]
             : "N/A",
-          applicationFee: exam.applicationFee?.toString() || "0",
+          applicationFee: formatExamFee(
+            exam.applicationFee,
+            exam.applicationFeeCurrency
+          ),
           noOfApplications: exam.noOfApplication?.toString() || "0",
           status: exam.status || "active",
           lastUpdated: exam.updatedAt
@@ -275,7 +293,7 @@ export default function ExamList() {
     },
     {
       key: "applicationFee",
-      header: "Fee (₹)",
+      header: "Fee",
       headerClassName: "text-center text-gray-700 dark:text-white/80",
       cellClassName:
         "text-sm text-gray-600 dark:text-white/70 text-center transition-colors duration-300",

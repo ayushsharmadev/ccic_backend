@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
+import { moneyView } from "@/lib/money";
 import connectDB from "@/lib/db";
 import { Course, Stream, Degree } from "@/lib/models";
 
@@ -114,8 +115,9 @@ export async function GET(request) {
       const courses = await Course.find(filter)
         .populate("streamId", "name")
         .populate("degreeId", "name")
+        .populate("averageFeeCurrency", "name code symbol status")
         .select(
-          "name logo icon averageFee description status isFeatured displayOrder slug"
+          "name logo icon averageFee averageFeeCurrency description status isFeatured displayOrder slug"
         )
         .sort(sort)
         .skip(skip)
@@ -133,6 +135,7 @@ export async function GET(request) {
         logo: course.logo,
         icon: course.icon,
         averageFee: course.averageFee,
+        averageFeeMoney: moneyView(course.averageFee, course.averageFeeCurrency),
         description: course.description,
         stream: course.streamId?.name || "",
         degree: course.degreeId?.name || "",
@@ -176,8 +179,9 @@ export async function GET(request) {
       })
         .populate("streamId", "name")
         .populate("degreeId", "name")
+        .populate("averageFeeCurrency", "name code symbol status")
         .select(
-          "name logo icon averageFee description status isFeatured displayOrder"
+          "name logo icon averageFee averageFeeCurrency description status isFeatured displayOrder"
         )
         .sort({ displayOrder: 1, name: 1 })
         .limit(limit)
@@ -190,6 +194,7 @@ export async function GET(request) {
         logo: item.logo,
         icon: item.icon,
         averageFee: item.averageFee,
+        averageFeeMoney: moneyView(item.averageFee, item.averageFeeCurrency),
         description: item.description,
         stream: {
           id: item.streamId?._id,
@@ -223,8 +228,9 @@ export async function GET(request) {
       })
         .populate("streamId", "name")
         .populate("degreeId", "name")
+        .populate("averageFeeCurrency", "name code symbol status")
         .select(
-          "name logo icon averageFee description status isFeatured displayOrder"
+          "name logo icon averageFee averageFeeCurrency description status isFeatured displayOrder"
         )
         .sort({ displayOrder: 1, name: 1 })
         .skip(skip)
@@ -242,6 +248,7 @@ export async function GET(request) {
       logo: item.logo,
       icon: item.icon,
       averageFee: item.averageFee,
+      averageFeeMoney: moneyView(item.averageFee, item.averageFeeCurrency),
       description: item.description,
       stream: {
         id: item.streamId?._id,

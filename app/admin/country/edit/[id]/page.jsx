@@ -18,6 +18,7 @@ export default function EditCountryPage() {
   const [loading, setLoading] = useState(true);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [countryMasterOptions, setCountryMasterOptions] = useState([]);
+  const [currencyOptions, setCurrencyOptions] = useState([]);
   const [newFaq, setNewFaq] = useState({ question: "", answer: "" });
   const [newSection, setNewSection] = useState({ title: "", content: "" });
   const [editingSectionIndex, setEditingSectionIndex] = useState(null);
@@ -37,6 +38,30 @@ export default function EditCountryPage() {
       })
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    const loadCurrencies = async () => {
+      try {
+        const token = getAccessToken();
+        const response = await fetch("/api/currencies?status=active&limit=200", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const result = await response.json();
+        if (result.success) {
+          setCurrencyOptions(
+            result.data.map((currency) => ({
+              value: currency._id,
+              label: `${currency.code} - ${currency.name}${currency.symbol ? ` (${currency.symbol})` : ""}`,
+            })),
+          );
+        }
+      } catch (error) {
+        console.error("Error loading currencies:", error);
+      }
+    };
+
+    loadCurrencies();
+  }, [getAccessToken]);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -124,7 +149,7 @@ export default function EditCountryPage() {
             shortName: country.shortName || "",
             code: country.code || "",
             capital: country.capital || "",
-            currency: country.currency || "",
+            currency: country.currency?._id || country.currency || "",
             language: country.language || "",
             population: country.population || "",
             timeZone: country.timeZone || "",
@@ -575,7 +600,7 @@ export default function EditCountryPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className={labelClassName}>Country Name *</label>
+                <label className={labelClassName}>Country Name <span className="text-secondary">*</span></label>
                 <ApnaSelect
                   title=""
                   options={countryMasterOptions}
@@ -608,7 +633,7 @@ export default function EditCountryPage() {
               </div>
               <div>
                 <label className={labelClassName}>
-                  Country Code (e.g. IND) *
+                  Country Code (e.g. IND) <span className="text-secondary">*</span>
                 </label>
                 <ApnaSelect
                   title=""
@@ -644,13 +669,17 @@ export default function EditCountryPage() {
               </div>
               <div>
                 <label className={labelClassName}>Currency</label>
-                <input
-                  type="text"
-                  name="currency"
+                <ApnaSelect
+                  title=""
+                  options={currencyOptions}
                   value={formData.currency}
-                  onChange={handleInputChange}
-                  placeholder="e.g. USD, RUB"
-                  className={inputClassName}
+                  onChange={(value) =>
+                    setFormData((prev) => ({ ...prev, currency: value }))
+                  }
+                  placeholder="Search & select currency..."
+                  searchable={true}
+                  required
+                  buttonClassName={selectButtonClassName}
                 />
               </div>
               <div>

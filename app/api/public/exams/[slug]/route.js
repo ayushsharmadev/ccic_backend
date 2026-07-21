@@ -1,14 +1,20 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Exam from "@/lib/models/Exam";
 import mongoose from "mongoose";
+import { moneyView } from "@/lib/money";
 
 const examPopulate = [
   { path: "stream", select: "name" },
   { path: "courseName", select: "name" },
   { path: "examType", select: "name shortName" },
   { path: "examLevel", select: "name" },
-  { path: "country", select: "name code" },
+  {
+    path: "country",
+    select: "name code currency",
+    populate: { path: "currency", match: { status: "active" }, select: "name code symbol status" },
+  },
+  { path: "applicationFeeCurrency", match: { status: "active" }, select: "name code symbol status" },
   { path: "state", select: "name" },
 ];
 
@@ -18,6 +24,7 @@ function transformExamDetail(item) {
     title: item.title,
     logo: item.logo,
     applicationFee: item.applicationFee,
+    applicationFeeMoney: moneyView(item.applicationFee, item.applicationFeeCurrency),
     examDate: item.examDate,
     resultDate: item.resultDate,
     applicationDate: item.applicationDate,

@@ -55,7 +55,9 @@ export async function GET(request, { params }) {
     await connectDB();
     const { slug } = await params;
 
-    const country = await Country.findOne({ slug, status: "active" }).lean();
+    const country = await Country.findOne({ slug, status: "active" })
+      .populate({ path: "currency", match: { status: "active" }, select: "name code symbol status" })
+      .lean();
 
     if (!country) {
       return NextResponse.json(

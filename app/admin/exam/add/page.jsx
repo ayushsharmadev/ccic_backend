@@ -26,7 +26,8 @@ export default function AddExam() {
     displayRank: "0",
     noOfApplication: "",
     purpose: "",
-    applicationFee: "0",
+    applicationFee: "",
+    applicationFeeCurrency: "",
     applicationDate: "",
     examDate: "",
     resultDate: "",
@@ -101,6 +102,22 @@ export default function AddExam() {
           }));
         }
 
+
+        const token = localStorage.getItem("token");
+        const currenciesResponse = await fetch(
+          "/api/currencies?status=active&limit=200",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const currenciesData = await currenciesResponse.json();
+        if (currenciesData.success) {
+          setDropdownData((prev) => ({
+            ...prev,
+            currencies: currenciesData.data.map((currency) => ({
+              value: currency._id,
+              label: `${currency.code} - ${currency.name}${currency.symbol ? ` (${currency.symbol})` : ""}`,
+            })),
+          }));
+        }
         setLoading(false);
         console.log("📊 Final dropdown data:", dropdownData);
       } catch (error) {
@@ -182,11 +199,15 @@ export default function AddExam() {
       return;
     }
 
-    if (!formData.state) {
-      showError("Please select a state");
+
+    if (
+      formData.applicationFee !== "" &&
+      Number(formData.applicationFee) > 0 &&
+      !formData.applicationFeeCurrency
+    ) {
+      showError("Please select an application fee currency");
       return;
     }
-
     try {
       setSubmitLoading(true);
 
@@ -199,7 +220,12 @@ export default function AddExam() {
         examType: formData.examType,
         examLevel: formData.examLevel,
         country: formData.country,
-        state: formData.state,
+        state: formData.state || null,
+        applicationFee:
+          formData.applicationFee === ""
+            ? null
+            : Number(formData.applicationFee),
+        applicationFeeCurrency: formData.applicationFeeCurrency || null,
         // Ensure logo and pdf are strings (URLs)
         logo: formData.logo || null,
         pdf: formData.pdf || null,
@@ -385,8 +411,11 @@ export default function AddExam() {
                   setFormData((prev) => ({ ...prev, state: value }))
                 }
                 showDistrict={false}
-                countryLabel="Conducting Country"
+                countryLabel={
+                  <>Conducting Country <span className="text-secondary">*</span></>
+                }
                 stateLabel="Conducting State"
+                labelClassName="text-xs font-medium text-gray-700 dark:text-white/80 mb-1 block transition-colors duration-300"
                 gridClassName="col-span-2 grid grid-cols-2 gap-4"
               />
 
@@ -410,7 +439,7 @@ export default function AddExam() {
             {/* Title - Full Width */}
             <div className="mt-4">
               <label className="text-xs font-medium text-gray-700 dark:text-white/80 mb-1 block transition-colors duration-300">
-                Examination Title *
+                Examination Title <span className="text-secondary">*</span>
               </label>
               <input
                 type="text"
@@ -441,7 +470,7 @@ export default function AddExam() {
             <h3 className="text-sm font-medium text-gray-900 dark:text-white transition-colors duration-300 mb-3 border-b border-gray-200 dark:border-slate-800 pb-2">
               Application Details
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* No of Application */}
               <div>
                 <label className="text-xs font-medium text-gray-700 dark:text-white/80 mb-1 block transition-colors duration-300">
@@ -461,16 +490,31 @@ export default function AddExam() {
               {/* Application Fee */}
               <div>
                 <label className="text-xs font-medium text-gray-700 dark:text-white/80 mb-1 block transition-colors duration-300">
-                  Application Fee (₹)
+                  Application Fee
                 </label>
                 <input
                   type="number"
+                  min="0"
                   value={formData.applicationFee}
                   onChange={(e) =>
                     handleInputChange("applicationFee", e.target.value)
                   }
-                  placeholder="0"
+                  placeholder="Leave blank if unavailable"
                   className="w-full px-2 py-1.5 border border-gray-300 dark:border-slate-700 rounded text-xs outline-none focus:border-primary focus:ring-2 focus:ring-primary-50 bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors duration-300 placeholder:text-gray-400 dark:placeholder:text-white/40"
+                />
+              </div>
+
+              <div>
+                <ApnaSelect
+                  options={dropdownData.currencies}
+                  value={formData.applicationFeeCurrency}
+                  onChange={(value) =>
+                    handleInputChange("applicationFeeCurrency", value)
+                  }
+                  placeholder="-- Select Currency --"
+                  searchable={true}
+                  title="Fee Currency"
+                  required={Number(formData.applicationFee) > 0}
                 />
               </div>
             </div>
