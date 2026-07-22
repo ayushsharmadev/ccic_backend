@@ -190,7 +190,7 @@ const CreatePage = () => {
     "text-xl font-semibold text-gray-900 dark:text-white mb-0.5";
   const headerSubtitleClass = "text-xs text-gray-600 dark:text-white/70";
   const aiButtonClass =
-    "flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-700 transition-colors duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed text-sm focus:outline-none focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary/30";
+    "flex shrink-0 self-end items-center gap-2 whitespace-nowrap px-4 py-2 bg-primary sm:self-auto text-white rounded-lg hover:bg-primary-700 transition-colors duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed text-sm focus:outline-none focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary/30";
   const cardClass =
     "bg-white dark:bg-slate-900/70 border border-gray-200 dark:border-slate-800 rounded-lg p-5 shadow-sm transition-colors";
   const labelClassName =
@@ -519,7 +519,7 @@ const CreatePage = () => {
             Back to Pages
           </Link>
         </div>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className={headerTitleClass}>Add New Page</h1>
             <p className={headerSubtitleClass}>

@@ -242,7 +242,7 @@ export default function FooterSectionsPage() {
     <div className="h-full p-4 sm:p-5 md:p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
       {/* Page Header */}
       <div className="mb-4">
-        <div className="flex items-center justify-between mb-2">
+        <div className="mb-2 md:flex md:items-center md:justify-between">
           <div>
             <h1 className="text-xl font-semibold text-gray-900 dark:text-white transition-colors duration-300 mb-0.5">
               Footer Sections
@@ -253,7 +253,7 @@ export default function FooterSectionsPage() {
           </div>
           <Link
             href="/admin/footer-sections/add"
-            className="px-3 py-1.5 text-xs text-white bg-primary hover:bg-primary-700 rounded no-underline transition-colors duration-200"
+            className="hidden shrink-0 items-center whitespace-nowrap px-3 py-1.5 text-xs text-white bg-primary hover:bg-primary-700 rounded no-underline transition-colors duration-200 md:flex"
           >
             + Add Section
           </Link>
@@ -261,14 +261,30 @@ export default function FooterSectionsPage() {
       </div>
 
       {/* Search Bar */}
-      <div className="mb-4">
-        <input
-          type="text"
-          placeholder="Search by title or links..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full max-w-md px-3 py-2 text-xs border border-gray-300 dark:border-slate-700 rounded-lg outline-none focus:border-primary focus:ring-2 focus:ring-primary-50 bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors duration-300 placeholder:text-gray-400 dark:placeholder:text-white/40"
-        />
+      <div className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 md:block">
+        <div className="relative min-w-0 w-full max-w-md">
+          <svg
+            className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-white/40"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input
+            type="text"
+            placeholder="Search by title or links..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-7 pr-2 py-2 text-xs border border-gray-300 dark:border-slate-700 rounded-lg outline-none focus:border-primary focus:ring-2 focus:ring-primary-50 dark:focus:ring-primary/30 bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors duration-300 placeholder:text-gray-400 dark:placeholder:text-white/40"
+          />
+        </div>
+        <Link
+          href="/admin/footer-sections/add"
+          className="flex shrink-0 items-center whitespace-nowrap px-3 py-2 text-xs text-white bg-primary hover:bg-primary-700 rounded no-underline transition-colors duration-200 md:hidden"
+        >
+          + Add Section
+        </Link>
       </div>
 
       {/* Table */}
@@ -277,6 +293,7 @@ export default function FooterSectionsPage() {
       ) : (
         <ApnaTable
           data={sections}
+          showSearch={false}
           columns={columns}
           selectedItems={selectedItems}
           onSelectionChange={handleSelectionChange}

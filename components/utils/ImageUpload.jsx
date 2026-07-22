@@ -528,7 +528,7 @@ export default function ImageUpload({
   const inputId = `${type}-input-${id}`;
 
   return (
-    <div className={className}>
+    <div className={`min-w-0 ${className}`}>
       <label className="text-xs font-medium text-gray-700 dark:text-white/80 mb-1 block">
         {title}
       </label>
@@ -553,7 +553,7 @@ export default function ImageUpload({
                 className="mx-auto rounded border-2 border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 flex items-center justify-center"
                 style={{ width, height }}
               >
-                <div className="text-center">
+                <div className="min-w-0 max-w-full px-2 text-center">
                   <svg
                     className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-2"
                     fill="none"
@@ -568,7 +568,7 @@ export default function ImageUpload({
                     />
                   </svg>
                   <p className="text-xs text-gray-600">PDF Document</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                  <p className="line-clamp-2 max-w-full break-all text-xs text-gray-500 dark:text-gray-400">
                     {preview.split("/").pop()}
                   </p>
                 </div>

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -363,9 +363,15 @@ export default function ExamList() {
       </div>
 
       {/* Search & Add Button Skeleton */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-        <div className="h-9 w-full sm:w-60 rounded bg-gray-200 dark:bg-slate-800 animate-pulse"></div>
-        <div className="h-9 w-36 rounded bg-gray-200 dark:bg-slate-800 animate-pulse"></div>
+      <div className="space-y-3 mb-4">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:justify-between">
+          <div className="h-9 min-w-0 w-full sm:w-60 rounded bg-gray-200 dark:bg-slate-800 animate-pulse"></div>
+          <div className="h-9 w-24 sm:w-36 rounded bg-gray-200 dark:bg-slate-800 animate-pulse"></div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="h-14 rounded bg-gray-200 dark:bg-slate-800 animate-pulse"></div>
+          <div className="h-14 rounded bg-gray-200 dark:bg-slate-800 animate-pulse"></div>
+        </div>
       </div>
 
       {/* Table Skeleton */}
@@ -419,8 +425,8 @@ export default function ExamList() {
 
       {/* Search and Add Button */}
       <div className="flex flex-col gap-3 mb-4">
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-        <div className="relative w-full sm:w-60">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:justify-between">
+        <div className="relative min-w-0 w-full sm:w-60">
           <svg
             className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-white/50 transition-colors duration-300"
             fill="none"
@@ -470,7 +476,7 @@ export default function ExamList() {
 
         <Link
           href="/admin/exam/add"
-          className="bg-primary hover:bg-primary-700 text-white px-3 py-1.5 rounded text-xs font-medium flex items-center gap-1 transition-colors no-underline focus:outline-none focus:ring-2 focus:ring-primary/40 shrink-0"
+          className="bg-primary hover:bg-primary-700 text-white px-3 py-1.5 rounded text-xs font-medium flex items-center gap-1 whitespace-nowrap cursor-pointer transition-colors no-underline focus:outline-none focus:ring-2 focus:ring-primary/40 shrink-0"
         >
           <svg
             className="w-3.5 h-3.5"
@@ -490,6 +496,8 @@ export default function ExamList() {
         </div>
 
         <LocationFilterBar
+          className="grid grid-cols-2 gap-3 items-end"
+          itemClassName="min-w-0 w-full"
           country={locationFilters.country}
           state={locationFilters.state}
           onCountryChange={(value) =>

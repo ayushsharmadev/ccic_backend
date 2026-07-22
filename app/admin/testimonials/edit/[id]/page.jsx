@@ -345,7 +345,7 @@ export default function EditTestimonialPage() {
             <textarea
               value={formData.testimonial}
               onChange={(e) => handleInputChange("testimonial", e.target.value)}
-              rows={4}
+              rows={5}
               placeholder="Enter the testimonial content..."
               required
               className="w-full px-2 py-1.5 border border-gray-300 dark:border-slate-700 rounded text-xs outline-none focus:border-primary focus:ring-2 focus:ring-primary-50 bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors duration-300 placeholder:text-gray-400 dark:placeholder:text-white/40"

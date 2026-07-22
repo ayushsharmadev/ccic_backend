@@ -812,15 +812,15 @@ export default function AddCountryPage() {
 
             <div className="space-y-3 mb-4">
               {formData.quickFacts.map((fact, index) => (
-                <div key={index} className="flex items-center justify-between p-4 border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800/50 hover:shadow-sm transition-shadow">
-                  <div className="flex-1 min-w-0 pr-4">
-                    <div className="flex items-center gap-3 mb-1">
+                <div key={index} className="relative flex flex-col items-stretch p-4 sm:flex-row sm:items-center sm:justify-between border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800/50 hover:shadow-sm transition-shadow">
+                  <div className="min-w-0 flex-1 pr-24 sm:pr-4">
+                    <div className="flex min-w-0 flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-3">
                       <h4 className="font-semibold text-sm text-gray-900 dark:text-white truncate" title={fact.label}>{fact.label}</h4>
-                      <span className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600"></span>
-                      <p className="text-xs text-primary font-medium whitespace-nowrap">{fact.value}</p>
+                      <span className="hidden h-1.5 w-1.5 shrink-0 rounded-full bg-gray-300 dark:bg-gray-600 sm:block"></span>
+                      <p className="max-w-full break-words text-xs font-medium text-primary sm:whitespace-nowrap">{fact.value}</p>
                     </div>
                   </div>
-                  <button type="button" onClick={() => handleRemoveQuickFact(index)} className="shrink-0 text-xs bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded transition-colors dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40">
+                  <button type="button" onClick={() => handleRemoveQuickFact(index)} className="absolute right-4 top-4 shrink-0 text-xs bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded transition-colors dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40 sm:static">
                     Remove
                   </button>
                 </div>
@@ -1009,12 +1009,12 @@ export default function AddCountryPage() {
             </div>
             <div className="space-y-3 mb-4">
               {formData.faqs.map((faq, index) => (
-                <div key={index} className="flex items-start justify-between gap-4 p-4 border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800/50 hover:shadow-sm transition-shadow">
+                <div key={index} className="flex flex-col items-stretch gap-3 p-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4 border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800/50 hover:shadow-sm transition-shadow">
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm text-gray-900 dark:text-white">Q: {faq.question}</p>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">A: {faq.answer}</p>
                   </div>
-                  <button type="button" onClick={() => handleRemoveFaq(index)} className="shrink-0 text-xs bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded transition-colors dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40">
+                  <button type="button" onClick={() => handleRemoveFaq(index)} className="shrink-0 self-end text-xs bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded transition-colors dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40 sm:self-auto">
                     Remove
                   </button>
                 </div>

@@ -432,7 +432,7 @@ export default function EditNews() {
   const sectionHeadingClass =
     "text-lg font-semibold text-gray-900 dark:text-white mb-4 transition-colors";
   const selectButtonClassName =
-    "!w-full !justify-between !px-2 !py-1.5 !text-xs border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900/70 text-gray-900 dark:text-white focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30";
+    "w-full px-2 py-1.5 rounded border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900/70 text-xs text-left text-gray-900 dark:text-white flex items-center justify-between outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30";
   const selectDropdownClassName =
     "bg-white dark:bg-slate-900/90 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white";
   const selectOptionClassName =

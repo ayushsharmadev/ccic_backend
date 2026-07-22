@@ -273,8 +273,8 @@ export default function AddExam() {
           <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded w-64 animate-pulse"></div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900/70 border border-gray-200 dark:border-slate-800 rounded-lg p-5 shadow-sm transition-colors duration-300">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+        <div className="bg-white dark:bg-slate-900/70 border border-gray-200 dark:border-slate-800 rounded-lg p-4 sm:p-5 shadow-sm transition-colors duration-300">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-5">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="space-y-2">
                 <div className="h-3.5 bg-gray-200 dark:bg-slate-800 rounded w-24 animate-pulse"></div>
@@ -282,7 +282,7 @@ export default function AddExam() {
               </div>
             ))}
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-5">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="space-y-2">
                 <div className="h-3.5 bg-gray-200 dark:bg-slate-800 rounded w-28 animate-pulse"></div>
@@ -341,14 +341,14 @@ export default function AddExam() {
       </div>
 
       {/* Form */}
-      <div className="bg-white dark:bg-slate-900/70 border border-gray-200 dark:border-slate-800 rounded-lg p-5 shadow-sm transition-colors duration-300">
+      <div className="bg-white dark:bg-slate-900/70 border border-gray-200 dark:border-slate-800 rounded-lg p-4 sm:p-5 shadow-sm transition-colors duration-300">
         <form onSubmit={handleSubmit}>
           {/* Basic Information */}
           <div className="mb-6">
             <h3 className="text-sm font-medium text-gray-900 dark:text-white transition-colors duration-300 mb-3 border-b border-gray-200 dark:border-slate-800 pb-2">
               Basic Information
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Stream */}
               <div>
                 <ApnaSelect
@@ -470,9 +470,9 @@ export default function AddExam() {
             <h3 className="text-sm font-medium text-gray-900 dark:text-white transition-colors duration-300 mb-3 border-b border-gray-200 dark:border-slate-800 pb-2">
               Application Details
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {/* No of Application */}
-              <div>
+              <div className="col-span-2 md:col-span-1">
                 <label className="text-xs font-medium text-gray-700 dark:text-white/80 mb-1 block transition-colors duration-300">
                   Expected Applications
                 </label>
@@ -525,7 +525,7 @@ export default function AddExam() {
             <h3 className="text-sm font-medium text-gray-900 dark:text-white transition-colors duration-300 mb-3 border-b border-gray-200 dark:border-slate-800 pb-2">
               Important Dates
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {/* Application Date */}
               <div>
                 <label className="text-xs font-medium text-gray-700 dark:text-white/80 mb-1 block transition-colors duration-300">
@@ -557,7 +557,7 @@ export default function AddExam() {
               </div>
 
               {/* Result Date */}
-              <div>
+              <div className="col-span-2 md:col-span-1">
                 <label className="text-xs font-medium text-gray-700 dark:text-white/80 mb-1 block transition-colors duration-300">
                   Result Declaration
                 </label>

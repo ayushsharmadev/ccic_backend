@@ -238,11 +238,11 @@ export default function EditBlog() {
           datePublished: new Date().toISOString(),
           author: {
             "@type": "Person",
-            name: "CCIC",
+            name: "VidyaVidhi",
           },
           publisher: {
             "@type": "Organization",
-            name: "CCIC",
+            name: "VidyaVidhi",
             logo: {
               "@type": "ImageObject",
               url: `${window.location.origin}/mainLogo.png`,
@@ -306,22 +306,24 @@ export default function EditBlog() {
   return (
     <div className="h-full p-4 sm:p-5 md:p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
       {/* Header */}
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4">
+        <div className="flex items-center gap-2 mb-0.5">
+          <Link
+            href="/admin/blogs"
+            className="text-gray-600 dark:text-white/70 no-underline text-xs flex items-center gap-1 transition-colors hover:text-gray-800 dark:hover:text-white"
+          >
+            <HiArrowLeft className="w-3.5 h-3.5 text-gray-500 dark:text-white/60" />
+            Back to Blogs
+          </Link>
+        </div>
         <div>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white transition-colors duration-300 mb-1">
+          <h1 className="text-xl font-semibold text-gray-900 dark:text-white transition-colors duration-300 mb-0.5">
             Edit Blog
           </h1>
-          <p className="text-sm text-gray-600 dark:text-white/70 transition-colors duration-300">
+          <p className="text-xs text-gray-600 dark:text-white/70 transition-colors duration-300">
             Update blog article details
           </p>
         </div>
-        <Link
-          href="/admin/blogs"
-          className="flex items-center gap-2 px-3 py-2 text-sm text-gray-700 dark:text-white/80 border border-gray-300 dark:border-slate-700 rounded hover:bg-gray-50 dark:hover:bg-slate-900/60 transition-colors no-underline"
-        >
-          <HiArrowLeft className="w-4 h-4" />
-          Back to Blogs
-        </Link>
       </div>
 
       {/* Form */}

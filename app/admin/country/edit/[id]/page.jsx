@@ -529,6 +529,12 @@ export default function EditCountryPage() {
     "w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded text-sm text-left flex items-center justify-between outline-none focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30 bg-white dark:bg-slate-900/70 text-gray-900 dark:text-white transition-colors cursor-pointer";
   const sectionHeadingClassName =
     "text-lg font-semibold text-gray-900 dark:text-white transition-colors";
+  const optionalText = (
+    <span className="ml-1 whitespace-nowrap text-[10px] font-normal text-gray-500 dark:text-white/45">
+      (Optional)
+    </span>
+  );
+
   const checkboxClassName =
     "w-4 h-4 text-primary border-gray-300 dark:border-slate-700 rounded focus:ring-primary dark:bg-slate-900/70";
   const secondaryActionClassName =
@@ -578,7 +584,7 @@ export default function EditCountryPage() {
       </div>
 
       {/* Form */}
-      <div className="bg-white dark:bg-slate-900/70 border border-gray-200 dark:border-slate-800 rounded-lg p-5 shadow-sm transition-colors">
+      <div className="bg-white dark:bg-slate-900/70 border border-gray-200 dark:border-slate-800 rounded-lg p-4 sm:p-5 shadow-sm transition-colors">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Information */}
           <div className="border-b border-gray-200 dark:border-slate-800 pb-4">
@@ -598,7 +604,7 @@ export default function EditCountryPage() {
               </svg>
               <h2 className={sectionHeadingClassName}>Basic Information</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
               <div>
                 <label className={labelClassName}>Country Name <span className="text-secondary">*</span></label>
                 <ApnaSelect
@@ -753,7 +759,7 @@ export default function EditCountryPage() {
               </svg>
               <h2 className={sectionHeadingClassName}>Media & Documents</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               <div>
                 <ImageUpload
                   title="Country Logo"
@@ -893,7 +899,7 @@ export default function EditCountryPage() {
             
             <div className="mb-6 p-4 border border-primary-200 dark:border-primary/30 rounded-lg bg-primary-50/30 dark:bg-primary/5">
               <h4 className="text-sm font-semibold mb-4 text-gray-900 dark:text-white">Add New Quick Fact</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+              <div className="grid grid-cols-1 gap-4 mb-3">
                 <div>
                   <label className={labelClassName}>Label (e.g. Duration)</label>
                   <input type="text" value={newQuickFact.label} onChange={(e) => handleNewQuickFactChange("label", e.target.value)} className={inputClassName} placeholder="Enter label..." />
@@ -912,15 +918,15 @@ export default function EditCountryPage() {
 
             <div className="space-y-3 mb-4">
               {formData.quickFacts.map((fact, index) => (
-                <div key={index} className="flex items-center justify-between p-4 border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800/50 hover:shadow-sm transition-shadow">
-                  <div className="flex-1 min-w-0 pr-4">
-                    <div className="flex items-center gap-3 mb-1">
+                <div key={index} className="relative flex flex-col items-stretch p-4 sm:flex-row sm:items-center sm:justify-between border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800/50 hover:shadow-sm transition-shadow">
+                  <div className="min-w-0 flex-1 pr-24 sm:pr-4">
+                    <div className="flex min-w-0 flex-col items-start gap-1 sm:flex-row sm:items-center sm:gap-3">
                       <h4 className="font-semibold text-sm text-gray-900 dark:text-white truncate" title={fact.label}>{fact.label}</h4>
-                      <span className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600"></span>
-                      <p className="text-xs text-primary font-medium whitespace-nowrap">{fact.value}</p>
+                      <span className="hidden h-1.5 w-1.5 shrink-0 rounded-full bg-gray-300 dark:bg-gray-600 sm:block"></span>
+                      <p className="max-w-full break-words text-xs font-medium text-primary sm:whitespace-nowrap">{fact.value}</p>
                     </div>
                   </div>
-                  <button type="button" onClick={() => handleRemoveQuickFact(index)} className="shrink-0 text-xs bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded transition-colors dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40">
+                  <button type="button" onClick={() => handleRemoveQuickFact(index)} className="absolute right-4 top-4 shrink-0 text-xs bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded transition-colors dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40 sm:static">
                     Remove
                   </button>
                 </div>
@@ -966,7 +972,7 @@ export default function EditCountryPage() {
               </div>
               <div>
                 <label className={labelClassName}>Long Description</label>
-                <div className="min-h-[300px] border border-gray-200 dark:border-slate-700 rounded overflow-hidden">
+                <div className="min-h-[300px] max-w-full border border-gray-200 dark:border-slate-700 rounded overflow-hidden">
                   <ApnaEditor
                     value={formData.longDescription}
                     onChange={(content) =>
@@ -999,7 +1005,7 @@ export default function EditCountryPage() {
             <div className="space-y-4">
               <div>
                 <label className={labelClassName}>List of Documents (HTML via Editor)</label>
-                <div className="min-h-[200px] border border-gray-200 dark:border-slate-700 rounded overflow-hidden">
+                <div className="min-h-[200px] max-w-full border border-gray-200 dark:border-slate-700 rounded overflow-hidden">
                   <ApnaEditor
                     value={formData.documentsRequired}
                     onChange={(content) =>
@@ -1013,7 +1019,7 @@ export default function EditCountryPage() {
 
           {/* Dynamic Overview Sections */}
           <div className="border-b border-gray-200 dark:border-slate-800 pb-4">
-            <h2 className={sectionHeadingClassName}>Dynamic Overview Sections (Optional)</h2>
+            <h2 className={sectionHeadingClassName}>Dynamic Overview Sections{optionalText}</h2>
             <div className="mb-6 p-4 border border-primary-200 dark:border-primary/30 rounded-lg bg-primary-50/30 dark:bg-primary/5">
               <h3 className="text-sm font-semibold mb-4 text-gray-900 dark:text-white">Add New Section</h3>
               <div className="mb-3">
@@ -1090,7 +1096,7 @@ export default function EditCountryPage() {
             <h2 className={sectionHeadingClassName}>FAQs (Accordion)</h2>
             <div className="mb-6 p-4 border border-primary-200 dark:border-primary/30 rounded-lg bg-primary-50/30 dark:bg-primary/5">
               <h3 className="text-sm font-semibold mb-4 text-gray-900 dark:text-white">Add New FAQ</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
+              <div className="grid grid-cols-1 gap-4 mb-3">
                 <div>
                   <label className={labelClassName}>Question</label>
                   <input type="text" value={newFaq.question} onChange={(e) => setNewFaq({...newFaq, question: e.target.value})} className={inputClassName} placeholder="Enter question..." />
@@ -1108,12 +1114,12 @@ export default function EditCountryPage() {
             </div>
             <div className="space-y-3 mb-4">
               {formData.faqs.map((faq, index) => (
-                <div key={index} className="flex items-start justify-between gap-4 p-4 border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800/50 hover:shadow-sm transition-shadow">
+                <div key={index} className="flex flex-col items-stretch gap-3 p-4 sm:flex-row sm:items-start sm:justify-between sm:gap-4 border border-gray-200 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800/50 hover:shadow-sm transition-shadow">
                   <div className="flex-1 min-w-0">
                     <p className="font-semibold text-sm text-gray-900 dark:text-white">Q: {faq.question}</p>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">A: {faq.answer}</p>
                   </div>
-                  <button type="button" onClick={() => handleRemoveFaq(index)} className="shrink-0 text-xs bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded transition-colors dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40">
+                  <button type="button" onClick={() => handleRemoveFaq(index)} className="shrink-0 self-end text-xs bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded transition-colors dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/40 sm:self-auto">
                     Remove
                   </button>
                 </div>
@@ -1140,11 +1146,11 @@ export default function EditCountryPage() {
                   d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
                 />
               </svg>
-              <h2 className={sectionHeadingClassName}>SEO Information (Optional)</h2>
+              <h2 className={sectionHeadingClassName}>SEO Information{optionalText}</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className={labelClassName}>Meta Title (Optional)</label>
+                <label className={labelClassName}>Meta Title{optionalText}</label>
                 <input
                   type="text"
                   name="metaTitle"
@@ -1155,7 +1161,7 @@ export default function EditCountryPage() {
                 />
               </div>
               <div>
-                <label className={labelClassName}>Focus Keyword (Optional)</label>
+                <label className={labelClassName}>Focus Keyword{optionalText}</label>
                 <input
                   type="text"
                   name="focusKeyword"
@@ -1165,8 +1171,8 @@ export default function EditCountryPage() {
                   className={inputClassName}
                 />
               </div>
-              <div className="col-span-1 md:col-span-2">
-                <label className={labelClassName}>Meta Description (Optional)</label>
+              <div className="col-span-full">
+                <label className={labelClassName}>Meta Description{optionalText}</label>
                 <textarea
                   name="metaDescription"
                   value={formData.metaDescription}
@@ -1176,39 +1182,39 @@ export default function EditCountryPage() {
                   placeholder="Enter meta description"
                 />
               </div>
-              <div className="col-span-1 md:col-span-2 mt-4 pt-4 border-t border-gray-200 dark:border-slate-800">
+              <div className="col-span-full mt-4 pt-4 border-t border-gray-200 dark:border-slate-800">
                 <h3 className="text-sm font-medium mb-3 text-gray-900 dark:text-white">Advanced SEO & Open Graph</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className={labelClassName}>Meta Keywords (Optional)</label>
+                    <label className={labelClassName}>Meta Keywords{optionalText}</label>
                     <input type="text" name="metaKeywords" value={formData.metaKeywords} onChange={handleInputChange} placeholder="e.g. mbbs in china, study abroad" className={inputClassName} />
                   </div>
                   <div>
-                    <label className={labelClassName}>Canonical URL (Optional)</label>
+                    <label className={labelClassName}>Canonical URL{optionalText}</label>
                     <input type="text" name="canonicalUrl" value={formData.canonicalUrl} onChange={handleInputChange} placeholder="https://example.com/country/china" className={inputClassName} />
                   </div>
                   <div>
-                    <label className={labelClassName}>OG Title (Optional)</label>
+                    <label className={labelClassName}>OG Title{optionalText}</label>
                     <input type="text" name="ogTitle" value={formData.ogTitle} onChange={handleInputChange} className={inputClassName} />
                   </div>
                   <div>
-                    <label className={labelClassName}>OG Description (Optional)</label>
+                    <label className={labelClassName}>OG Description{optionalText}</label>
                     <textarea name="ogDescription" value={formData.ogDescription} onChange={handleInputChange} rows={2} className={inputClassName} />
                   </div>
-                  <div className="col-span-1 md:col-span-2">
-                    <label className={labelClassName}>OG Image URL (Optional)</label>
+                  <div className="col-span-full">
+                    <label className={labelClassName}>OG Image URL{optionalText}</label>
                     <input type="text" name="ogImage" value={formData.ogImage} onChange={handleInputChange} className={inputClassName} />
                   </div>
                   <div>
-                    <label className={labelClassName}>Twitter Title (Optional)</label>
+                    <label className={labelClassName}>Twitter Title{optionalText}</label>
                     <input type="text" name="twitterTitle" value={formData.twitterTitle} onChange={handleInputChange} className={inputClassName} />
                   </div>
                   <div>
-                    <label className={labelClassName}>Twitter Description (Optional)</label>
+                    <label className={labelClassName}>Twitter Description{optionalText}</label>
                     <textarea name="twitterDescription" value={formData.twitterDescription} onChange={handleInputChange} rows={2} className={inputClassName} />
                   </div>
-                  <div className="col-span-1 md:col-span-2">
-                    <label className={labelClassName}>Twitter Image URL (Optional)</label>
+                  <div className="col-span-full">
+                    <label className={labelClassName}>Twitter Image URL{optionalText}</label>
                     <input type="text" name="twitterImage" value={formData.twitterImage} onChange={handleInputChange} className={inputClassName} />
                   </div>
                 </div>
@@ -1234,7 +1240,7 @@ export default function EditCountryPage() {
               </svg>
               <h2 className={sectionHeadingClassName}>Status & Metadata</h2>
             </div>
-            <div className="grid grid-cols-3 gap-4 mb-4">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
               <div>
                 <label className={labelClassName}>Status</label>
                 <select
@@ -1260,7 +1266,7 @@ export default function EditCountryPage() {
                 />
               </div>
             </div>
-            <div className="flex items-center gap-6">
+            <div className="flex flex-wrap items-center gap-4 sm:gap-6">
               <label className="flex items-center gap-2 text-sm font-medium text-gray-700 dark:text-white/80 cursor-pointer">
                 <input
                   type="checkbox"

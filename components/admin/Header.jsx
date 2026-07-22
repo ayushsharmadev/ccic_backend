@@ -315,7 +315,7 @@ export default function Header({ onMenuClick }) {
       <div className="flex shrink-0 items-center gap-x-1 min-[400px]:gap-x-2 lg:gap-x-4">
         <ThemeToggle
           size="sm"
-          className="hidden sm:inline-flex bg-transparent shadow-none text-gray-600 dark:text-white/80 hover:bg-gray-100/60 dark:hover:bg-slate-800/70 focus:ring-primary/30"
+          className="hidden sm:inline-flex"
         />
         {/* Profile dropdown */}
         <div className="relative z-[110]" ref={dropdownRef}>
@@ -372,10 +372,7 @@ export default function Header({ onMenuClick }) {
                   <span className="text-xs font-medium text-gray-600 dark:text-white/70">
                     Appearance
                   </span>
-                  <ThemeToggle
-                    size="sm"
-                    className="border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-none"
-                  />
+                  <ThemeToggle size="sm" />
                 </div>
               </div>
 

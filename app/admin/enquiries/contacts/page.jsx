@@ -259,14 +259,22 @@ export default function ContactEnquiriesPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex gap-3 mb-4">
-        <div className="relative flex-1 max-w-xs">
+      <div className="mb-4 grid grid-cols-[minmax(0,1fr)_minmax(9rem,0.72fr)] gap-3">
+        <div className="relative min-w-0 w-full">
+          <svg
+            className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-white/40"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
           <input
             type="text"
-            placeholder="Search by name, phone, email..."
+            placeholder="Search contacts"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-3 pr-2 py-1.5 border border-gray-300 dark:border-slate-700 rounded text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors duration-300 placeholder:text-gray-400 dark:placeholder:text-white/40"
+            className="w-full pl-7 pr-2 py-1.5 border border-gray-300 dark:border-slate-700 rounded text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors duration-300 placeholder:text-gray-400 dark:placeholder:text-white/40"
           />
         </div>
         <ApnaSelect
@@ -277,7 +285,8 @@ export default function ContactEnquiriesPage() {
           placeholder="Filter by status"
           searchable={false}
           required={false}
-          buttonClassName="px-3 py-1.5 border border-gray-300 dark:border-slate-700 rounded text-sm outline-none focus:border-primary bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors duration-300 flex items-center justify-between text-left cursor-pointer"
+          className="min-w-0 w-full"
+          buttonClassName="w-full px-3 py-1.5 border border-gray-300 dark:border-slate-700 rounded text-sm outline-none focus:border-primary bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors duration-300 flex items-center justify-between text-left cursor-pointer"
         />
       </div>
 

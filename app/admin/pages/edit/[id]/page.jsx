@@ -191,7 +191,7 @@ const EditPage = ({ params }) => {
     "text-xl font-semibold text-gray-900 dark:text-white mb-0.5";
   const headerSubtitleClass = "text-xs text-gray-600 dark:text-white/70";
   const aiButtonClass =
-    "flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-700 transition-colors duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed text-sm focus:outline-none focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary/30";
+    "flex shrink-0 self-end items-center gap-2 whitespace-nowrap px-4 py-2 bg-primary sm:self-auto text-white rounded-lg hover:bg-primary-700 transition-colors duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed text-sm focus:outline-none focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary/30";
   const cardClass =
     "bg-white dark:bg-slate-900/70 border border-gray-200 dark:border-slate-800 rounded-lg p-5 shadow-sm transition-colors";
   const labelClassName =
@@ -210,7 +210,7 @@ const EditPage = ({ params }) => {
   const modalInputClass =
     "w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30 bg-white dark:bg-slate-900/70 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/50 transition-colors";
   const selectButtonClassName =
-    "!w-full !justify-between !px-2 !py-1.5 !text-xs border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900/70 text-gray-900 dark:text-white focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30";
+    "w-full px-2 py-1.5 rounded border border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900/70 text-xs text-left text-gray-900 dark:text-white flex items-center justify-between outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30";
   const selectDropdownClassName =
     "bg-white dark:bg-slate-900/90 border border-gray-200 dark:border-slate-700 text-gray-900 dark:text-white";
   const selectOptionClassName =
@@ -557,7 +557,7 @@ const EditPage = ({ params }) => {
             Back to Pages
           </Link>
         </div>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className={headerTitleClass}>Edit Page</h1>
             <p className={headerSubtitleClass}>

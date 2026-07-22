@@ -382,9 +382,9 @@ export default function PageCategoryList() {
       </div>
 
       {/* Search & Add Button Skeleton */}
-      <div className="flex justify-between items-center mb-4">
-        <div className="h-7 bg-gray-200 dark:bg-slate-800 rounded w-60 animate-pulse"></div>
-        <div className="h-7 bg-gray-200 dark:bg-slate-800 rounded w-32 animate-pulse"></div>
+      <div className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 md:flex md:justify-between">
+        <div className="h-7 min-w-0 w-full bg-gray-200 dark:bg-slate-800 rounded animate-pulse md:w-60"></div>
+        <div className="h-7 w-28 shrink-0 bg-gray-200 dark:bg-slate-800 rounded animate-pulse"></div>
       </div>
 
       {/* Table Skeleton */}
@@ -429,7 +429,7 @@ export default function PageCategoryList() {
   const searchInputClass =
     "w-full pl-7 pr-2 py-1.5 border border-gray-300 dark:border-slate-700 rounded text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30 bg-white dark:bg-slate-900/70 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/50 transition-colors";
   const buttonPrimaryClass =
-    "bg-primary hover:bg-primary-700 text-white px-3 py-1.5 rounded text-xs font-medium flex items-center gap-1 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary/30";
+    "shrink-0 whitespace-nowrap bg-primary hover:bg-primary-700 text-white px-3 py-1.5 rounded text-xs font-medium flex items-center gap-1 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary/30";
   const selectedBannerClass =
     "mb-4 p-3 bg-primary-50 dark:bg-primary/15 border border-primary-200 dark:border-primary/30 rounded-lg transition-colors";
   const selectedTextClass = "text-sm text-primary-800 dark:text-primary-100";
@@ -454,8 +454,8 @@ export default function PageCategoryList() {
       </div>
 
       {/* Search and Add Button */}
-      <div className="flex justify-between items-center mb-4">
-        <div className="relative w-60">
+      <div className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 md:flex md:justify-between">
+        <div className="relative min-w-0 w-full md:w-60">
           <svg
             className={searchIconClass}
             fill="none"

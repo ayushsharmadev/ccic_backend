@@ -405,7 +405,7 @@ export default function Sidebar({ isOpen, onClose }) {
                 <span className="text-white font-bold text-sm">BA</span>
               </div> */}
               <Image src="/fav.png" alt="CCIC" className="h-8 w-8 object-contain" width={30} height={30} />
-              <span className="font-bold text-gray-900 dark:text-white lg:text-gray-900 text-lg dark:lg:text-primary">
+              <span className="font-bold text-gray-900 dark:text-white lg:text-primary text-lg dark:lg:text-primary">
                 CCIC
               </span>
               {/* <Image
@@ -439,7 +439,7 @@ export default function Sidebar({ isOpen, onClose }) {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto">
+          <nav className="flex-1 overflow-y-auto mt-2">
             <ul className="space-y-1 p-2">
               {menuItems.map((item) => (
                 <li key={item.id}>

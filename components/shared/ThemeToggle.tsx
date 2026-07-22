@@ -210,7 +210,7 @@ export default function ThemeToggle({
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "inline-flex items-center justify-center rounded-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-700 dark:text-white/80 hover:bg-gray-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/40 transition-colors duration-200 shadow-sm",
+          "inline-flex cursor-pointer items-center justify-center rounded-full border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-700 dark:text-white/80 hover:bg-gray-50 dark:hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/40 transition-colors duration-200 shadow-sm",
           sizeStyles[size]
         )}
         aria-label="Select theme"
