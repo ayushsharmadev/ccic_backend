@@ -104,7 +104,7 @@ export const GET = withAdminAuth(async (request) => {
       activities.push({
         id: `college-${college._id}`,
         type: isNew ? "college_added" : "college_updated",
-        title: isNew ? "New MBBS college added" : "MBBS college updated",
+        title: isNew ? "New college added" : "College updated",
         description: `${college.name} was ${isNew ? "added to" : "updated in"} the system`,
         time: college.updatedAt || college.createdAt,
         icon: isNew ? "add" : "edit",
@@ -136,7 +136,7 @@ export const GET = withAdminAuth(async (request) => {
       activities.push({
         id: `exam-${exam._id}`,
         type: isNew ? "exam_created" : "exam_updated",
-        title: isNew ? "New MBBS exam created" : "MBBS exam updated",
+        title: isNew ? "New exam created" : "Exam updated",
         description: `${exam.title} exam ${isNew ? "details added" : "was updated"}`,
         time: exam.updatedAt || exam.createdAt,
         icon: isNew ? "exam" : "edit",
@@ -151,7 +151,7 @@ export const GET = withAdminAuth(async (request) => {
       activities.push({
         id: `course-${course._id}`,
         type: isNew ? "course_added" : "course_updated",
-        title: isNew ? "New MBBS course added" : "MBBS course updated",
+        title: isNew ? "New course added" : "Course updated",
         description: `${course.name} course ${isNew ? "created" : "was updated"}`,
         time: course.updatedAt || course.createdAt,
         icon: isNew ? "course" : "edit",

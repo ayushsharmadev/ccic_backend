@@ -84,7 +84,7 @@ export default function StudentEnquiriesPage() {
         page: page.toString(),
         limit: "10",
         search: search,
-        formType: "mbbs_admission,apply_enquiry",
+        formType: "admission_enquiry,apply_enquiry",
         ...(status && { status }),
       });
 

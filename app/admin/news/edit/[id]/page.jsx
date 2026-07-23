@@ -675,7 +675,7 @@ export default function EditNews() {
                     onChange={(e) =>
                       handleInputChange("metaKeywords", e.target.value)
                     }
-                    placeholder="e.g., mbbs admission, neet exam, ayurveda news"
+                    placeholder="e.g., study abroad, admissions, visa updates"
                     className={inputClassName}
                   />
                   <p className={helperTextClassName}>

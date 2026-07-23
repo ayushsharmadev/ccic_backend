@@ -328,7 +328,7 @@ export default function EditTestimonialPage() {
                 onChange={(e) =>
                   handleInputChange("designation", e.target.value)
                 }
-                placeholder="e.g., MBBS Graduate, MBBS Student"
+                placeholder="e.g., International Student, University Graduate"
                 required
                 className="w-full px-2 py-1.5 border border-gray-300 dark:border-slate-700 rounded text-xs outline-none focus:border-primary focus:ring-2 focus:ring-primary-50 bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors duration-300 placeholder:text-gray-400 dark:placeholder:text-white/40"
               />

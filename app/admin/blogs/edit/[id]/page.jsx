@@ -466,7 +466,7 @@ export default function EditBlog() {
                   name="tags"
                   value={formData.tags}
                   onChange={handleInputChange}
-                  placeholder="MBBS, Education, Career"
+                  placeholder="Study Abroad, Education, Career"
                   className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary-50 bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors duration-300 placeholder:text-gray-400 dark:placeholder:text-white/40"
                 />
               </div>
@@ -583,7 +583,7 @@ export default function EditBlog() {
                     name="metaKeywords"
                     value={formData.metaKeywords}
                     onChange={handleInputChange}
-                    placeholder="e.g., ayurveda, mbbs, medical education"
+                    placeholder="e.g., study abroad, admissions, career guidance"
                     className="w-full px-3 py-2 border border-gray-300 dark:border-slate-700 rounded text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary-50 bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors duration-300 placeholder:text-gray-400 dark:placeholder:text-white/40"
                   />
                   <p className="text-xs text-gray-500 dark:text-white/60 mt-1 transition-colors duration-300">

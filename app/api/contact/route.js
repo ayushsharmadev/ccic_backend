@@ -36,6 +36,8 @@ export async function POST(request) {
     const ipAddress = request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown";
     const userAgent = request.headers.get("user-agent") || "";
     const referrer = request.headers.get("referer") || "";
+    const normalizedFormType =
+      formType === "mbbs_admission" ? "admission_enquiry" : formType;
 
     // Create contact entry
     const contact = await Contact.create({
@@ -44,11 +46,11 @@ export async function POST(request) {
       email: email.trim().toLowerCase(),
       city: city?.trim() || "",
       neetScore: neetScore || "",
-      course: course || "MBBS",
+      course: course?.trim() || "",
       message: message || "",
       preferredColleges: preferredColleges || [],
       source: source || "contact",
-      formType: formType || "contact",
+      formType: normalizedFormType || "contact",
       meta: meta || {},
       ipAddress,
       userAgent,

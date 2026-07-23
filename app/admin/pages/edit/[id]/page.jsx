@@ -587,7 +587,7 @@ const EditPage = ({ params }) => {
                 type="text"
                 value={formData.title}
                 onChange={(e) => handleInputChange("title", e.target.value)}
-                placeholder="e.g., About MBBS Education in India"
+                placeholder="e.g., Study Abroad Guidance and Counselling"
                 required
                 className={inputClassName}
               />
@@ -599,7 +599,7 @@ const EditPage = ({ params }) => {
                 type="text"
                 value={formData.slug}
                 onChange={(e) => handleInputChange("slug", e.target.value)}
-                placeholder="about-mbbs-education-in-india"
+                placeholder="study-abroad-guidance"
                 required
                 className={inputClassName}
               />
@@ -827,7 +827,7 @@ const EditPage = ({ params }) => {
                       handleInputChange("metaTitle", e.target.value)
                     }
                     maxLength={60}
-                    placeholder="MBBS Education India | Complete Guide"
+                    placeholder="Study Abroad Guidance | Complete Guide"
                     className={inputClassName}
                   />
                   <p className={helperTextClassName}>
@@ -844,7 +844,7 @@ const EditPage = ({ params }) => {
                       handleInputChange("focusKeyword", e.target.value)
                     }
                     maxLength={100}
-                    placeholder="MBBS Education India"
+                    placeholder="Study Abroad Guidance"
                     className={inputClassName}
                   />
                 </div>
@@ -861,7 +861,7 @@ const EditPage = ({ params }) => {
                   }
                   rows={2}
                   maxLength={160}
-                  placeholder="Explore MBBS colleges, admission process, eligibility criteria and career opportunities in Bangladesh medicine."
+                  placeholder="Explore universities, courses, admission processes, eligibility criteria and study abroad opportunities."
                   className={textareaClassName}
                 />
                 <p className={helperTextClassName}>
@@ -879,7 +879,7 @@ const EditPage = ({ params }) => {
                   onChange={(e) =>
                     handleInputChange("metaKeywords", e.target.value)
                   }
-                  placeholder="mbbs, ayurveda, college"
+                  placeholder="study abroad, admissions, counselling"
                   className={inputClassName}
                 />
               </div>
@@ -892,7 +892,7 @@ const EditPage = ({ params }) => {
                   onChange={(e) =>
                     handleInputChange("canonicalUrl", e.target.value)
                   }
-                  placeholder="https://mbbscollegeBangladesh.com/page/your-slug"
+                  placeholder="https://example.com/page/your-slug"
                   className={inputClassName}
                 />
               </div>
@@ -914,7 +914,7 @@ const EditPage = ({ params }) => {
                       handleInputChange("ogTitle", e.target.value)
                     }
                     maxLength={60}
-                    placeholder="MBBS Education Guide | Colleges & Admission"
+                    placeholder="Study Abroad Guide | Universities & Admission"
                     className={inputClassName}
                   />
                   <p className={helperTextClassName}>
@@ -933,7 +933,7 @@ const EditPage = ({ params }) => {
                     }
                     rows={2}
                     maxLength={160}
-                    placeholder="Discover top MBBS colleges, admission process, eligibility criteria and career opportunities in Bangladesh medicine."
+                    placeholder="Discover universities, courses, admission requirements and study abroad opportunities."
                     className={textareaClassName}
                   />
                   <p className={helperTextClassName}>
@@ -976,7 +976,7 @@ const EditPage = ({ params }) => {
                       handleInputChange("twitterTitle", e.target.value)
                     }
                     maxLength={60}
-                    placeholder="MBBS Education Guide | Colleges & Admission"
+                    placeholder="Study Abroad Guide | Universities & Admission"
                     className={inputClassName}
                   />
                   <p className={helperTextClassName}>
@@ -995,7 +995,7 @@ const EditPage = ({ params }) => {
                     }
                     rows={2}
                     maxLength={160}
-                    placeholder="Discover top MBBS colleges, admission process, eligibility criteria and career opportunities in Bangladesh medicine."
+                    placeholder="Discover universities, courses, admission requirements and study abroad opportunities."
                     className={textareaClassName}
                   />
                   <p className={helperTextClassName}>

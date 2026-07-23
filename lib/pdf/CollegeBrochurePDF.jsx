@@ -805,7 +805,7 @@ const CollegeBrochurePDF = ({ college }) => {
           {/* Call to Action */}
           <View style={styles.ctaBox}>
             <Text style={styles.ctaTitle}>
-              🎓 Start Your MBBS Journey Today!
+              🎓 Start Your Study Abroad Journey Today!
             </Text>
             <Text style={styles.ctaSubtitle}>
               Visit www.ccic.com for online application and

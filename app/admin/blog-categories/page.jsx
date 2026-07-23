@@ -377,7 +377,7 @@ export default function BlogCategoriesList() {
           Blog Categories Management
         </h1>
         <p className="text-xs text-gray-600 dark:text-white/70 transition-colors duration-300">
-          Manage and organize blog categories for MBBS content
+          Manage and organize blog categories for education and counselling content
         </p>
       </div>
 
