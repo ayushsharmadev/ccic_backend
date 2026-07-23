@@ -339,13 +339,13 @@ export default function ExamList() {
         <div className="flex gap-1 justify-center">
           <button
             onClick={() => handleEdit(item)}
-            className="px-2 py-1 text-xs text-primary dark:text-primary-200 border border-primary dark:border-primary/60 rounded bg-transparent cursor-pointer transition-colors duration-200 hover:bg-primary-50 dark:hover:bg-primary/20"
+            className="admin-action admin-action-edit"
           >
             Edit
           </button>
           <button
             onClick={() => handleDelete(item)}
-            className="px-2 py-1 text-xs text-secondary dark:text-secondary-200 border border-secondary dark:border-secondary/60 rounded bg-transparent cursor-pointer transition-colors duration-200 hover:bg-secondary-50 dark:hover:bg-secondary/20"
+            className="admin-action admin-action-delete"
           >
             Delete
           </button>

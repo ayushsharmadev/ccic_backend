@@ -227,13 +227,13 @@ export default function DistanceMeterList() {
         <div className="flex gap-1 justify-center items-center">
           <Link
             href={`/admin/distance-meters/edit/${item.id}`}
-            className="px-2 py-1 text-xs text-primary border border-primary rounded bg-transparent no-underline transition-colors duration-200 hover:bg-blue-50 dark:hover:bg-primary/20 dark:text-primary-200 dark:border-primary/60"
+            className="admin-action admin-action-edit"
           >
             Edit
           </Link>
           <button
             onClick={() => handleDelete(item.id)}
-            className="px-2 py-1 text-xs text-secondary border border-secondary rounded bg-transparent cursor-pointer transition-colors duration-200 hover:bg-secondary-50 dark:text-secondary-200 dark:border-secondary/60 dark:hover:bg-secondary/20"
+            className="admin-action admin-action-delete"
           >
             Delete
           </button>

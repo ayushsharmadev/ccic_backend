@@ -332,18 +332,18 @@ export default function NewsPage() {
         <div className="flex gap-2 justify-center">
           <button
             onClick={() => handleViewClick(item.title, item.content)}
-            className="px-2 py-1 text-xs text-blue-600 dark:text-blue-300 border border-blue-600 dark:border-blue-400 rounded bg-transparent cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors"
+            className="admin-action admin-action-view"
           >
             View
           </button>
           <Link
             href={`/admin/news/edit/${item.id}`}
-            className="px-2 py-1 text-xs text-primary border border-primary rounded bg-transparent no-underline hover:bg-primary-50 dark:hover:bg-primary/20 transition-colors"
+            className="admin-action admin-action-edit"
           >
             Edit
           </Link>
           <button
-            className="px-2 py-1 text-xs text-secondary border border-secondary rounded bg-transparent cursor-pointer hover:bg-secondary-50 dark:hover:bg-secondary/20 transition-colors"
+            className="admin-action admin-action-delete"
             onClick={() => handleDeleteClick(item.id, item.title)}
           >
             Delete

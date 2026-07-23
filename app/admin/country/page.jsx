@@ -190,7 +190,7 @@ export default function CountryList() {
         <div className="flex gap-1 justify-start items-center flex-nowrap">
           <Link
             href={`/admin/country/edit/${item.id}`}
-            className="px-2 py-1 text-xs text-blue-600 border border-blue-300 rounded bg-transparent no-underline hover:bg-blue-50 transition-colors"
+            className="admin-action admin-action-edit"
           >
             Edit
           </Link>

@@ -73,12 +73,12 @@ export default function FooterSectionsPage() {
         <div className="flex gap-2 justify-center">
           <Link
             href={`/admin/footer-sections/edit/${item.id}`}
-            className="px-2 py-1 text-xs text-primary dark:text-primary-200 border border-primary dark:border-primary/60 rounded bg-transparent no-underline transition-colors duration-200 hover:bg-primary-50 dark:hover:bg-primary/20"
+            className="admin-action admin-action-edit"
           >
             Edit
           </Link>
           <button
-            className="px-2 py-1 text-xs text-secondary dark:text-secondary-200 border border-secondary dark:border-secondary/60 rounded bg-transparent cursor-pointer transition-colors duration-200 hover:bg-secondary-50 dark:hover:bg-secondary/20"
+            className="admin-action admin-action-delete"
             onClick={() => handleDeleteClick(item.id, item.title)}
           >
             Delete

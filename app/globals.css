@@ -305,6 +305,89 @@ body {
   @apply bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-md px-4 py-2 font-medium transition-colors;
 }
 
+/* Shared admin CRUD actions. Scoped away from the public site. */
+.admin-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid;
+  border-radius: 0.25rem;
+  background-color: transparent;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 500;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 200ms, background-color 200ms, border-color 200ms;
+}
+
+.admin-action-view {
+  color: #d97706;
+  border-color: color-mix(in srgb, currentColor 28%, transparent);
+}
+
+.admin-action-view:hover {
+  background-color: #fffbeb;
+}
+
+.admin-action-edit {
+  color: var(--primary);
+  border-color: color-mix(in srgb, currentColor 28%, transparent);
+}
+
+.admin-action-edit:hover {
+  background-color: color-mix(in srgb, var(--primary) 10%, transparent);
+}
+
+.admin-action-delete {
+  color: #dc2626;
+  border-color: color-mix(in srgb, currentColor 28%, transparent);
+}
+
+.admin-action-delete:hover {
+  background-color: #fef2f2;
+}
+
+.dark .admin-action-view {
+  color: #fbbf24;
+  border-color: color-mix(in srgb, currentColor 28%, transparent);
+}
+
+.dark .admin-action-view:hover {
+  background-color: rgba(251, 191, 36, 0.12);
+}
+
+.dark .admin-action-edit {
+  color: var(--primary);
+  border-color: color-mix(in srgb, currentColor 28%, transparent);
+}
+
+.dark .admin-action-edit:hover {
+  background-color: color-mix(in srgb, var(--primary) 14%, transparent);
+}
+
+.dark .admin-action-delete {
+  color: #ef4444;
+  border-color: color-mix(in srgb, currentColor 28%, transparent);
+}
+
+.dark .admin-action-delete:hover {
+  background-color: rgba(239, 68, 68, 0.12);
+}
+
+.admin-action:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.admin-action:disabled,
+.admin-action[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 .input {
   @apply flex h-10 w-full rounded-md border border-border bg-input px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50;
 }

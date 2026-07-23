@@ -342,7 +342,7 @@ export default function CollegeList() {
         <div className="flex gap-1 justify-start items-center flex-nowrap whitespace-nowrap [&>*]:shrink-0">
           <Link
             href={`/admin/college/edit/${item.id}`}
-            className="px-2 py-1 text-xs text-primary border border-primary rounded bg-transparent no-underline hover:bg-blue-50"
+            className="admin-action admin-action-edit"
           >
             Edit
           </Link>

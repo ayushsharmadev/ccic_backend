@@ -323,21 +323,21 @@ export default function UsersPage() {
         <div className="flex gap-1 justify-center">
           <button
             onClick={() => handleView(user)}
-            className="px-2 py-1 text-xs text-primary border border-primary rounded bg-transparent cursor-pointer hover:bg-primary-50 dark:hover:bg-primary/15 transition-colors"
+            className="admin-action admin-action-view"
           >
             <HiEye className="w-3 h-3 mr-1 inline" />
             View
           </button>
           <button
             onClick={() => handleEdit(user)}
-            className="px-2 py-1 text-xs text-primary-600 border border-primary-600 rounded bg-transparent cursor-pointer hover:bg-primary-50 dark:hover:bg-primary/15 transition-colors"
+            className="admin-action admin-action-edit"
           >
             <HiPencil className="w-3 h-3 mr-1 inline" />
             Edit
           </button>
           <button
             onClick={() => handleDelete(user)}
-            className="px-2 py-1 text-xs text-secondary border border-secondary rounded bg-transparent cursor-pointer hover:bg-secondary-50 dark:hover:bg-secondary/15 transition-colors"
+            className="admin-action admin-action-delete"
           >
             <HiTrash className="w-3 h-3 mr-1 inline" />
             Delete
