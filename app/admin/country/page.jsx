@@ -88,9 +88,8 @@ export default function CountryList() {
           isPopular: country.isPopular || false,
           displayOrder: country.displayOrder || 0,
           logo: country.logo || null,
-          sectionsCount: country.sections?.length || 0,
+          sectionsCount: country.sectionsCount || 0,
           galleryCount: country.countryGallery?.length || 0,
-          pathwaysCount: country.studyPathways?.length || 0,
         }));
         
         setCountries(transformedCountries);
@@ -195,13 +194,6 @@ export default function CountryList() {
             Edit
           </Link>
           <Link
-            href={`/admin/country/pathways/${item.id}`}
-            className="px-2 py-1 text-xs text-orange-600 border border-orange-300 rounded bg-transparent no-underline hover:bg-orange-50 transition-colors"
-            title={`Manage Pathways`}
-          >
-            Pathways
-          </Link>
-          <Link
             href={`/admin/country/sections/${item.id}`}
             className="px-2 py-1 text-xs text-indigo-600 border border-indigo-300 rounded bg-transparent no-underline hover:bg-indigo-50 transition-colors"
             title={`Manage Sections (${item.sectionsCount || 0})`}
@@ -209,14 +201,14 @@ export default function CountryList() {
             Sections ({item.sectionsCount || 0})
           </Link>
           <Link
-            href={`/admin/country/gallery/${item.id}`}
+            href={`/admin/country/edit/${item.id}#gallery`}
             className="px-2 py-1 text-xs text-purple-600 border border-purple-300 rounded bg-transparent no-underline hover:bg-purple-50 transition-colors"
             title={`Manage Gallery (${item.galleryCount || 0})`}
           >
             Gallery ({item.galleryCount || 0})
           </Link>
           <Link
-            href={`/admin/country/seo/${item.id}`}
+            href={`/admin/country/edit/${item.id}#seo`}
             className="px-2 py-1 text-xs text-pink-600 border border-pink-300 rounded bg-transparent no-underline hover:bg-pink-50 transition-colors"
             title="Manage SEO Data"
           >

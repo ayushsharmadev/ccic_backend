@@ -303,6 +303,7 @@ const styles = StyleSheet.create({
   },
   ctaTitle: {
     fontSize: 16,
+    lineHeight: 1.25,
     fontWeight: "bold",
     color: "#ffffff",
     marginBottom: 6,
@@ -805,7 +806,7 @@ const CollegeBrochurePDF = ({ college }) => {
           {/* Call to Action */}
           <View style={styles.ctaBox}>
             <Text style={styles.ctaTitle}>
-              🎓 Start Your Study Abroad Journey Today!
+              Start Your Study Abroad Journey Today!
             </Text>
             <Text style={styles.ctaSubtitle}>
               Visit www.ccic.com for online application and

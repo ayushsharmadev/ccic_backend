@@ -137,6 +137,22 @@ html {
   user-select: none;
 }
 
+button,
+[role="button"],
+a[href],
+summary,
+label[for],
+select {
+  cursor: pointer;
+}
+
+button:disabled,
+[role="button"][aria-disabled="true"],
+a[aria-disabled="true"],
+select:disabled {
+  cursor: not-allowed;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

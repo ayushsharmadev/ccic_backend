@@ -210,6 +210,19 @@ export default function EditCountryPage() {
     };
   }, [countryId, getAccessToken, router]);
 
+  useEffect(() => {
+    if (loading || !window.location.hash) return;
+
+    const target = document.querySelector(window.location.hash);
+    if (!target) return;
+
+    const frameId = window.requestAnimationFrame(() => {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+
+    return () => window.cancelAnimationFrame(frameId);
+  }, [loading]);
+
   const handleAddSection = () => {
     const title = newSection.title.trim();
     const content = newSection.content?.trim() || "";
@@ -846,7 +859,10 @@ export default function EditCountryPage() {
             </div>
 
             {/* Country Gallery */}
-            <div className="mt-6 pt-4 border-t border-dashed border-gray-200 dark:border-slate-700">
+            <div
+              id="gallery"
+              className="scroll-mt-24 mt-6 pt-4 border-t border-dashed border-gray-200 dark:border-slate-700"
+            >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Country Gallery</h3>
               </div>
@@ -1131,7 +1147,10 @@ export default function EditCountryPage() {
           </div>
   
           {/* SEO Information */}
-          <div className="border-b border-gray-200 dark:border-slate-800 pb-4">
+          <div
+            id="seo"
+            className="scroll-mt-24 border-b border-gray-200 dark:border-slate-800 pb-4"
+          >
             <div className="flex items-center gap-2 mb-4">
               <svg
                 className="w-5 h-5 text-primary"

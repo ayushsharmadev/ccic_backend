@@ -236,19 +236,27 @@ export const GET = withAdminAuth(async (request) => {
       .populate("currency", "name code symbol status")
       .lean();
 
-    const countriesWithCounts = await Promise.all(
-      countries.map(async (country) => {
-        const sectionsCount = await CountrySection.countDocuments({
-          country: country._id,
-          status: "active",
-        });
-
-        return {
-          ...country,
-          sectionsCount,
-        };
-      })
+    const countryIds = countries.map((country) => country._id);
+    const sectionCounts = await CountrySection.aggregate([
+      {
+        $match: {
+          country: { $in: countryIds },
+        },
+      },
+      {
+        $group: {
+          _id: "$country",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+    const sectionCountMap = new Map(
+      sectionCounts.map((item) => [item._id.toString(), item.count])
     );
+    const countriesWithCounts = countries.map((country) => ({
+      ...country,
+      sectionsCount: sectionCountMap.get(country._id.toString()) || 0,
+    }));
 
     return NextResponse.json({
       success: true,

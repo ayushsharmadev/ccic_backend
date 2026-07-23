@@ -90,9 +90,11 @@ export async function GET(request) {
     if (course || exam) {
       const allocationMatch = { "assignedCourses.isActive": true };
       if (course) {
-        try {
+        if (mongoose.isValidObjectId(course)) {
           allocationMatch["assignedCourses.course"] = new mongoose.Types.ObjectId(course);
-        } catch(e) { }
+        } else {
+          allocationMatch["assignedCourses.course"] = null;
+        }
       }
       if (exam) {
         try {
@@ -102,7 +104,9 @@ export async function GET(request) {
           } else {
              allocationMatch["assignedCourses.course"] = null;
           }
-        } catch(e) { }
+        } catch {
+          allocationMatch["assignedCourses.course"] = null;
+        }
       }
 
       const allocations = await CollegeCourseAllocation.aggregate([
@@ -145,7 +149,7 @@ export async function GET(request) {
     }
 
     const collegeQuery = College.find(filter)
-      .populate("country", "name")
+      .populate("country", "name logo")
       .populate("state", "name")
       .populate("district", "name")
       .populate("ownership", "name")
@@ -177,6 +181,12 @@ export async function GET(request) {
         brochure: compactPath(college.brochure),
         hasBrochure: Boolean(college.brochure),
         location: location || college.location || "",
+        country: college.country
+          ? {
+              name: college.country.name,
+              logo: compactPath(college.country.logo),
+            }
+          : null,
         established: college.estdYear,
         ownership: college.ownership?.name,
         affiliation: college.affiliation?.name,
