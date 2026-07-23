@@ -37,5 +37,7 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: "/api/:path*",
+  // Large testimonial videos are authenticated and validated by their route.
+  // Every other API route keeps the existing middleware behavior.
+  matcher: ["/api/((?!testimonials/video-upload(?:/|$)).*)"],
 };

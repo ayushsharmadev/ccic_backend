@@ -11,12 +11,23 @@ export async function GET(request) {
     const limit = parseInt(searchParams.get("limit")) || 8;
     const featured = searchParams.get("featured") || "";
     const count = searchParams.get("count") || "";
+    const video = searchParams.get("video") || "";
+
+    const filter = {
+      status: "published",
+    };
+
+    if (featured === "true") {
+      filter.isFeatured = true;
+    }
+
+    if (video === "true") {
+      filter.videoType = { $in: ["local", "external"] };
+    }
 
     // If count is requested, return total count
     if (count === "true") {
-      const totalCount = await Testimonial.countDocuments({
-        status: "published",
-      });
+      const totalCount = await Testimonial.countDocuments(filter);
 
       return NextResponse.json({
         success: true,
@@ -24,26 +35,25 @@ export async function GET(request) {
       });
     }
 
-    // Build filter for published testimonials
-    const filter = {
-      status: "published",
-    };
-
-    // If featured is requested, filter by featured status
-    if (featured === "true") {
-      filter.isFeatured = true;
-    }
-
     // Get testimonials
     const testimonials = await Testimonial.find(filter)
-      .select("name designation college testimonial rating avatar image")
+      .select(
+        "name designation college testimonial rating avatar image videoUrl videoType"
+      )
       .sort({ displayOrder: 1, createdAt: -1 })
       .limit(limit)
       .lean({ virtuals: true });
+    const publicTestimonials = testimonials.map((testimonial) => ({
+      ...testimonial,
+      videoType:
+        testimonial.videoType === "local"
+          ? "hosted"
+          : testimonial.videoType,
+    }));
 
     return NextResponse.json({
       success: true,
-      data: { testimonials },
+      data: { testimonials: publicTestimonials },
     });
   } catch (error) {
     console.error("Error fetching public testimonials:", error);

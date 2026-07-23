@@ -6,6 +6,7 @@ import ApnaTable from "@/components/utils/ApnaTable";
 import ApnaModalConfirmation from "@/components/utils/ApnaModalConfirmation";
 import ApnaModal from "@/components/utils/ApnaModal";
 import { showSuccess, showError } from "@/components/utils/ApnaNotify";
+import { getTestimonialEmbedUrl } from "@/lib/utils/testimonialVideo";
 
 export default function TestimonialsPage() {
   const [testimonials, setTestimonials] = useState([]);
@@ -25,6 +26,8 @@ export default function TestimonialsPage() {
     isOpen: false,
     testimonialName: "",
     testimonial: "",
+    videoUrl: "",
+    videoType: "",
   });
 
   // Define table columns
@@ -107,7 +110,7 @@ export default function TestimonialsPage() {
       render: (item) => (
         <div className="flex gap-2 justify-center">
           <button
-            onClick={() => handleViewClick(item.name, item.testimonial)}
+            onClick={() => handleViewClick(item)}
             className="admin-action admin-action-view"
           >
             View
@@ -130,11 +133,13 @@ export default function TestimonialsPage() {
   ];
 
   // View modal handlers
-  const handleViewClick = (testimonialName, testimonial) => {
+  const handleViewClick = (item) => {
     setViewModal({
       isOpen: true,
-      testimonialName,
-      testimonial: testimonial || "No testimonial content available.",
+      testimonialName: item.name,
+      testimonial: item.testimonial || "No testimonial content available.",
+      videoUrl: item.videoUrl || "",
+      videoType: item.videoType || "",
     });
   };
 
@@ -143,6 +148,8 @@ export default function TestimonialsPage() {
       isOpen: false,
       testimonialName: "",
       testimonial: "",
+      videoUrl: "",
+      videoType: "",
     });
   };
 
@@ -238,6 +245,8 @@ export default function TestimonialsPage() {
           designation: item.designation,
           college: item.college,
           testimonial: item.testimonial,
+          videoUrl: item.videoUrl,
+          videoType: item.videoType,
           rating: item.rating,
           avatar: item.avatar,
           status: item.status,
@@ -475,6 +484,24 @@ export default function TestimonialsPage() {
         showFooter={false}
       >
         <div className="prose prose-lg max-w-none text-gray-700 dark:text-white/80 transition-colors duration-300">
+          {viewModal.videoType === "local" && viewModal.videoUrl && (
+            <video
+              src={viewModal.videoUrl}
+              controls
+              preload="metadata"
+              className="mb-4 max-h-80 w-full rounded bg-black"
+            />
+          )}
+          {viewModal.videoType === "external" &&
+            getTestimonialEmbedUrl(viewModal.videoUrl) && (
+              <iframe
+                src={getTestimonialEmbedUrl(viewModal.videoUrl)}
+                title={`Video testimonial from ${viewModal.testimonialName}`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="mb-4 aspect-video w-full rounded"
+              />
+            )}
           <div className="leading-relaxed text-base">
             "{viewModal.testimonial}"
           </div>

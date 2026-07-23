@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Testimonial from "@/lib/models/Testimonial";
 import { withAdminAuth } from "@/lib/middleware/auth";
+import { isValidTestimonialVideo } from "@/lib/utils/testimonialVideo";
 
 // GET /api/testimonials - Get all testimonials with pagination and filters
 export const GET = withAdminAuth(async (request) => {
@@ -48,7 +49,7 @@ export const GET = withAdminAuth(async (request) => {
     const [testimonials, totalCount] = await Promise.all([
       Testimonial.find(filter)
         .select(
-          "name designation college testimonial rating avatar image isPublished isFeatured publishedAt status displayOrder createdAt updatedAt"
+          "name designation college testimonial rating avatar image videoUrl videoType isPublished isFeatured publishedAt status displayOrder createdAt updatedAt"
         )
         .sort(sort)
         .skip(skip)
@@ -119,6 +120,19 @@ export const POST = withAdminAuth(async (request) => {
 
     const status = body.status || "draft";
     const isPublished = status === "published";
+    const videoUrl = body.videoUrl?.trim() || null;
+    const videoType = videoUrl ? body.videoType : null;
+
+    if (!isValidTestimonialVideo(videoType, videoUrl)) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "Select a video type and provide either an uploaded video or a valid YouTube/Vimeo link",
+        },
+        { status: 400 }
+      );
+    }
 
     // Create new testimonial
     const testimonial = new Testimonial({
@@ -129,6 +143,8 @@ export const POST = withAdminAuth(async (request) => {
       rating: body.rating || 5,
       avatar: body.avatar,
       image: body.image || null,
+      videoUrl,
+      videoType,
       isPublished,
       isFeatured: body.isFeatured || false,
       status,
@@ -146,6 +162,8 @@ export const POST = withAdminAuth(async (request) => {
         name: savedTestimonial.name,
         designation: savedTestimonial.designation,
         status: savedTestimonial.status,
+        videoUrl: savedTestimonial.videoUrl,
+        videoType: savedTestimonial.videoType,
       },
     });
   } catch (error) {

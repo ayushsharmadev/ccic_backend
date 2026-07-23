@@ -5,12 +5,14 @@ import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import ApnaSelect from "@/components/utils/ApnaSelect";
 import { showSuccess, showError } from "@/components/utils/ApnaNotify";
+import TestimonialVideoFields from "@/components/admin/testimonials/TestimonialVideoFields";
 
 export default function EditTestimonialPage() {
   const router = useRouter();
   const params = useParams();
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [persistedVideoUrl, setPersistedVideoUrl] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     designation: "",
@@ -19,6 +21,8 @@ export default function EditTestimonialPage() {
     rating: 5,
     avatar: "",
     image: "",
+    videoUrl: "",
+    videoType: "",
     isFeatured: false,
     status: "draft",
     displayOrder: 0,
@@ -54,10 +58,17 @@ export default function EditTestimonialPage() {
             rating: testimonial.rating || 5,
             avatar: testimonial.avatar || "",
             image: testimonial.image || "",
+            videoUrl: testimonial.videoUrl || "",
+            videoType: testimonial.videoType || "",
             isFeatured: testimonial.isFeatured || false,
             status: testimonial.status || "draft",
             displayOrder: testimonial.displayOrder || 0,
           });
+          setPersistedVideoUrl(
+            testimonial.videoType === "local"
+              ? testimonial.videoUrl || ""
+              : ""
+          );
         } else {
           showError(result.error || "Failed to fetch testimonial");
           router.push("/admin/testimonials");
@@ -167,6 +178,8 @@ export default function EditTestimonialPage() {
         rating: formData.rating,
         avatar: formData.avatar.trim(),
         image: formData.image || null,
+        videoUrl: formData.videoUrl.trim() || null,
+        videoType: formData.videoUrl.trim() ? formData.videoType : null,
         isFeatured: formData.isFeatured,
         status: formData.status,
         displayOrder: formData.displayOrder,
@@ -351,6 +364,20 @@ export default function EditTestimonialPage() {
               className="w-full px-2 py-1.5 border border-gray-300 dark:border-slate-700 rounded text-xs outline-none focus:border-primary focus:ring-2 focus:ring-primary-50 bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors duration-300 placeholder:text-gray-400 dark:placeholder:text-white/40"
             />
           </div>
+
+          {/* Rating and Avatar Row */}
+          <TestimonialVideoFields
+            videoType={formData.videoType}
+            videoUrl={formData.videoUrl}
+            persistedVideoUrl={persistedVideoUrl}
+            onChange={({ videoType, videoUrl }) =>
+              setFormData((current) => ({
+                ...current,
+                videoType,
+                videoUrl,
+              }))
+            }
+          />
 
           {/* Rating and Avatar Row */}
           <div className="grid grid-cols-2 gap-4 mb-5">
