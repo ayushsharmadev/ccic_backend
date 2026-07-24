@@ -13,6 +13,7 @@ import {
   HiXCircle,
   HiClock,
   HiTrash,
+  HiChevronDown,
 } from "react-icons/hi2";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -26,6 +27,7 @@ export default function ReviewsList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalItems, setTotalItems] = useState(0);
+  const [limitInitialized, setLimitInitialized] = useState(false);
   const [deleteReviewModal, setDeleteReviewModal] = useState({
     isOpen: false,
     reviewId: null,
@@ -35,13 +37,31 @@ export default function ReviewsList() {
     reviewId: null,
     replyIndex: null,
   });
+  const [expandedReplies, setExpandedReplies] = useState({});
+
+  const toggleReplies = (reviewId) => {
+    setExpandedReplies((current) => ({
+      ...current,
+      [reviewId]: !current[reviewId],
+    }));
+  };
 
   const [filters, setFilters] = useState({
     college: searchParams.get("college") || "all",
     status: searchParams.get("status") || "all",
     rating: searchParams.get("rating") || "all",
-    limit: searchParams.get("limit") || "10",
+    limit: searchParams.get("limit") || "100",
   });
+
+  useEffect(() => {
+    const limitParam = searchParams.get("limit");
+    const isCompact = window.matchMedia("(max-width: 767px)").matches;
+    setFilters((prev) => ({
+      ...prev,
+      limit: limitParam || (isCompact ? "10" : "100"),
+    }));
+    setLimitInitialized(true);
+  }, []);
 
   useEffect(() => {
     const collegeParam = searchParams.get("college");
@@ -54,7 +74,7 @@ export default function ReviewsList() {
       college: collegeParam || "all",
       status: statusParam || "all",
       rating: ratingParam || "all",
-      limit: limitParam || "10",
+      limit: limitParam || prev.limit,
     }));
 
     const pageParam = searchParams.get("page");
@@ -68,10 +88,13 @@ export default function ReviewsList() {
   }, []);
 
   useEffect(() => {
+    if (!limitInitialized) return;
     fetchReviews();
-  }, [currentPage, filters]);
+  }, [currentPage, filters, limitInitialized]);
 
   useEffect(() => {
+    if (!limitInitialized) return;
+
     // Update URL params when filters or page change
     const params = new URLSearchParams();
     if (filters.college !== "all") {
@@ -83,7 +106,12 @@ export default function ReviewsList() {
     if (filters.rating !== "all") {
       params.set("rating", filters.rating);
     }
-    if (filters.limit !== "10") {
+    const defaultLimit =
+      typeof window !== "undefined" &&
+        window.matchMedia("(max-width: 767px)").matches
+        ? "10"
+        : "100";
+    if (filters.limit !== defaultLimit) {
       params.set("limit", filters.limit);
     }
     if (currentPage > 1) {
@@ -102,7 +130,7 @@ export default function ReviewsList() {
         router.replace(newUrl, { scroll: false });
       }
     }
-  }, [filters, currentPage, router]);
+  }, [filters, currentPage, router, limitInitialized]);
 
   const fetchColleges = async () => {
     try {
@@ -182,8 +210,7 @@ export default function ReviewsList() {
 
       if (data.success) {
         showSuccess(
-          `Review ${
-            newStatus === "approved" ? "approved" : "rejected"
+          `Review ${newStatus === "approved" ? "approved" : "rejected"
           } successfully`
         );
         fetchReviews();
@@ -214,8 +241,7 @@ export default function ReviewsList() {
 
       if (data.success) {
         showSuccess(
-          `Reply ${
-            newStatus === "approved" ? "approved" : "rejected"
+          `Reply ${newStatus === "approved" ? "approved" : "rejected"
           } successfully`
         );
         fetchReviews();
@@ -335,11 +361,10 @@ export default function ReviewsList() {
         {[1, 2, 3, 4, 5].map((star) => (
           <HiStar
             key={star}
-            className={`w-4 h-4 ${
-              star <= rating
-                ? "text-yellow-400 fill-yellow-400"
-                : "text-gray-300"
-            }`}
+            className={`w-4 h-4 ${star <= rating
+              ? "text-yellow-400 fill-yellow-400"
+              : "text-gray-300"
+              }`}
           />
         ))}
       </div>
@@ -387,13 +412,13 @@ export default function ReviewsList() {
     }
 
     return (
-      <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200 dark:border-slate-700">
-        <div className="text-sm text-gray-700 dark:text-white/70">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mt-6 pt-4 border-t border-gray-200 dark:border-slate-700">
+        <div className="text-sm text-center sm:text-left text-gray-700 dark:text-white/70">
           Showing {(currentPage - 1) * parseInt(filters.limit, 10) + 1} to{" "}
           {Math.min(currentPage * parseInt(filters.limit, 10), totalItems)} of{" "}
           {totalItems} reviews
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex w-full items-center gap-2 overflow-x-auto pb-1 sm:w-auto sm:overflow-visible sm:pb-0">
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
@@ -405,11 +430,10 @@ export default function ReviewsList() {
             <button
               key={page}
               onClick={() => handlePageChange(page)}
-              className={`px-3 py-1.5 text-sm border rounded-lg transition-colors ${
-                currentPage === page
-                  ? "bg-primary text-white border-primary"
-                  : "border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-slate-800"
-              }`}
+              className={`px-3 py-1.5 text-sm border rounded-lg transition-colors ${currentPage === page
+                ? "bg-primary text-white border-primary"
+                : "border-gray-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-gray-700 dark:text-white hover:bg-gray-50 dark:hover:bg-slate-800"
+                }`}
             >
               {page}
             </button>
@@ -426,30 +450,6 @@ export default function ReviewsList() {
     );
   };
 
-  if (loading && reviews.length === 0) {
-    return (
-      <div className="p-4 space-y-4">
-        <div className="h-8 bg-gray-200 dark:bg-slate-700 rounded w-48 animate-pulse"></div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
-            <div
-              key={i}
-              className="h-20 bg-gray-200 dark:bg-slate-700 rounded animate-pulse"
-            ></div>
-          ))}
-        </div>
-        <div className="space-y-4">
-          {[...Array(5)].map((_, i) => (
-            <div
-              key={i}
-              className="h-32 bg-gray-200 dark:bg-slate-700 rounded-lg animate-pulse"
-            ></div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="p-4 space-y-4">
       <div className="flex items-center justify-between">
@@ -459,8 +459,8 @@ export default function ReviewsList() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-slate-900 rounded-lg p-4 border border-gray-200 dark:border-slate-700">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-white/80 mb-2">
               College
@@ -525,30 +525,39 @@ export default function ReviewsList() {
       </div>
 
       {/* Reviews List */}
-      <div className="bg-white dark:bg-slate-900 rounded-lg p-4 border border-gray-200 dark:border-slate-700">
-        {reviews && reviews.length > 0 ? (
-          <div className="space-y-4">
+      <div>
+        {loading ? (
+          <div className="space-y-3 py-2" aria-busy="true" aria-label="Loading reviews">
+            {[...Array(5)].map((_, index) => (
+              <div
+                key={index}
+                className="h-32 animate-pulse rounded-lg bg-gray-200 dark:bg-slate-700"
+              />
+            ))}
+          </div>
+        ) : reviews && reviews.length > 0 ? (
+          <div className="space-y-3">
             {reviews.map((review, index) => (
               <div
                 key={review._id || index}
-                className="border border-gray-200 dark:border-slate-700 rounded-lg p-4 hover:shadow-md transition-shadow"
+                className="rounded-xl bg-gray-50/80 dark:bg-slate-900/55 p-3 sm:p-4 transition-colors hover:bg-gray-100/80 dark:hover:bg-slate-900/75"
               >
                 {/* Review Header */}
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex items-center gap-3 flex-1">
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <div className="flex items-start gap-3 flex-1 min-w-0">
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                       <span className="text-primary font-semibold text-sm">
                         {review.name?.charAt(0).toUpperCase() || "U"}
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h4 className="font-semibold text-gray-900 dark:text-white text-sm">
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
+                        <h4 className="font-semibold text-gray-900 dark:text-white text-sm break-words min-w-0">
                           {review.name || "Anonymous"}
                         </h4>
                         {getStatusBadge(review.status)}
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                         {getRatingStars(review.rating)}
                         <span className="text-xs text-gray-500 dark:text-white/60">
                           {review.createdAt
@@ -558,17 +567,16 @@ export default function ReviewsList() {
                       </div>
                       {review.college?.name && (
                         <Link
-                          href={`/admin/college/edit/${
-                            review.college._id || review.college
-                          }`}
-                          className="text-xs text-primary hover:text-primary-600 dark:text-emerald-400 dark:hover:text-emerald-300 transition-colors mt-1 inline-block"
+                          href={`/admin/college/edit/${review.college._id || review.college
+                            }`}
+                          className="text-xs text-primary hover:opacity-80 transition-opacity mt-1 inline-block"
                         >
                           {review.college.name}
                         </Link>
                       )}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 shrink-0">
                     {review.status === "pending" && (
                       <>
                         <button
@@ -602,78 +610,92 @@ export default function ReviewsList() {
                 </div>
 
                 {/* Review Comment */}
-                <p className="text-sm text-gray-700 dark:text-white/80 mb-3 whitespace-pre-wrap">
+                <p className="text-sm text-gray-700 dark:text-white/80 mt-2 mb-2 ml-[52px] whitespace-pre-wrap break-words">
                   {review.comment}
                 </p>
 
                 {/* Replies Section */}
                 {review.replies && review.replies.length > 0 && (
-                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-slate-700 space-y-3">
-                    <h5 className="text-xs font-semibold text-gray-700 dark:text-white/80 mb-2">
-                      Replies ({review.replies.length})
-                    </h5>
-                    {review.replies.map((reply, replyIndex) => (
-                      <div
-                        key={replyIndex}
-                        className="pl-4 border-l-2 border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50 rounded-lg p-3"
-                      >
-                        <div className="flex items-center justify-between mb-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium text-sm text-gray-900 dark:text-white">
-                              {reply.name || "Admin"}
-                            </span>
-                            {getStatusBadge(reply.status || "pending")}
+                  <div className="mt-1 ml-[52px]">
+                    <button
+                      type="button"
+                      onClick={() => toggleReplies(review._id)}
+                      aria-expanded={Boolean(expandedReplies[review._id])}
+                      className="inline-flex cursor-pointer items-center gap-1.5 rounded-md px-1.5 py-1 text-xs font-medium text-gray-600 hover:bg-gray-200/70 hover:text-gray-900 dark:text-white/55 dark:hover:bg-white/5 dark:hover:text-white/85 transition-colors"
+                    >
+                      <HiChevronDown
+                        className={`h-4 w-4 transition-transform ${expandedReplies[review._id] ? "rotate-180" : ""
+                          }`}
+                      />
+                      {expandedReplies[review._id] ? "Hide" : "Show"} replies ({review.replies.length})
+                    </button>
+
+                    {expandedReplies[review._id] && (
+                      <div className="mt-3 space-y-3">
+                        {review.replies.map((reply, replyIndex) => (
+                          <div
+                            key={replyIndex}
+                            className="border-l-2 border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50 rounded-lg p-3"
+                          >
+                            <div className="flex items-start justify-between gap-2 mb-2">
+                              <div className="flex min-w-0 items-start gap-1">
+                                <span className="font-medium text-sm text-gray-900 dark:text-white break-words">
+                                  {reply.name || "Admin"}
+                                </span>
+                                {getStatusBadge(reply.status || "pending")}
+                              </div>
+                              <div className="flex items-center gap-2 shrink-0">
+                                <span className="text-xs text-gray-500 dark:text-white/60">
+                                  {reply.createdAt
+                                    ? new Date(reply.createdAt).toLocaleDateString()
+                                    : "Recently"}
+                                </span>
+                                <button
+                                  onClick={() =>
+                                    handleDeleteReplyClick(review._id, replyIndex)
+                                  }
+                                  className="p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-500/20 rounded transition-colors"
+                                  title="Delete Reply"
+                                >
+                                  <HiTrash className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                            <p className="text-sm text-gray-700 dark:text-white/80 mb-2 whitespace-pre-wrap break-words">
+                              {reply.comment}
+                            </p>
+                            {reply.status === "pending" && (
+                              <div className="flex items-center gap-2 pt-2 border-t border-gray-200 dark:border-slate-700">
+                                <button
+                                  onClick={() =>
+                                    handleReplyStatusChange(
+                                      review._id,
+                                      replyIndex,
+                                      "approved"
+                                    )
+                                  }
+                                  className="px-2 py-1 text-xs bg-green-600 hover:bg-green-700 text-white font-medium rounded transition-colors"
+                                >
+                                  Approve
+                                </button>
+                                <button
+                                  onClick={() =>
+                                    handleReplyStatusChange(
+                                      review._id,
+                                      replyIndex,
+                                      "rejected"
+                                    )
+                                  }
+                                  className="px-2 py-1 text-xs bg-red-600 hover:bg-red-700 text-white font-medium rounded transition-colors"
+                                >
+                                  Reject
+                                </button>
+                              </div>
+                            )}
                           </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs text-gray-500 dark:text-white/60">
-                              {reply.createdAt
-                                ? new Date(reply.createdAt).toLocaleDateString()
-                                : "Recently"}
-                            </span>
-                            <button
-                              onClick={() =>
-                                handleDeleteReplyClick(review._id, replyIndex)
-                              }
-                              className="p-1 text-red-600 hover:bg-red-50 dark:hover:bg-red-500/20 rounded transition-colors"
-                              title="Delete Reply"
-                            >
-                              <HiTrash className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-                        <p className="text-sm text-gray-700 dark:text-white/80 mb-2">
-                          {reply.comment}
-                        </p>
-                        {reply.status === "pending" && (
-                          <div className="flex items-center gap-2 pt-2 border-t border-gray-200 dark:border-slate-700">
-                            <button
-                              onClick={() =>
-                                handleReplyStatusChange(
-                                  review._id,
-                                  replyIndex,
-                                  "approved"
-                                )
-                              }
-                              className="px-2 py-1 text-xs bg-green-600 hover:bg-green-700 text-white font-medium rounded transition-colors"
-                            >
-                              Approve
-                            </button>
-                            <button
-                              onClick={() =>
-                                handleReplyStatusChange(
-                                  review._id,
-                                  replyIndex,
-                                  "rejected"
-                                )
-                              }
-                              className="px-2 py-1 text-xs bg-red-600 hover:bg-red-700 text-white font-medium rounded transition-colors"
-                            >
-                              Reject
-                            </button>
-                          </div>
-                        )}
+                        ))}
                       </div>
-                    ))}
+                    )}
                   </div>
                 )}
               </div>

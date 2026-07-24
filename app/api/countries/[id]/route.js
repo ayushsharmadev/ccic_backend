@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
-import { Country } from "@/lib/models";
+import { Country, Currency } from "@/lib/models";
 import CountrySection from "@/lib/models/CountrySection";
 import { withAdminAuth } from "@/lib/middleware/auth";
 import mongoose from "mongoose";
@@ -207,7 +207,9 @@ export const GET = withAdminAuth(async (request, { params }) => {
       );
     }
 
-    const country = await Country.findById(id).lean();
+    const country = await Country.findById(id)
+      .populate("currency", "name code symbol status")
+      .lean();
 
     if (!country) {
       return NextResponse.json(
@@ -258,6 +260,14 @@ export const PUT = withAdminAuth(async (request, { params }) => {
 
     const body = await request.json();
     const payload = buildCountryPayload(body);
+
+    if (!mongoose.Types.ObjectId.isValid(payload.currency) ||
+        !(await Currency.exists({ _id: payload.currency, status: "active" }))) {
+      return NextResponse.json(
+        { success: false, error: "A valid active currency is required" },
+        { status: 400 }
+      );
+    }
 
     const requiredError = getRequiredCountryError(body, payload);
     if (requiredError) {
@@ -359,7 +369,7 @@ export const PUT = withAdminAuth(async (request, { params }) => {
     return NextResponse.json({
       success: true,
       message: "Country updated successfully",
-      data: updatedCountry,
+      data: await updatedCountry.populate("currency", "name code symbol status"),
     });
   } catch (error) {
     if (error.name === "ValidationError") {

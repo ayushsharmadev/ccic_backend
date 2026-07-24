@@ -30,7 +30,8 @@ export default function EditExam() {
     displayRank: "0",
     noOfApplication: "",
     purpose: "",
-    applicationFee: "0",
+    applicationFee: "",
+    applicationFeeCurrency: "",
     applicationDate: "",
     examDate: "",
     resultDate: "",
@@ -102,6 +103,22 @@ export default function EditExam() {
           })),
         }));
       }
+
+      const token = localStorage.getItem("token");
+      const currenciesResponse = await fetch(
+        "/api/currencies?status=active&limit=200",
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const currenciesData = await currenciesResponse.json();
+      if (currenciesData.success) {
+        setDropdownData((prev) => ({
+          ...prev,
+          currencies: currenciesData.data.map((currency) => ({
+            value: currency._id,
+            label: `${currency.code} - ${currency.name}${currency.symbol ? ` (${currency.symbol})` : ""}`,
+          })),
+        }));
+      }
     } catch (error) {
       console.error("Error loading dropdown data:", error);
     }
@@ -138,7 +155,14 @@ export default function EditExam() {
             displayRank: exam.displayRank?.toString() || "0",
             noOfApplication: exam.noOfApplication?.toString() || "",
             purpose: exam.purpose || "",
-            applicationFee: exam.applicationFee?.toString() || "0",
+            applicationFee:
+              exam.applicationFee !== null && exam.applicationFee !== undefined
+                ? exam.applicationFee.toString()
+                : "",
+            applicationFeeCurrency:
+              exam.applicationFeeCurrency?._id ||
+              exam.applicationFeeCurrency ||
+              "",
             applicationDate: exam.applicationDate
               ? new Date(exam.applicationDate).toISOString().split("T")[0]
               : "",
@@ -261,11 +285,15 @@ export default function EditExam() {
       return;
     }
 
-    if (!formData.state) {
-      showError("Please select a state");
+
+    if (
+      formData.applicationFee !== "" &&
+      Number(formData.applicationFee) > 0 &&
+      !formData.applicationFeeCurrency
+    ) {
+      showError("Please select an application fee currency");
       return;
     }
-
     try {
       setFormLoading(true);
 
@@ -285,7 +313,11 @@ export default function EditExam() {
         displayRank: parseInt(formData.displayRank) || 0,
         noOfApplication: parseInt(formData.noOfApplication) || 0,
         purpose: formData.purpose.trim(),
-        applicationFee: parseInt(formData.applicationFee) || 0,
+        applicationFee:
+          formData.applicationFee === ""
+            ? null
+            : Number(formData.applicationFee),
+        applicationFeeCurrency: formData.applicationFeeCurrency || null,
         applicationDate: formData.applicationDate || null,
         examDate: formData.examDate || null,
         resultDate: formData.resultDate || null,
@@ -298,7 +330,7 @@ export default function EditExam() {
         admitCardDetails: formData.admitCardDetails,
         resultInformation: formData.resultInformation,
         country: formData.country,
-        state: formData.state,
+        state: formData.state || null,
         logo: formData.logo?.preview || null,
         pdf: formData.pdf?.preview || null,
       };
@@ -338,8 +370,8 @@ export default function EditExam() {
           <div className="h-4 bg-gray-200 dark:bg-slate-800 rounded w-64 animate-pulse"></div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900/70 border border-gray-200 dark:border-slate-800 rounded-lg p-5 shadow-sm transition-colors duration-300">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+        <div className="bg-white dark:bg-slate-900/70 border border-gray-200 dark:border-slate-800 rounded-lg p-4 sm:p-5 shadow-sm transition-colors duration-300">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-5">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="space-y-2">
                 <div className="h-3.5 bg-gray-200 dark:bg-slate-800 rounded w-24 animate-pulse"></div>
@@ -347,7 +379,7 @@ export default function EditExam() {
               </div>
             ))}
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-5">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="space-y-2">
                 <div className="h-3.5 bg-gray-200 dark:bg-slate-800 rounded w-28 animate-pulse"></div>
@@ -406,14 +438,14 @@ export default function EditExam() {
       </div>
 
       {/* Form */}
-      <div className="bg-white dark:bg-slate-900/70 border border-gray-200 dark:border-slate-800 rounded-lg p-5 shadow-sm transition-colors duration-300">
+      <div className="bg-white dark:bg-slate-900/70 border border-gray-200 dark:border-slate-800 rounded-lg p-4 sm:p-5 shadow-sm transition-colors duration-300">
         <form onSubmit={handleSubmit}>
           {/* Basic Information */}
           <div className="mb-6">
             <h3 className="text-sm font-medium text-gray-900 dark:text-white transition-colors duration-300 mb-3 border-b border-gray-200 dark:border-slate-800 pb-2">
               Basic Information
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
               {/* Stream */}
               <div>
                 <ApnaSelect
@@ -476,8 +508,11 @@ export default function EditExam() {
                   setFormData((prev) => ({ ...prev, state: value }))
                 }
                 showDistrict={false}
-                countryLabel="Conducting Country"
+                countryLabel={
+                  <>Conducting Country <span className="text-secondary">*</span></>
+                }
                 stateLabel="Conducting State"
+                labelClassName="text-xs font-medium text-gray-700 dark:text-white/80 mb-1 block transition-colors duration-300"
                 gridClassName="col-span-2 grid grid-cols-2 gap-4"
               />
 
@@ -501,7 +536,7 @@ export default function EditExam() {
             {/* Title - Full Width */}
             <div className="mt-4">
               <label className="text-xs font-medium text-gray-700 dark:text-white/80 mb-1 block transition-colors duration-300">
-                Examination Title *
+                Examination Title <span className="text-secondary">*</span>
               </label>
               <input
                 type="text"
@@ -532,9 +567,9 @@ export default function EditExam() {
             <h3 className="text-sm font-medium text-gray-900 dark:text-white transition-colors duration-300 mb-3 border-b border-gray-200 dark:border-slate-800 pb-2">
               Application Details
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {/* No of Application */}
-              <div>
+              <div className="col-span-2 md:col-span-1">
                 <label className="text-xs font-medium text-gray-700 dark:text-white/80 mb-1 block transition-colors duration-300">
                   Expected Applications
                 </label>
@@ -552,16 +587,31 @@ export default function EditExam() {
               {/* Application Fee */}
               <div>
                 <label className="text-xs font-medium text-gray-700 dark:text-white/80 mb-1 block transition-colors duration-300">
-                  Application Fee (₹)
+                  Application Fee
                 </label>
                 <input
                   type="number"
+                  min="0"
                   value={formData.applicationFee}
                   onChange={(e) =>
                     handleInputChange("applicationFee", e.target.value)
                   }
-                  placeholder="0"
+                  placeholder="Leave blank if unavailable"
                   className="w-full px-2 py-1.5 border border-gray-300 dark:border-slate-700 rounded text-xs outline-none focus:border-primary focus:ring-2 focus:ring-primary-50 bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors duration-300 placeholder:text-gray-400 dark:placeholder:text-white/40"
+                />
+              </div>
+
+              <div>
+                <ApnaSelect
+                  options={dropdownData.currencies}
+                  value={formData.applicationFeeCurrency}
+                  onChange={(value) =>
+                    handleInputChange("applicationFeeCurrency", value)
+                  }
+                  placeholder="-- Select Currency --"
+                  searchable={true}
+                  title="Fee Currency"
+                  required={Number(formData.applicationFee) > 0}
                 />
               </div>
             </div>
@@ -572,7 +622,7 @@ export default function EditExam() {
             <h3 className="text-sm font-medium text-gray-900 dark:text-white transition-colors duration-300 mb-3 border-b border-gray-200 dark:border-slate-800 pb-2">
               Important Dates
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {/* Application Date */}
               <div>
                 <label className="text-xs font-medium text-gray-700 dark:text-white/80 mb-1 block transition-colors duration-300">
@@ -604,7 +654,7 @@ export default function EditExam() {
               </div>
 
               {/* Result Date */}
-              <div>
+              <div className="col-span-2 md:col-span-1">
                 <label className="text-xs font-medium text-gray-700 dark:text-white/80 mb-1 block transition-colors duration-300">
                   Result Declaration
                 </label>

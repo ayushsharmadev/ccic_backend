@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Exam from "@/lib/models/Exam";
 import { applyDirectLocationFilters } from "@/lib/locationFilters";
+import { currencyView, moneyView } from "@/lib/money";
 
 function transformExam(item) {
   return {
@@ -9,6 +10,7 @@ function transformExam(item) {
     title: item.title,
     logo: item.logo,
     applicationFee: item.applicationFee,
+    applicationFeeMoney: moneyView(item.applicationFee, item.applicationFeeCurrency),
     examDate: item.examDate,
     resultDate: item.resultDate,
     slug: item.slug,
@@ -33,6 +35,7 @@ function transformExam(item) {
       id: item.country?._id,
       name: item.country?.name,
       code: item.country?.code,
+      currency: currencyView(item.country?.currency),
     },
     state: {
       id: item.state?._id,
@@ -49,7 +52,12 @@ const examPopulate = [
   { path: "courseName", select: "name" },
   { path: "examType", select: "name shortName" },
   { path: "examLevel", select: "name" },
-  { path: "country", select: "name code" },
+  {
+    path: "country",
+    select: "name code currency",
+    populate: { path: "currency", match: { status: "active" }, select: "name code symbol status" },
+  },
+  { path: "applicationFeeCurrency", match: { status: "active" }, select: "name code symbol status" },
   { path: "state", select: "name" },
 ];
 
@@ -93,7 +101,7 @@ export async function GET(request) {
       })
         .populate(examPopulate)
         .select(
-          "title logo applicationFee examDate resultDate status isFeatured displayOrder slug"
+          "title logo applicationFee applicationFeeCurrency examDate resultDate status isFeatured displayOrder slug"
         )
         .sort({ displayOrder: 1, examDate: 1 })
         .limit(limit)
@@ -124,7 +132,7 @@ export async function GET(request) {
       Exam.find(baseFilter)
         .populate(examPopulate)
         .select(
-          "title logo applicationFee examDate resultDate status isFeatured displayOrder slug"
+          "title logo applicationFee applicationFeeCurrency examDate resultDate status isFeatured displayOrder slug"
         )
         .sort({ displayOrder: 1, examDate: 1 })
         .skip(skip)

@@ -1,7 +1,8 @@
-import { withAdminAuth } from "@/lib/middleware/auth";
+﻿import { withAdminAuth } from "@/lib/middleware/auth";
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Exam from "@/lib/models/Exam";
+import { resolveApplicationFeeFields } from "@/lib/money";
 
 // GET /api/exams/[id] - Get a single exam by ID
 export const GET = withAdminAuth(async (request, { params }) => {
@@ -21,12 +22,17 @@ export const GET = withAdminAuth(async (request, { params }) => {
       .populate("stream", "name")
       .populate("courseName", "courseName")
       .populate("examType", "name shortName")
-      .populate("country", "name code")
+      .populate({
+        path: "country",
+        select: "name code currency",
+        populate: { path: "currency", select: "name code symbol status" },
+      })
       .populate({
         path: "state",
         select: "name code country",
         populate: { path: "country", select: "name code" },
       })
+      .populate("applicationFeeCurrency", "name code symbol status")
       .lean();
 
     if (!exam) {
@@ -65,7 +71,7 @@ export async function PUT(request, { params }) {
     }
 
     // Validate required fields
-    const requiredFields = ["stream", "courseName", "examType", "title", "country", "state"];
+    const requiredFields = ["stream", "courseName", "examType", "title", "country"];
     for (const field of requiredFields) {
       if (!body[field]) {
         return NextResponse.json(
@@ -75,15 +81,22 @@ export async function PUT(request, { params }) {
       }
     }
 
+    const feeFields = await resolveApplicationFeeFields(body);
+
     const updatedExam = await Exam.findByIdAndUpdate(
       id,
-      { ...body },
+      { ...body, state: body.state || null, ...feeFields },
       { new: true, runValidators: true }
     ).populate("stream", "name")
       .populate("courseName", "courseName")
       .populate("examType", "name shortName")
-      .populate("country", "name code")
-      .populate("state", "name");
+      .populate({
+        path: "country",
+        select: "name code currency",
+        populate: { path: "currency", select: "name code symbol status" },
+      })
+      .populate("state", "name")
+      .populate("applicationFeeCurrency", "name code symbol status");
 
     if (!updatedExam) {
       return NextResponse.json(
@@ -98,6 +111,10 @@ export async function PUT(request, { params }) {
       data: updatedExam,
     });
   } catch (error) {
+    if (error.statusCode === 400) {
+      return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+    }
+
     console.error("Error updating exam:", error);
 
     if (error.name === "ValidationError") {

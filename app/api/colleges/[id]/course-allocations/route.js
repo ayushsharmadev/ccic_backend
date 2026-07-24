@@ -1,8 +1,10 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import CollegeCourseAllocation from "@/lib/models/CollegeCourseAllocation";
 import Course from "@/lib/models/Course";
 import CourseDuration from "@/lib/models/CourseDuration";
+import College from "@/lib/models/College";
+import Currency from "@/lib/models/Currency";
 import { withAdminAuth } from "@/lib/middleware/auth";
 
 const SESSION_REGEX = /^\d{4}-\d{4}$/;
@@ -72,6 +74,7 @@ const normalizeAllocationDocument = (allocation) => {
           : (structure.seats === 0 ? 0 : undefined);
 
         return {
+          currency: structure.currency || null,
           session: (structure.session || structure.academicYear || "").trim(),
           structureType: normalizedStructureType,
           seats: seatsValue,
@@ -100,7 +103,7 @@ const normalizeAllocationDocument = (allocation) => {
   return clone;
 };
 
-const sanitizeAssignedCourses = (payload) => {
+const sanitizeAssignedCourses = (payload, fallbackCurrency) => {
   const sanitized = [];
 
   for (const item of payload) {
@@ -172,7 +175,15 @@ const sanitizeAssignedCourses = (payload) => {
         }
       }
 
+      const currency =
+        structure.currency?._id || structure.currency || fallbackCurrency || null;
+
+      if (!currency) {
+        continue;
+      }
+
       const structureToPush = {
+        currency,
         session,
         structureType,
         periods,
@@ -229,6 +240,11 @@ const populateAllocation = async (collegeId) => {
       path: "assignedCourses.examType",
       select: "name shortName",
     })
+    .populate({
+      path: "assignedCourses.feeStructures.currency",
+      model: Currency,
+      select: "name code symbol status",
+    })
     .lean()
     .then(normalizeAllocationDocument);
 };
@@ -247,11 +263,30 @@ export const GET = withAdminAuth(async (request, { params }) => {
       );
     }
 
+    const college = await College.findById(id)
+      .populate({
+        path: "country",
+        select: "name code currency",
+        populate: {
+          path: "currency",
+          select: "name code symbol status",
+        },
+      })
+      .lean();
+
+    if (!college) {
+      return NextResponse.json({ success: false, error: "College not found" }, { status: 404 });
+    }
+
     const allocation = await populateAllocation(id);
+    const data = allocation || { college: id, assignedCourses: [] };
 
     return NextResponse.json({
       success: true,
-      data: allocation || { college: id, assignedCourses: [] },
+      data: {
+        ...data,
+        suggestedCurrency: college.country?.currency || null,
+      },
     });
   } catch (error) {
     console.error("Error fetching course allocations:", error);
@@ -277,7 +312,20 @@ export const PUT = withAdminAuth(async (request, { params }) => {
       );
     }
 
-    const assignedCourses = sanitizeAssignedCourses(body.assignedCourses);
+    const college = await College.findById(id)
+      .populate({
+        path: "country",
+        select: "currency",
+        populate: { path: "currency", select: "_id status" },
+      })
+      .lean();
+
+    if (!college) {
+      return NextResponse.json({ success: false, error: "College not found" }, { status: 404 });
+    }
+
+    const fallbackCurrency = college.country?.currency?._id?.toString?.() || null;
+    const assignedCourses = sanitizeAssignedCourses(body.assignedCourses, fallbackCurrency);
 
     if (!assignedCourses.length) {
       return NextResponse.json(
@@ -308,6 +356,24 @@ export const PUT = withAdminAuth(async (request, { params }) => {
           success: false,
           error: "One or more selected courses are invalid or inactive",
         },
+        { status: 400 }
+      );
+    }
+
+    const currencyIds = [
+      ...new Set(
+        assignedCourses.flatMap((item) =>
+          item.feeStructures.map((structure) => structure.currency.toString())
+        )
+      ),
+    ];
+    const currenciesCount = await Currency.countDocuments({
+      _id: { $in: currencyIds },
+      status: "active",
+    });
+    if (currenciesCount !== currencyIds.length) {
+      return NextResponse.json(
+        { success: false, error: "One or more fee currencies are invalid or inactive" },
         { status: 400 }
       );
     }
@@ -369,4 +435,3 @@ export const PUT = withAdminAuth(async (request, { params }) => {
     );
   }
 });
-

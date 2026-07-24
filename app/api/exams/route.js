@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Exam from "@/lib/models/Exam";
 import { withAdminAuth } from "@/lib/middleware/auth";
+import { resolveApplicationFeeFields } from "@/lib/money";
 
 // GET /api/exams - Get all exams with pagination and filters
 export const GET = withAdminAuth(async (request) => {
@@ -74,8 +75,13 @@ export const GET = withAdminAuth(async (request) => {
       .populate("courseName", "courseName")
       .populate("examType", "name shortName")
       .populate("examLevel", "name")
-      .populate("country", "name code")
+      .populate({
+        path: "country",
+        select: "name code currency",
+        populate: { path: "currency", select: "name code symbol status" },
+      })
       .populate("state", "name code")
+      .populate("applicationFeeCurrency", "name code symbol status")
       .sort({ displayOrder: 1, examDate: 1, createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -106,13 +112,13 @@ export const POST = withAdminAuth(async (request) => {
     await connectDB();
 
     // Debug: Check the Exam model schema
-    console.log("🔍 Exam model schema fields:", Object.keys(Exam.schema.paths));
+    console.log("ðŸ” Exam model schema fields:", Object.keys(Exam.schema.paths));
     console.log(
-      "🔍 examType field type:",
+      "ðŸ” examType field type:",
       Exam.schema.paths.examType?.instance
     );
     console.log(
-      "🔍 examLevel field type:",
+      "ðŸ” examLevel field type:",
       Exam.schema.paths.examLevel?.instance
     );
 
@@ -125,7 +131,6 @@ export const POST = withAdminAuth(async (request) => {
       "title",
       "examLevel",
       "country",
-      "state",
     ];
     for (const field of requiredFields) {
       if (!body[field]) {
@@ -136,8 +141,14 @@ export const POST = withAdminAuth(async (request) => {
       }
     }
 
+    const feeFields = await resolveApplicationFeeFields(body);
+
     // Create new exam
-    const exam = new Exam(body);
+    const exam = new Exam({
+      ...body,
+      state: body.state || null,
+      ...feeFields,
+    });
     await exam.save();
 
     // Populate references for response
@@ -146,8 +157,13 @@ export const POST = withAdminAuth(async (request) => {
       .populate("courseName", "courseName")
       .populate("examType", "name shortName")
       .populate("examLevel", "name")
-      .populate("country", "name code")
+      .populate({
+        path: "country",
+        select: "name code currency",
+        populate: { path: "currency", select: "name code symbol status" },
+      })
       .populate("state", "name code")
+      .populate("applicationFeeCurrency", "name code symbol status")
       .lean();
 
     return NextResponse.json(
@@ -159,6 +175,10 @@ export const POST = withAdminAuth(async (request) => {
       { status: 201 }
     );
   } catch (error) {
+    if (error.statusCode === 400) {
+      return NextResponse.json({ success: false, error: error.message }, { status: 400 });
+    }
+
     console.error("Error creating exam:", error);
 
     if (error.name === "ValidationError") {

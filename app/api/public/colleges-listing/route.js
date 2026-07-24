@@ -1,6 +1,8 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
+import mongoose from "mongoose";
 import connectDB from "@/lib/db";
-import { College, Ownership, Country } from "@/lib/models";
+import { College, Ownership, Country, Exam } from "@/lib/models";
+import CollegeCourseAllocation from "@/lib/models/CollegeCourseAllocation";
 import { applyDirectLocationFilters } from "@/lib/locationFilters";
 
 function compactPath(path) {
@@ -44,6 +46,8 @@ export async function GET(request) {
     const district = searchParams.get("district") || "";
     const ownership = searchParams.get("ownership") || "";
     const sortBy = searchParams.get("sortBy") || "alphabetical";
+    const course = searchParams.get("course") || "";
+    const exam = searchParams.get("exam") || "";
 
     const filter = { status: "active" };
 
@@ -83,6 +87,45 @@ export async function GET(request) {
       }
     }
 
+    if (course || exam) {
+      const allocationMatch = { "assignedCourses.isActive": true };
+      if (course) {
+        if (mongoose.isValidObjectId(course)) {
+          allocationMatch["assignedCourses.course"] = new mongoose.Types.ObjectId(course);
+        } else {
+          allocationMatch["assignedCourses.course"] = null;
+        }
+      }
+      if (exam) {
+        try {
+          const actualExam = await Exam.findById(exam).select("courseName").lean();
+          if (actualExam && actualExam.courseName) {
+             allocationMatch["assignedCourses.course"] = actualExam.courseName;
+          } else {
+             allocationMatch["assignedCourses.course"] = null;
+          }
+        } catch {
+          allocationMatch["assignedCourses.course"] = null;
+        }
+      }
+
+      const allocations = await CollegeCourseAllocation.aggregate([
+        { $match: allocationMatch },
+        { $unwind: "$assignedCourses" },
+        { $match: allocationMatch },
+        { $group: { _id: "$college" } }
+      ]);
+
+      const matchedCollegeIds = allocations.map(a => a._id);
+      
+      if (filter._id) {
+        // In case _id is already being filtered (rare but safe)
+        filter._id = { $in: matchedCollegeIds.filter(id => filter._id.$in?.includes(id)) };
+      } else {
+        filter._id = { $in: matchedCollegeIds };
+      }
+    }
+
     let sort = {};
     switch (sortBy) {
       case "alphabetical":
@@ -106,7 +149,7 @@ export async function GET(request) {
     }
 
     const collegeQuery = College.find(filter)
-      .populate("country", "name")
+      .populate("country", "name logo")
       .populate("state", "name")
       .populate("district", "name")
       .populate("ownership", "name")
@@ -138,6 +181,12 @@ export async function GET(request) {
         brochure: compactPath(college.brochure),
         hasBrochure: Boolean(college.brochure),
         location: location || college.location || "",
+        country: college.country
+          ? {
+              name: college.country.name,
+              logo: compactPath(college.country.logo),
+            }
+          : null,
         established: college.estdYear,
         ownership: college.ownership?.name,
         affiliation: college.affiliation?.name,

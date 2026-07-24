@@ -18,7 +18,7 @@ export async function GET(request, { params }) {
     if (!college) {
       return NextResponse.json(
         { success: false, error: "College not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -27,6 +27,7 @@ export async function GET(request, { params }) {
         college: college._id,
         status: "approved",
       })
+        .select("-mobile -email")
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
@@ -40,9 +41,13 @@ export async function GET(request, { params }) {
     // Filter only approved replies
     const reviewsWithApprovedReplies = reviews.map((review) => ({
       ...review,
-      replies: (review.replies || []).filter(
-        (reply) => reply.status === "approved"
-      ),
+      replies: (review.replies || [])
+        .filter((reply) => reply.status === "approved")
+        .map((reply) => ({
+          name: reply.name,
+          comment: reply.comment,
+          status: reply.status
+        })),
     }));
 
     return NextResponse.json({
@@ -58,7 +63,7 @@ export async function GET(request, { params }) {
   } catch {
     return NextResponse.json(
       { success: false, error: "Failed to fetch reviews" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -76,7 +81,7 @@ export async function POST(request, { params }) {
     if (!name || !rating || !comment) {
       return NextResponse.json(
         { success: false, error: "Missing required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -84,14 +89,14 @@ export async function POST(request, { params }) {
     if (!college) {
       return NextResponse.json(
         { success: false, error: "College not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     if (rating < 1 || rating > 5) {
       return NextResponse.json(
         { success: false, error: "Rating must be between 1 and 5" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -109,7 +114,8 @@ export async function POST(request, { params }) {
 
     return NextResponse.json({
       success: true,
-      message: "Review submitted successfully. It will be visible after admin approval.",
+      message:
+        "Review submitted successfully. It will be visible after admin approval.",
       data: {
         _id: review._id,
         name: review.name,
@@ -121,18 +127,17 @@ export async function POST(request, { params }) {
   } catch (error) {
     if (error.name === "ValidationError") {
       const errors = Object.values(error.errors || {}).map(
-        (err) => err.message
+        (err) => err.message,
       );
       return NextResponse.json(
         { success: false, error: "Validation failed", details: errors },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     return NextResponse.json(
       { success: false, error: "Failed to submit review" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

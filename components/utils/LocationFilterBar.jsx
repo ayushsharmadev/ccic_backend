@@ -19,9 +19,11 @@ export default function LocationFilterBar({
   countryLabel = "Country",
   stateLabel = "State",
   districtLabel = "District",
+  showLabels = true,
   className = "flex gap-3 items-end flex-wrap",
   itemClassName = "min-w-48",
   countryApiUrl = "/api/locations/country-master",
+  buttonClassName = filterButtonClassName,
 }) {
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
@@ -152,7 +154,7 @@ export default function LocationFilterBar({
       {showCountry && (
         <div className={itemClassName}>
           <ApnaSelect
-            title={countryLabel}
+            title={showLabels ? countryLabel : ""}
             options={[{ value: "", label: `All ${countryLabel}s` }, ...countries]}
             value={country}
             onChange={handleCountryChange}
@@ -161,7 +163,7 @@ export default function LocationFilterBar({
             }
             searchable={true}
             disabled={loadingCountries}
-            buttonClassName={filterButtonClassName}
+            buttonClassName={buttonClassName}
           />
         </div>
       )}
@@ -169,20 +171,20 @@ export default function LocationFilterBar({
       {showState && (
         <div className={itemClassName}>
           <ApnaSelect
-            title={stateLabel}
+            title={showLabels ? stateLabel : ""}
             options={[{ value: "", label: `All ${stateLabel}s` }, ...states]}
             value={state}
             onChange={handleStateChange}
             placeholder={
               showCountry && !country
-                ? "Select country first"
+                ? stateLabel
                 : loadingStates
                   ? "Loading..."
                   : `All ${stateLabel}s`
             }
             searchable={true}
             disabled={(showCountry && !country) || loadingStates}
-            buttonClassName={filterButtonClassName}
+            buttonClassName={buttonClassName}
           />
         </div>
       )}
@@ -190,7 +192,7 @@ export default function LocationFilterBar({
       {showDistrict && (
         <div className={itemClassName}>
           <ApnaSelect
-            title={districtLabel}
+            title={showLabels ? districtLabel : ""}
             options={[
               { value: "", label: `All ${districtLabel}s` },
               ...districts,
@@ -206,7 +208,7 @@ export default function LocationFilterBar({
             }
             searchable={true}
             disabled={(!state && !country) || loadingDistricts}
-            buttonClassName={filterButtonClassName}
+            buttonClassName={buttonClassName}
           />
         </div>
       )}

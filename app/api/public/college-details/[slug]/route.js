@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import College from "@/lib/models/College";
 import FacilitySection from "@/lib/models/FacilitySection";
 import CollegeCourseAllocation from "@/lib/models/CollegeCourseAllocation";
+import Currency from "@/lib/models/Currency";
 import CollegeRanking from "@/lib/models/CollegeRanking";
 import CollegeDistanceMeter from "@/lib/models/CollegeDistanceMeter";
 import CollegeReview from "@/lib/models/CollegeReview";
@@ -56,7 +57,11 @@ export async function GET(request, { params }) {
     }
 
     const college = await College.findOne(query)
-      .populate("country", "name code")
+      .populate({
+        path: "country",
+        select: "name code currency",
+        populate: { path: "currency", match: { status: "active" }, select: "name code symbol status" },
+      })
       .populate("state", "name code")
       .populate("district", "name")
       .populate("ownership", "name")
@@ -105,6 +110,12 @@ export async function GET(request, { params }) {
         path: "assignedCourses.examType",
         select: "name shortName",
       })
+      .populate({
+        path: "assignedCourses.feeStructures.currency",
+        model: Currency,
+        match: { status: "active" },
+        select: "name code symbol",
+      })
       .lean();
 
     // Prefer current year fees, but fall back to the latest uploaded session.
@@ -125,6 +136,7 @@ export async function GET(request, { params }) {
             examType: assignedCourse.examType || null,
             session: feeStructure.session,
             feeStructureType: feeStructure.structureType,
+            currency: feeStructure.currency || null,
             seats: feeStructure.seats,
             periods: feeStructure.periods || [],
             notes: assignedCourse.notes,

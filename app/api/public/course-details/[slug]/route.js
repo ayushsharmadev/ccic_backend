@@ -1,7 +1,8 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Course from "@/lib/models/Course";
 import mongoose from "mongoose";
+import { moneyView } from "@/lib/money";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +33,7 @@ export async function GET(request, { params }) {
     const course = await Course.findOne(query)
       .populate("streamId", "name logo about")
       .populate("degreeId", "name shortName description")
+      .populate("averageFeeCurrency", "name code symbol status")
       .lean();
 
     if (!course) {
@@ -49,6 +51,7 @@ export async function GET(request, { params }) {
       logo: course.logo,
       icon: course.icon,
       averageFee: course.averageFee,
+      averageFeeMoney: moneyView(course.averageFee, course.averageFeeCurrency),
 
       // Stream and Degree
       stream: course.streamId

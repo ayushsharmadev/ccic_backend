@@ -18,6 +18,7 @@ export default function AddStatePage() {
     country: "",
     logo: null,
     map: null,
+    status: "active",
   });
   const [logoPreview, setLogoPreview] = useState(null);
   const [mapPreview, setMapPreview] = useState(null);
@@ -116,7 +117,7 @@ export default function AddStatePage() {
         name: formData.name.trim(),
         code: formData.code.trim().toUpperCase(),
         country: formData.country,
-        status: "active",
+        status: formData.status,
       };
 
       // Add logo if exists (already uploaded or file)
@@ -221,6 +222,7 @@ export default function AddStatePage() {
           code: "",
           logo: null,
           map: null,
+          status: "active",
         });
         setLogoPreview(null);
         setMapPreview(null);
@@ -360,6 +362,18 @@ export default function AddStatePage() {
                 className="w-full px-2 py-1.5 border border-gray-300 dark:border-slate-700 rounded text-xs outline-none uppercase focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30 bg-white dark:bg-slate-900/70 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/50"
               />
             </div>
+            <ApnaSelect
+              title="Status"
+              value={formData.status}
+              onChange={(status) =>
+                setFormData((prev) => ({ ...prev, status }))
+              }
+              options={[
+                { value: "active", label: "Active" },
+                { value: "inactive", label: "Inactive" },
+              ]}
+              required
+            />
           </div>
 
           {/* Image Upload Areas */}

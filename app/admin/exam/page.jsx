@@ -8,6 +8,21 @@ import LocationFilterBar from "@/components/utils/LocationFilterBar";
 import ApnaModalConfirmation from "@/components/utils/ApnaModalConfirmation";
 import { showSuccess, showError } from "@/components/utils/ApnaNotify";
 
+const formatExamFee = (amount, currency) => {
+  if (amount === null || amount === undefined || amount === "") return "Not listed";
+  const numeric = Number(amount);
+  if (!Number.isFinite(numeric)) return String(amount);
+  if (!currency?.code) return numeric.toLocaleString("en-IN");
+
+  try {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: currency.code,
+    }).format(numeric);
+  } catch {
+    return `${currency.symbol || currency.code} ${numeric.toLocaleString("en-IN")}`;
+  }
+};
 export default function ExamList() {
   const router = useRouter();
   const [exams, setExams] = useState([]);
@@ -77,7 +92,10 @@ export default function ExamList() {
           examDate: exam.examDate
             ? new Date(exam.examDate).toISOString().split("T")[0]
             : "N/A",
-          applicationFee: exam.applicationFee?.toString() || "0",
+          applicationFee: formatExamFee(
+            exam.applicationFee,
+            exam.applicationFeeCurrency
+          ),
           noOfApplications: exam.noOfApplication?.toString() || "0",
           status: exam.status || "active",
           lastUpdated: exam.updatedAt
@@ -275,7 +293,7 @@ export default function ExamList() {
     },
     {
       key: "applicationFee",
-      header: "Fee (₹)",
+      header: "Fee",
       headerClassName: "text-center text-gray-700 dark:text-white/80",
       cellClassName:
         "text-sm text-gray-600 dark:text-white/70 text-center transition-colors duration-300",
@@ -321,13 +339,13 @@ export default function ExamList() {
         <div className="flex gap-1 justify-center">
           <button
             onClick={() => handleEdit(item)}
-            className="px-2 py-1 text-xs text-primary dark:text-primary-200 border border-primary dark:border-primary/60 rounded bg-transparent cursor-pointer transition-colors duration-200 hover:bg-primary-50 dark:hover:bg-primary/20"
+            className="admin-action admin-action-edit"
           >
             Edit
           </button>
           <button
             onClick={() => handleDelete(item)}
-            className="px-2 py-1 text-xs text-secondary dark:text-secondary-200 border border-secondary dark:border-secondary/60 rounded bg-transparent cursor-pointer transition-colors duration-200 hover:bg-secondary-50 dark:hover:bg-secondary/20"
+            className="admin-action admin-action-delete"
           >
             Delete
           </button>
@@ -345,9 +363,15 @@ export default function ExamList() {
       </div>
 
       {/* Search & Add Button Skeleton */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-        <div className="h-9 w-full sm:w-60 rounded bg-gray-200 dark:bg-slate-800 animate-pulse"></div>
-        <div className="h-9 w-36 rounded bg-gray-200 dark:bg-slate-800 animate-pulse"></div>
+      <div className="space-y-3 mb-4">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:justify-between">
+          <div className="h-9 min-w-0 w-full sm:w-60 rounded bg-gray-200 dark:bg-slate-800 animate-pulse"></div>
+          <div className="h-9 w-24 sm:w-36 rounded bg-gray-200 dark:bg-slate-800 animate-pulse"></div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="h-14 rounded bg-gray-200 dark:bg-slate-800 animate-pulse"></div>
+          <div className="h-14 rounded bg-gray-200 dark:bg-slate-800 animate-pulse"></div>
+        </div>
       </div>
 
       {/* Table Skeleton */}
@@ -386,10 +410,6 @@ export default function ExamList() {
     </div>
   );
 
-  if (loading) {
-    return <LoadingSkeleton />;
-  }
-
   return (
     <div className="h-full p-4 sm:p-5 md:p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
       {/* Page Header */}
@@ -405,8 +425,8 @@ export default function ExamList() {
 
       {/* Search and Add Button */}
       <div className="flex flex-col gap-3 mb-4">
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-        <div className="relative w-full sm:w-60">
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 sm:flex sm:justify-between">
+        <div className="relative min-w-0 w-full sm:w-60">
           <svg
             className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-white/50 transition-colors duration-300"
             fill="none"
@@ -456,7 +476,7 @@ export default function ExamList() {
 
         <Link
           href="/admin/exam/add"
-          className="bg-primary hover:bg-primary-700 text-white px-3 py-1.5 rounded text-xs font-medium flex items-center gap-1 transition-colors no-underline focus:outline-none focus:ring-2 focus:ring-primary/40 shrink-0"
+          className="bg-primary hover:bg-primary-700 text-white px-3 py-1.5 rounded text-xs font-medium flex items-center gap-1 whitespace-nowrap cursor-pointer transition-colors no-underline focus:outline-none focus:ring-2 focus:ring-primary/40 shrink-0"
         >
           <svg
             className="w-3.5 h-3.5"
@@ -476,6 +496,8 @@ export default function ExamList() {
         </div>
 
         <LocationFilterBar
+          className="grid grid-cols-2 gap-3 items-end"
+          itemClassName="min-w-0 w-full"
           country={locationFilters.country}
           state={locationFilters.state}
           onCountryChange={(value) =>

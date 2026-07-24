@@ -212,7 +212,7 @@ export default function Header({ onMenuClick }) {
   };
 
   return (
-    <div className="flex h-16 shrink-0 items-center gap-x-2 sm:gap-x-4 border-b border-gray-200/50 dark:border-slate-800 bg-linear-to-r from-white via-white to-gray-50/30 dark:from-slate-950 dark:via-slate-900/95 dark:to-slate-900/80 px-4 sm:px-6 shadow-sm backdrop-blur-sm transition-colors duration-300">
+    <div className="relative z-[100] flex h-16 shrink-0 items-center gap-x-2 sm:gap-x-4 border-b border-gray-200/50 dark:border-slate-800 bg-linear-to-r from-white via-white to-gray-50/30 dark:from-slate-950 dark:via-slate-900/95 dark:to-slate-900/80 px-3 min-[400px]:px-4 sm:px-6 shadow-sm backdrop-blur-sm transition-colors duration-300">
       {/* Mobile menu button */}
       <button
         type="button"
@@ -227,7 +227,7 @@ export default function Header({ onMenuClick }) {
       <div className="h-6 w-px bg-gray-900/10 dark:bg-white/10 lg:hidden" />
 
       {/* Search - Left side */}
-      <div className="flex flex-1 items-center" ref={searchRef}>
+      <div className="flex min-w-0 flex-1 items-center" ref={searchRef}>
         <div className="relative flex max-w-xs sm:max-w-md w-full">
           <label htmlFor="search-field" className="sr-only">
             Search
@@ -237,7 +237,7 @@ export default function Header({ onMenuClick }) {
             <input
               ref={searchInputRef}
               id="search-field"
-              className="block h-10 w-full rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/70 py-2 pl-10 pr-[68px] text-sm text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-white/40 focus:border-primary focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-primary/20 transition-all"
+              className="block h-10 w-full min-w-0 rounded-lg border border-gray-200 dark:border-slate-700 bg-gray-50/50 dark:bg-slate-900/70 py-2 pl-9 pr-10 min-[400px]:pl-10 min-[400px]:pr-[68px] text-sm text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-white/40 focus:border-primary focus:bg-white dark:focus:bg-slate-900 focus:ring-2 focus:ring-primary/20 transition-all"
               placeholder="Search..."
               type="search"
               name="search"
@@ -276,7 +276,7 @@ export default function Header({ onMenuClick }) {
 
           {/* Search Results Dropdown */}
           {isSearchOpen && (
-            <div className="absolute left-0 right-0 top-full mt-2 z-50 max-h-96 overflow-y-auto rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl ring-1 ring-black/5 dark:ring-white/5 backdrop-blur-sm">
+            <div className="absolute left-0 right-0 top-full mt-2 z-[120] max-h-96 overflow-y-auto rounded-lg border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-xl ring-1 ring-black/5 dark:ring-white/5 backdrop-blur-sm">
               {searchResults.length > 0 ? (
                 <div className="py-2">
                   {searchResults.map((result) => (
@@ -312,16 +312,16 @@ export default function Header({ onMenuClick }) {
       </div>
 
       {/* Right side - Notifications and Profile */}
-      <div className="flex items-center gap-x-3 lg:gap-x-4">
+      <div className="flex shrink-0 items-center gap-x-1 min-[400px]:gap-x-2 lg:gap-x-4">
         <ThemeToggle
           size="sm"
-          className="hidden sm:inline-flex bg-transparent shadow-none text-gray-600 dark:text-white/80 hover:bg-gray-100/60 dark:hover:bg-slate-800/70 focus:ring-primary/30"
+          className="hidden sm:inline-flex"
         />
         {/* Profile dropdown */}
-        <div className="relative" ref={dropdownRef}>
+        <div className="relative z-[110]" ref={dropdownRef}>
           <button
             type="button"
-            className="flex items-center p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 transition-all"
+            className="flex items-center p-1 min-[400px]:p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 transition-all"
             onClick={() => setProfileOpen(!profileOpen)}
           >
             <span className="sr-only">Open user menu</span>
@@ -329,11 +329,11 @@ export default function Header({ onMenuClick }) {
               <img
                 src={`${user.avatar}?v=${avatarVersion}`}
                 alt={getUserDisplayName()}
-                className="h-9 w-9 rounded-full object-cover shadow-lg ring-2 ring-white dark:ring-slate-900"
+                className="h-8 w-8 min-[400px]:h-9 min-[400px]:w-9 rounded-full object-cover shadow-lg ring-2 ring-white dark:ring-slate-900"
               />
             ) : (
               <div
-                className="h-9 w-9 rounded-full flex items-center justify-center shadow-lg ring-2 ring-white dark:ring-slate-900"
+                className="h-8 w-8 min-[400px]:h-9 min-[400px]:w-9 rounded-full flex items-center justify-center shadow-lg ring-2 ring-white dark:ring-slate-900"
                 style={{
                   background:
                     "linear-gradient(135deg, var(--primary), var(--primary-900))",
@@ -357,7 +357,7 @@ export default function Header({ onMenuClick }) {
           </button>
 
           {profileOpen && (
-            <div className="absolute right-0 z-10 mt-3 w-56 origin-top-right rounded-xl bg-white dark:bg-slate-900/95 py-2 shadow-xl ring-1 ring-black/5 dark:ring-white/5 backdrop-blur-sm transition-all duration-200 ease-out opacity-100 scale-100">
+            <div className="absolute right-0 z-[130] mt-3 w-56 origin-top-right rounded-xl bg-white dark:bg-slate-900/95 py-2 shadow-xl ring-1 ring-black/5 dark:ring-white/5 backdrop-blur-sm transition-all duration-200 ease-out opacity-100 scale-100">
               <div className="px-4 py-3 border-b border-gray-100 dark:border-slate-800/80">
                 <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
                   {getUserDisplayName()}
@@ -372,10 +372,7 @@ export default function Header({ onMenuClick }) {
                   <span className="text-xs font-medium text-gray-600 dark:text-white/70">
                     Appearance
                   </span>
-                  <ThemeToggle
-                    size="sm"
-                    className="border border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-none"
-                  />
+                  <ThemeToggle size="sm" />
                 </div>
               </div>
 

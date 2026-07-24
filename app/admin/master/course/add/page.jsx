@@ -18,6 +18,7 @@ export default function AddCourse() {
   const [submitting, setSubmitting] = useState(false);
   const [streams, setStreams] = useState([]);
   const [degrees, setDegrees] = useState([]);
+  const [currencies, setCurrencies] = useState([]);
   const [formData, setFormData] = useState({
     streamId: "",
     degreeId: "",
@@ -25,6 +26,7 @@ export default function AddCourse() {
     logo: null,
     icon: "",
     averageFee: "",
+    averageFeeCurrency: "",
     description: "",
     admissionProcess: "",
     eligibilityCriteria: "",
@@ -67,13 +69,25 @@ export default function AddCourse() {
           },
         });
         const degreesData = await degreesResponse.json();
+        const currenciesResponse = await fetch(
+          "/api/currencies?status=active&limit=200",
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        const currenciesData = await currenciesResponse.json();
         console.log("📊 Degrees response:", degreesData);
 
-        if (streamsData.success && degreesData.success) {
+        if (streamsData.success && degreesData.success && currenciesData.success) {
           console.log("✅ Setting streams:", streamsData.data);
           console.log("✅ Setting degrees:", degreesData.data);
           setStreams(streamsData.data);
           setDegrees(degreesData.data);
+          setCurrencies(
+            currenciesData.data.map((currency) => ({
+              value: currency._id,
+              label: `${currency.code} - ${currency.name}${currency.symbol ? ` (${currency.symbol})` : ""}`,
+              meta: currency,
+            }))
+          );
         } else {
           console.error("❌ Streams success:", streamsData.success);
           console.error("❌ Degrees success:", degreesData.success);
@@ -98,6 +112,7 @@ export default function AddCourse() {
       logo: null,
       icon: "",
       averageFee: "",
+    averageFeeCurrency: "",
       description: "",
       admissionProcess: "",
       eligibilityCriteria: "",
@@ -245,6 +260,10 @@ export default function AddCourse() {
 
     console.log("✅ All validations passed, proceeding with API call...");
 
+    if (formData.averageFee !== "" && !formData.averageFeeCurrency) {
+      showError("Please select an average fee currency");
+      return;
+    }
     try {
       setSubmitting(true);
 
@@ -261,7 +280,9 @@ export default function AddCourse() {
         name: formData.name.trim(),
         streamId: formData.streamId,
         degreeId: formData.degreeId,
-        averageFee: formData.averageFee.trim(),
+        averageFee:
+          formData.averageFee === "" ? null : Number(formData.averageFee),
+        averageFeeCurrency: formData.averageFeeCurrency || null,
         description: formData.description.trim(),
         admissionProcess: formData.admissionProcess.trim(),
         eligibilityCriteria: formData.eligibilityCriteria.trim(),
@@ -440,40 +461,22 @@ export default function AddCourse() {
               </div>
             </div>
 
-            {/* Course Name, Average Fee, Status, Display Order - 4 columns */}
-            <div className="grid grid-cols-2 gap-4">
-              {/* Course Name */}
+            {/* Course Name and average fee */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="text-xs font-medium text-gray-700 dark:text-white/80 mb-1 block">
-                  Course Name *
+                  Course Name <span className="text-secondary">*</span>
                 </label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange("name", e.target.value)}
-                  placeholder="Enter course name"
-                  required
-                  className="w-full px-2 py-2 border border-gray-300 dark:border-slate-700 rounded text-xs outline-none focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30 bg-white dark:bg-slate-900/70 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/50"
-                />
+                <input type="text" value={formData.name} onChange={(e) => handleInputChange("name", e.target.value)} placeholder="Enter course name" required className="w-full px-2 py-2 border border-gray-300 dark:border-slate-700 rounded text-xs outline-none focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30 bg-white dark:bg-slate-900/70 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/50" />
               </div>
-
-              {/* Average Fee */}
               <div>
-                <label className="text-xs font-medium text-gray-700 dark:text-white/80 mb-1 block">
-                  Average Fee
-                </label>
-                <input
-                  type="text"
-                  value={formData.averageFee}
-                  onChange={(e) =>
-                    handleInputChange("averageFee", e.target.value)
-                  }
-                  placeholder="Enter average fee"
-                  className="w-full px-2 py-2 border border-gray-300 dark:border-slate-700 rounded text-xs outline-none focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30 bg-white dark:bg-slate-900/70 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/50"
-                />
+                <label className="text-xs font-medium text-gray-700 dark:text-white/80 mb-1 block">Average Fee</label>
+                <input type="number" min="0" value={formData.averageFee} onChange={(e) => handleInputChange("averageFee", e.target.value)} placeholder="Leave blank if unavailable" className="w-full px-2 py-2 border border-gray-300 dark:border-slate-700 rounded text-xs outline-none focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30 bg-white dark:bg-slate-900/70 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-white/50" />
+              </div>
+              <div>
+                <ApnaSelect title="Average Fee Currency" options={currencies} value={formData.averageFeeCurrency} onChange={(value) => handleInputChange("averageFeeCurrency", value)} placeholder="-- Select Currency --" searchable={true} required={formData.averageFee !== ""} buttonClassName="w-full px-3 py-1.5 rounded text-sm text-left flex items-center justify-between outline-none transition-all duration-200 border border-gray-300 dark:border-slate-700 focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30 bg-white dark:bg-slate-900/70 text-gray-700 dark:text-white/80 cursor-pointer" />
               </div>
             </div>
-
             {/* Status, Display Order, Featured - 3 columns */}
             <div className="grid grid-cols-3 gap-4">
               {/* Status */}

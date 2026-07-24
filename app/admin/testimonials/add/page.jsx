@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ApnaSelect from "@/components/utils/ApnaSelect";
 import { showSuccess, showError } from "@/components/utils/ApnaNotify";
+import TestimonialVideoFields from "@/components/admin/testimonials/TestimonialVideoFields";
 
 export default function AddTestimonialPage() {
   const router = useRouter();
@@ -18,6 +19,8 @@ export default function AddTestimonialPage() {
     rating: 5,
     avatar: "",
     image: "",
+    videoUrl: "",
+    videoType: "",
     isFeatured: false,
     status: "draft",
     displayOrder: 0,
@@ -122,6 +125,8 @@ export default function AddTestimonialPage() {
         rating: formData.rating,
         avatar: formData.avatar.trim(),
         image: formData.image || null,
+        videoUrl: formData.videoUrl.trim() || null,
+        videoType: formData.videoUrl.trim() ? formData.videoType : null,
         isFeatured: formData.isFeatured,
         status: formData.status,
         displayOrder: formData.displayOrder,
@@ -153,6 +158,8 @@ export default function AddTestimonialPage() {
           rating: 5,
           avatar: "",
           image: "",
+          videoUrl: "",
+          videoType: "",
           isFeatured: false,
           status: "draft",
           displayOrder: 0,
@@ -284,7 +291,7 @@ export default function AddTestimonialPage() {
                 onChange={(e) =>
                   handleInputChange("designation", e.target.value)
                 }
-                placeholder="e.g., MBBS Graduate, MBBS Student"
+                placeholder="e.g., International Student, University Graduate"
                 required
                 className="w-full px-2 py-1.5 border border-gray-300 dark:border-slate-700 rounded text-xs outline-none focus:border-primary focus:ring-2 focus:ring-primary-50 bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors duration-300 placeholder:text-gray-400 dark:placeholder:text-white/40"
               />
@@ -314,12 +321,25 @@ export default function AddTestimonialPage() {
             <textarea
               value={formData.testimonial}
               onChange={(e) => handleInputChange("testimonial", e.target.value)}
-              rows={4}
+              rows={5}
               placeholder="Enter the testimonial content..."
               required
               className="w-full px-2 py-1.5 border border-gray-300 dark:border-slate-700 rounded text-xs outline-none focus:border-primary focus:ring-2 focus:ring-primary-50 bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors duration-300 placeholder:text-gray-400 dark:placeholder:text-white/40"
             />
           </div>
+
+          {/* Rating and Avatar Row */}
+          <TestimonialVideoFields
+            videoType={formData.videoType}
+            videoUrl={formData.videoUrl}
+            onChange={({ videoType, videoUrl }) =>
+              setFormData((current) => ({
+                ...current,
+                videoType,
+                videoUrl,
+              }))
+            }
+          />
 
           {/* Rating and Avatar Row */}
           <div className="grid grid-cols-2 gap-4 mb-5">

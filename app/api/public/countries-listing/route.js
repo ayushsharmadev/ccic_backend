@@ -46,14 +46,8 @@ export async function GET(request) {
         const max = maxStr === "Infinity" ? Infinity : parseInt(maxStr);
 
         return {
-          $or: [
-            {
-              "studyMetrics.tuitionFeeMin": { $lte: max, $gte: min },
-            },
-            {
-              "studyMetrics.tuitionFeeMax": { $lte: max, $gte: min },
-            },
-          ],
+          "studyMetrics.tuitionFeeMin": { $lte: max },
+          "studyMetrics.tuitionFeeMax": { $gte: min },
         };
       });
 
@@ -84,6 +78,7 @@ export async function GET(request) {
       .sort(sortOption)
       .skip(skip)
       .limit(limit)
+      .populate({ path: "currency", match: { status: "active" }, select: "name code symbol status" })
       .lean();
 
     const total = await Country.countDocuments(query);

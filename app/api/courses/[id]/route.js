@@ -1,7 +1,8 @@
-import { withAdminAuth } from "@/lib/middleware/auth";
+﻿import { withAdminAuth } from "@/lib/middleware/auth";
 import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Course from "@/lib/models/Course";
+import { resolveAverageFeeFields } from "@/lib/money";
 
 // GET /api/courses/[id] - Get a single course by ID
 export const GET = withAdminAuth(async (request, { params }) => {
@@ -20,6 +21,7 @@ export const GET = withAdminAuth(async (request, { params }) => {
     const course = await Course.findById(id)
       .populate("streamId", "name")
       .populate("degreeId", "name")
+      .populate("averageFeeCurrency", "name code symbol status")
       .lean();
 
     if (!course) {
@@ -68,13 +70,16 @@ export async function PUT(request, { params }) {
       }
     }
 
+    const averageFeeFields = await resolveAverageFeeFields(body);
+
     const updatedCourse = await Course.findByIdAndUpdate(
       id,
-      { ...body },
+      { ...body, ...averageFeeFields },
       { new: true, runValidators: true }
     )
       .populate("streamId", "name")
-      .populate("degreeId", "name");
+      .populate("degreeId", "name")
+      .populate("averageFeeCurrency", "name code symbol status");
 
     if (!updatedCourse) {
       return NextResponse.json(

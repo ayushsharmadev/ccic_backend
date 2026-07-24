@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 
 // Clean menu structure as array of objects based on provided HTML
 const menuItems = [
@@ -69,6 +70,11 @@ const menuItems = [
         name: "Course Duration",
         href: "/admin/master/course-duration",
         icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
+      },
+      {
+        name: "Currency",
+        href: "/admin/master/currency",
+        icon: "M12 6v12m3-9.5C15 7.12 13.66 6 12 6s-3 1.12-3 2.5 1.34 2.5 3 2.5 3 1.12 3 2.5S13.66 18 12 18s-3-1.12-3-2.5M5 12h14",
       },
       {
         name: "Affiliation Name",
@@ -388,8 +394,8 @@ export default function Sidebar({ isOpen, onClose }) {
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="flex items-center h-14 px-4 border-b border-white/10 dark:border-slate-900/60 backdrop-blur-sm lg:border-gray-200 dark:lg:border-slate-900 lg:backdrop-blur-none transition-colors duration-300">
-            <div className="flex items-center">
-              <div
+            <div className="flex gap-2 items-center">
+              {/* <div
                 className="w-8 h-8 rounded-lg flex items-center justify-center shadow-lg"
                 style={{
                   background:
@@ -397,10 +403,19 @@ export default function Sidebar({ isOpen, onClose }) {
                 }}
               >
                 <span className="text-white font-bold text-sm">BA</span>
-              </div>
-              <span className="ml-3 font-bold text-gray-900 dark:text-white lg:text-gray-900 dark:lg:text-white">
+              </div> */}
+              <Image src="/fav.png" alt="CCIC" className="h-8 w-8 object-contain" width={30} height={30} />
+              <span className="font-bold text-gray-900 dark:text-white lg:text-primary text-lg dark:lg:text-primary">
                 CCIC
               </span>
+              {/* <Image
+                src="/mainLogo.png"
+                alt="CCIC"
+                width={130}
+                height={30}
+                className="h-8 w-auto object-contain"
+                priority
+              /> */}
             </div>
             {/* Close button for mobile */}
             <button
@@ -424,7 +439,7 @@ export default function Sidebar({ isOpen, onClose }) {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 overflow-y-auto">
+          <nav className="flex-1 overflow-y-auto mt-2">
             <ul className="space-y-1 p-2">
               {menuItems.map((item) => (
                 <li key={item.id}>

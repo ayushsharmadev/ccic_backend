@@ -2,8 +2,10 @@ import { NextResponse, type NextRequest } from "next/server";
 
 const allowedOrigins = new Set([
   "http://localhost:3000",
+  "http://localhost:3002",
   "https://ccic-eight.vercel.app",
-  "http://100.90.206.34:3000"
+  "http://100.90.206.34:3000",
+  "https://ccic.in"
 ]);
 
 function applyCorsHeaders(response: NextResponse, origin: string | null) {
@@ -35,5 +37,7 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: "/api/:path*",
+  // Large testimonial videos are authenticated and validated by their route.
+  // Every other API route keeps the existing middleware behavior.
+  matcher: ["/api/((?!testimonials/video-upload(?:/|$)).*)"],
 };

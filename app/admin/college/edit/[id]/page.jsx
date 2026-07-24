@@ -128,6 +128,81 @@ export default function EditCollegePage() {
   const [showHostelFacilitiesModal, setShowHostelFacilitiesModal] =
     useState(false);
 
+  const [showStateModal, setShowStateModal] = useState(false);
+  const [showDistrictModal, setShowDistrictModal] = useState(false);
+  const [stateRefreshKey, setStateRefreshKey] = useState(0);
+  const [districtRefreshKey, setDistrictRefreshKey] = useState(0);
+  const [stateSubmitLoading, setStateSubmitLoading] = useState(false);
+  const [districtSubmitLoading, setDistrictSubmitLoading] = useState(false);
+  const [locationMasterCountries, setLocationMasterCountries] = useState([]);
+  const [stateFormData, setStateFormData] = useState({ country: "", name: "", code: "", logo: null, map: null, status: "active" });
+  const [stateLogoPreview, setStateLogoPreview] = useState(null);
+  const [stateMapPreview, setStateMapPreview] = useState(null);
+  const [districtFormData, setDistrictFormData] = useState({ country: "", state: "", name: "", status: "active" });
+
+  useEffect(() => {
+    if (!showStateModal) return;
+    fetch("/api/locations/country-master?all=true").then((response) => response.json())
+      .then((result) => setLocationMasterCountries(result.success ? result.data.map((item) => ({ value: item._id, label: item.name })) : []))
+      .catch(() => setLocationMasterCountries([]));
+  }, [showStateModal]);
+
+  const uploadStateAsset = useCallback(async (asset, identifier) => {
+    if (!asset || typeof asset === "string") return asset || undefined;
+    const token = getAccessToken();
+    if (!token) throw new Error("Authentication required");
+    const uploadData = new FormData();
+    uploadData.append("file", asset); uploadData.append("type", "states"); uploadData.append("identifier", identifier);
+    const response = await fetch("/api/upload", { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: uploadData });
+    const result = await response.json();
+    if (!result.success) throw new Error(result.error || `Failed to upload ${identifier}`);
+    return result.file.fileUrl;
+  }, [getAccessToken]);
+
+  const handleStateSubmit = useCallback(async (e) => {
+    e?.preventDefault?.();
+    if (!stateFormData.country || !stateFormData.name.trim() || !stateFormData.code.trim()) return showWarning("Location Master country, state name and code are required");
+    try {
+      setStateSubmitLoading(true);
+      const [logo, map] = await Promise.all([uploadStateAsset(stateFormData.logo, "state-logo"), uploadStateAsset(stateFormData.map, "state-map")]);
+      const data = await makeAuthenticatedRequest("/api/locations/states", { method: "POST", body: JSON.stringify({
+        name: stateFormData.name.trim(), code: stateFormData.code.trim().toUpperCase(), country: stateFormData.country,
+        status: stateFormData.status, ...(logo ? { logo } : {}), ...(map ? { map } : {}),
+      }) });
+      if (!data.success) return showError(data.error || "Failed to add state");
+      let canSelectInCollege = false;
+      if (formData.country) {
+        const response = await fetch(`/api/locations/states?all=true&country=${formData.country}`);
+        const result = await response.json();
+        canSelectInCollege = result.success && result.data.some((item) => item._id === data.data._id);
+      }
+      if (canSelectInCollege) setFormData((prev) => ({ ...prev, state: data.data._id, district: "" }));
+      setStateRefreshKey((key) => key + 1); setShowStateModal(false);
+      setStateFormData({ country: "", name: "", code: "", logo: null, map: null, status: "active" });
+      setStateLogoPreview(null); setStateMapPreview(null);
+      showSuccess("State added successfully!");
+    } catch (error) { console.error("Error adding state:", error); showError(error.message || "Error adding state"); }
+    finally { setStateSubmitLoading(false); }
+  }, [formData.country, makeAuthenticatedRequest, stateFormData, uploadStateAsset]);
+
+  const handleDistrictSubmit = useCallback(async (e) => {
+    e?.preventDefault?.();
+    if (!districtFormData.country || !districtFormData.state || !districtFormData.name.trim()) return showWarning("Location Master country, state and district name are required");
+    try {
+      setDistrictSubmitLoading(true);
+      const data = await makeAuthenticatedRequest("/api/locations/districts", { method: "POST", body: JSON.stringify({
+        name: districtFormData.name.trim(), state: districtFormData.state, status: districtFormData.status,
+      }) });
+      if (!data.success) return showError(data.error || "Failed to add district");
+      const canSelectInCollege = formData.state === districtFormData.state;
+      if (canSelectInCollege) setFormData((prev) => ({ ...prev, district: data.data._id }));
+      setDistrictRefreshKey((key) => key + 1); setShowDistrictModal(false);
+      setDistrictFormData({ country: "", state: "", name: "", status: "active" });
+      showSuccess("District added successfully!");
+    } catch (error) { console.error("Error adding district:", error); showError(error.message || "Error adding district"); }
+    finally { setDistrictSubmitLoading(false); }
+  }, [districtFormData, formData.state, makeAuthenticatedRequest]);
+
   // Modal form states
   const [affiliationFormData, setAffiliationFormData] = useState({
     name: "",
@@ -1534,6 +1609,12 @@ export default function EditCollegePage() {
               labelClassName={labelClassName}
               selectButtonClassName={selectButtonClassName}
               gridClassName="col-span-2 grid grid-cols-3 gap-4"
+              onAddCountry={() => { window.open("/admin/country/add", "_blank", "noopener,noreferrer"); }}
+              onAddState={() => setShowStateModal(true)}
+              onAddDistrict={() => setShowDistrictModal(true)}
+              stateRefreshKey={stateRefreshKey}
+              districtRefreshKey={districtRefreshKey}
+              addButtonClassName={addIconButtonClassName}
             />
             </div>
 
@@ -2372,6 +2453,31 @@ export default function EditCollegePage() {
               className={inputClassName}
             />
           </div>
+        </form>
+      </ApnaModal>
+
+      {/* Quick Add State Modal */}
+      <ApnaModal isOpen={showStateModal} onClose={() => setShowStateModal(false)} onSubmit={handleStateSubmit} title="Add State" size="lg" submitText="Add State" loading={stateSubmitLoading}>
+        <form onSubmit={handleStateSubmit} className="space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div><label className={labelClassName}>Location Master Country *</label><ApnaSelect title="" options={locationMasterCountries} value={stateFormData.country} onChange={(country) => setStateFormData((prev) => ({ ...prev, country }))} placeholder="-- Select Country --" searchable buttonClassName={selectButtonClassName} /></div>
+            <div><label className={labelClassName}>State Name *</label><input value={stateFormData.name} onChange={(e) => setStateFormData((prev) => ({ ...prev, name: e.target.value }))} placeholder="Enter state name" required className={inputClassName} /></div>
+            <div><label className={labelClassName}>State Code *</label><input value={stateFormData.code} maxLength={2} onChange={(e) => setStateFormData((prev) => ({ ...prev, code: e.target.value }))} placeholder="e.g., MH" required className={`${inputClassName} uppercase`} /></div>
+            <div><label className={labelClassName}>Status</label><ApnaSelect title="" value={stateFormData.status} onChange={(status) => setStateFormData((prev) => ({ ...prev, status }))} options={[{ value: "active", label: "Active" }, { value: "inactive", label: "Inactive" }]} buttonClassName={selectButtonClassName} /></div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <ImageUpload title="State Logo" type="logo" preview={stateLogoPreview} onFileChange={(file, preview) => { setStateFormData((prev) => ({ ...prev, logo: file })); setStateLogoPreview(preview); }} onRemove={() => { setStateFormData((prev) => ({ ...prev, logo: null })); setStateLogoPreview(null); }} maxSize="2" uploadType="states" identifier="state-logo" onUploadSuccess={(file) => setStateFormData((prev) => ({ ...prev, logo: file.fileUrl }))} showUploadProgress onUploadError={(error) => showError(`Logo upload failed: ${error}`)} />
+            <ImageUpload title="State Map" type="map" preview={stateMapPreview} onFileChange={(file, preview) => { setStateFormData((prev) => ({ ...prev, map: file })); setStateMapPreview(preview); }} onRemove={() => { setStateFormData((prev) => ({ ...prev, map: null })); setStateMapPreview(null); }} maxSize="2" uploadType="states" identifier="state-map" onUploadSuccess={(file) => setStateFormData((prev) => ({ ...prev, map: file.fileUrl }))} showUploadProgress onUploadError={(error) => showError(`Map upload failed: ${error}`)} />
+          </div>
+        </form>
+      </ApnaModal>
+
+      {/* Quick Add District Modal */}
+      <ApnaModal isOpen={showDistrictModal} onClose={() => setShowDistrictModal(false)} onSubmit={handleDistrictSubmit} title="Add District" size="md" submitText="Add District" loading={districtSubmitLoading}>
+        <form onSubmit={handleDistrictSubmit} className="space-y-4">
+          <LocationSelects country={districtFormData.country} state={districtFormData.state} onCountryChange={(country) => setDistrictFormData((prev) => ({ ...prev, country, state: "" }))} onStateChange={(state) => setDistrictFormData((prev) => ({ ...prev, state }))} showDistrict={false} gridClassName="grid grid-cols-2 gap-4" countryApiUrl="/api/locations/country-master" labelClassName={labelClassName} selectButtonClassName={selectButtonClassName} />
+          <div><label className={labelClassName}>District Name *</label><input value={districtFormData.name} onChange={(e) => setDistrictFormData((prev) => ({ ...prev, name: e.target.value }))} placeholder="Enter district name" required className={inputClassName} /></div>
+          <div><label className={labelClassName}>Status</label><ApnaSelect title="" value={districtFormData.status} onChange={(status) => setDistrictFormData((prev) => ({ ...prev, status }))} options={[{ value: "active", label: "Active" }, { value: "inactive", label: "Inactive" }]} buttonClassName={selectButtonClassName} className="relative z-10" portal /></div>
         </form>
       </ApnaModal>
 

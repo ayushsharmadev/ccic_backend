@@ -6,6 +6,20 @@ import ApnaTable from "@/components/utils/ApnaTable";
 import ApnaModalConfirmation from "@/components/utils/ApnaModalConfirmation";
 import { showSuccess, showError } from "@/components/utils/ApnaNotify";
 
+const formatAverageFee = (amount, currency) => {
+  if (amount === null || amount === undefined || amount === "") return "N/A";
+  const numeric = Number(amount);
+  if (!Number.isFinite(numeric)) return String(amount);
+  if (!currency?.code) return numeric.toLocaleString("en-IN");
+  try {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: currency.code,
+    }).format(numeric);
+  } catch {
+    return `${currency.symbol || currency.code} ${numeric.toLocaleString("en-IN")}`;
+  }
+};
 export default function CourseList() {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -68,12 +82,12 @@ export default function CourseList() {
         <div className="flex gap-2 justify-center">
           <Link
             href={`/admin/master/course/edit/${item.id}`}
-            className="px-2 py-1 text-xs text-primary border border-primary rounded bg-transparent no-underline hover:bg-primary-50 dark:hover:bg-primary/20 transition-colors"
+            className="admin-action admin-action-edit"
           >
             Edit
           </Link>
           <button
-            className="px-2 py-1 text-xs text-secondary border border-secondary rounded bg-transparent cursor-pointer hover:bg-secondary-50 dark:hover:bg-secondary/20 transition-colors"
+            className="admin-action admin-action-delete"
             onClick={() => {
               setDeleteModal({
                 isOpen: true,
@@ -131,7 +145,10 @@ export default function CourseList() {
           streamName: course.streamId?.name || "N/A",
           degreeType: course.degreeId?.name || "N/A",
           status: course.status || "N/A",
-          averageFee: course.averageFee || "N/A",
+          averageFee: formatAverageFee(
+            course.averageFee,
+            course.averageFeeCurrency
+          ),
         }));
         setCourses(transformedCourses);
         setTotalPages(data.pagination.pages);
@@ -273,10 +290,6 @@ export default function CourseList() {
       </div>
     </div>
   );
-
-  if (loading) {
-    return <LoadingSkeleton />;
-  }
 
   return (
     <div className="h-full p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">

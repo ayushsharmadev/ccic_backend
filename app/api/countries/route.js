@@ -1,6 +1,7 @@
-import { NextResponse } from "next/server";
+﻿import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
-import { Country } from "@/lib/models";
+import { Country, Currency } from "@/lib/models";
+import mongoose from "mongoose";
 import CountrySection from "@/lib/models/CountrySection";
 import { withAdminAuth } from "@/lib/middleware/auth";
 
@@ -232,21 +233,30 @@ export const GET = withAdminAuth(async (request) => {
       .sort({ displayOrder: 1, name: 1 })
       .skip(skip)
       .limit(limit)
+      .populate("currency", "name code symbol status")
       .lean();
 
-    const countriesWithCounts = await Promise.all(
-      countries.map(async (country) => {
-        const sectionsCount = await CountrySection.countDocuments({
-          country: country._id,
-          status: "active",
-        });
-
-        return {
-          ...country,
-          sectionsCount,
-        };
-      })
+    const countryIds = countries.map((country) => country._id);
+    const sectionCounts = await CountrySection.aggregate([
+      {
+        $match: {
+          country: { $in: countryIds },
+        },
+      },
+      {
+        $group: {
+          _id: "$country",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+    const sectionCountMap = new Map(
+      sectionCounts.map((item) => [item._id.toString(), item.count])
     );
+    const countriesWithCounts = countries.map((country) => ({
+      ...country,
+      sectionsCount: sectionCountMap.get(country._id.toString()) || 0,
+    }));
 
     return NextResponse.json({
       success: true,
@@ -272,6 +282,14 @@ export const POST = withAdminAuth(async (request) => {
     await connectDB();
     const body = await request.json();
     const payload = buildCountryPayload(body);
+
+    if (!mongoose.Types.ObjectId.isValid(payload.currency) ||
+        !(await Currency.exists({ _id: payload.currency, status: "active" }))) {
+      return NextResponse.json(
+        { success: false, error: "A valid active currency is required" },
+        { status: 400 }
+      );
+    }
 
     const requiredError = getRequiredCountryError(body, payload);
     if (requiredError) {
@@ -315,7 +333,7 @@ export const POST = withAdminAuth(async (request) => {
       {
         success: true,
         message: "Country created successfully",
-        data: country,
+        data: await country.populate("currency", "name code symbol status"),
       },
       { status: 201 }
     );

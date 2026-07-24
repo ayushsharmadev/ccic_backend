@@ -223,19 +223,19 @@ export default function ContactEnquiriesPage() {
         <div className="flex items-center justify-center gap-2">
           <button
             onClick={() => handleViewClick(item)}
-            className="px-2 py-1 text-xs text-blue-600 dark:text-blue-400 border border-blue-300 dark:border-blue-500/40 rounded bg-transparent hover:bg-blue-50 dark:hover:bg-blue-500/10 transition-colors duration-200"
+            className="admin-action admin-action-view"
           >
             View
           </button>
           <button
             onClick={() => handleEditClick(item)}
-            className="px-2 py-1 text-xs text-green-600 dark:text-green-400 border border-green-300 dark:border-emerald-500/40 rounded bg-transparent hover:bg-green-50 dark:hover:bg-emerald-500/10 transition-colors duration-200"
+            className="admin-action admin-action-edit"
           >
             Edit
           </button>
           <button
             onClick={() => handleDelete(item)}
-            className="px-2 py-1 text-xs text-red-600 dark:text-red-400 border border-red-300 dark:border-rose-500/40 rounded bg-transparent hover:bg-red-50 dark:hover:bg-rose-500/10 transition-colors duration-200"
+            className="admin-action admin-action-delete"
           >
             Delete
           </button>
@@ -245,35 +245,6 @@ export default function ContactEnquiriesPage() {
   ];
 
   const actions = [];
-
-  if (loading && enquiries.length === 0) {
-    return (
-      <div className="h-full p-4 sm:p-5 md:p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <div className="h-7 w-44 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-            <div className="h-4 w-64 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-          </div>
-          <div className="flex gap-3">
-            <div className="h-10 flex-1 max-w-xs rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-            <div className="h-10 w-44 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-          </div>
-          <div className="border border-gray-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-sm">
-            <div className="divide-y divide-gray-200 dark:divide-slate-800">
-              {[...Array(6)].map((_, idx) => (
-                <div key={idx} className="flex gap-4 px-4 py-4 bg-white dark:bg-slate-900">
-                  <div className="h-4 w-32 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-                  <div className="h-4 w-28 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-                  <div className="h-4 w-40 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-                  <div className="h-4 w-20 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="h-full p-4 sm:p-5 md:p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
@@ -288,14 +259,22 @@ export default function ContactEnquiriesPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex gap-3 mb-4">
-        <div className="relative flex-1 max-w-xs">
+      <div className="mb-4 grid grid-cols-[minmax(0,1fr)_minmax(9rem,0.72fr)] gap-3 md:grid-cols-[20rem_11rem] md:justify-start">
+        <div className="relative min-w-0 w-full">
+          <svg
+            className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-white/40"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
           <input
             type="text"
-            placeholder="Search by name, phone, email..."
+            placeholder="Search contacts"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-3 pr-2 py-1.5 border border-gray-300 dark:border-slate-700 rounded text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors duration-300 placeholder:text-gray-400 dark:placeholder:text-white/40"
+            className="w-full pl-7 pr-2 py-1.5 border border-gray-300 dark:border-slate-700 rounded text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors duration-300 placeholder:text-gray-400 dark:placeholder:text-white/40"
           />
         </div>
         <ApnaSelect
@@ -306,7 +285,8 @@ export default function ContactEnquiriesPage() {
           placeholder="Filter by status"
           searchable={false}
           required={false}
-          buttonClassName="px-3 py-1.5 border border-gray-300 dark:border-slate-700 rounded text-sm outline-none focus:border-primary bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors duration-300 flex items-center justify-between text-left cursor-pointer"
+          className="min-w-0 w-full"
+          buttonClassName="w-full px-3 py-1.5 border border-gray-300 dark:border-slate-700 rounded text-sm outline-none focus:border-primary bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors duration-300 flex items-center justify-between text-left cursor-pointer"
         />
       </div>
 

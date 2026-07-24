@@ -151,13 +151,13 @@ export default function NewsletterSubscriptionsPage() {
         <div className="flex items-center justify-center gap-2">
           <button
             onClick={() => handleView(item)}
-            className="px-2 py-1 text-xs text-primary dark:text-green-400 border border-primary rounded transition-colors duration-200 hover:bg-primary-50 dark:hover:bg-primary/20 dark:text-primary-200 dark:border-primary/60"
+            className="admin-action admin-action-view"
           >
             View
           </button>
           <button
             onClick={() => handleDelete(item.id)}
-            className="px-2 py-1 text-xs text-red-600 dark:text-red-400 border border-red-200 dark:border-rose-600/40 rounded transition-colors duration-200 hover:bg-red-50 dark:hover:bg-rose-500/20"
+            className="admin-action admin-action-delete"
           >
             Delete
           </button>
@@ -165,47 +165,6 @@ export default function NewsletterSubscriptionsPage() {
       ),
     },
   ];
-
-  if (loading && subscriptions.length === 0) {
-    return (
-      <div className="h-full p-4 sm:p-5 md:p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <div className="h-7 w-52 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-            <div className="h-4 w-64 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
-            <div className="h-10 flex-1 max-w-xs rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-          </div>
-          <div className="border border-gray-200 dark:border-slate-800 rounded-lg overflow-hidden shadow-sm">
-            <div className="hidden sm:grid grid-cols-12 gap-4 px-4 py-3 bg-gray-100 dark:bg-slate-900">
-              <div className="col-span-5 h-4 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-              <div className="col-span-3 h-4 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-              <div className="col-span-4 h-4 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-            </div>
-            <div className="divide-y divide-gray-200 dark:divide-slate-800">
-              {[...Array(6)].map((_, idx) => (
-                <div
-                  key={idx}
-                  className="grid grid-cols-1 sm:grid-cols-12 gap-4 px-4 py-4 bg-white dark:bg-slate-900 transition-colors duration-300"
-                >
-                  <div className="sm:col-span-5">
-                    <div className="h-4 w-44 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-                  </div>
-                  <div className="sm:col-span-3">
-                    <div className="h-4 w-24 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-                  </div>
-                  <div className="sm:col-span-4">
-                    <div className="h-4 w-32 rounded bg-gray-200 dark:bg-slate-800 animate-pulse" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="h-full p-4 sm:p-5 md:p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
@@ -220,12 +179,20 @@ export default function NewsletterSubscriptionsPage() {
 
       <div className="flex gap-4 mb-4">
         <div className="relative flex-1 max-w-xs">
+          <svg
+            className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 dark:text-white/40"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
           <input
             type="text"
-            placeholder="Search by email"
+            placeholder="Search emails"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-3 pr-2 py-1.5 border border-gray-300 dark:border-slate-700 rounded text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary-50 bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors duration-300 placeholder:text-gray-400 dark:placeholder:text-white/40"
+            className="w-full pl-7 pr-2 py-1.5 border border-gray-300 dark:border-slate-700 rounded text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary-50 dark:focus:ring-primary/30 bg-white dark:bg-slate-900 text-gray-900 dark:text-white transition-colors duration-300 placeholder:text-gray-400 dark:placeholder:text-white/40"
           />
         </div>
       </div>

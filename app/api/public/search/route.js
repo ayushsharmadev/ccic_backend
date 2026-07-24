@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import { College, Country, Course, Exam, News } from "@/lib/models";
 import { applyDirectLocationFilters } from "@/lib/locationFilters";
+import { moneyView } from "@/lib/money";
 
 const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -101,6 +102,7 @@ export const GET = async (request) => {
           .select(
             "name shortName code capital currency language shortDescription slug logo banner isFeatured isPopular displayOrder"
           )
+          .populate({ path: "currency", match: { status: "active" }, select: "name code symbol" })
           .sort({ isPopular: -1, isFeatured: -1, displayOrder: 1, name: 1 })
           .limit(perTypeLimit)
           .lean()
@@ -136,7 +138,8 @@ export const GET = async (request) => {
         })
           .populate("streamId", "name")
           .populate("degreeId", "name")
-          .select("name description averageFee streamId degreeId slug")
+          .select("name description averageFee averageFeeCurrency streamId degreeId slug")
+          .populate("averageFeeCurrency", "name code symbol status")
           .limit(perTypeLimit)
           .lean()
           .then((courses) =>
@@ -146,7 +149,8 @@ export const GET = async (request) => {
               title: course.name,
               description: stripHtml(course.description, course.name),
               url: `/courses/${course.slug || course._id}`,
-              fees: course.averageFee || null,
+              fees: course.averageFee,
+              feesMoney: moneyView(course.averageFee, course.averageFeeCurrency),
               stream: course.streamId?.name,
               degree: course.degreeId?.name,
             }))
@@ -168,9 +172,10 @@ export const GET = async (request) => {
           .populate("examType", "name")
           .populate("examLevel", "name")
           .populate("country", "name code")
+          .populate("applicationFeeCurrency", "name code symbol status")
           .populate("state", "name")
           .select(
-            "title examDescription applicationFee examDate examType examLevel country state slug"
+            "title examDescription applicationFee applicationFeeCurrency examDate examType examLevel country state slug"
           )
           .limit(perTypeLimit)
           .lean()
@@ -182,9 +187,8 @@ export const GET = async (request) => {
               description: stripHtml(exam.examDescription, exam.title),
               url: `/exams/${exam.slug || exam._id}`,
               examDate: exam.examDate,
-              applicationFee: exam.applicationFee
-                ? `INR ${exam.applicationFee.toLocaleString()}`
-                : null,
+              applicationFee: exam.applicationFee,
+              applicationFeeMoney: moneyView(exam.applicationFee, exam.applicationFeeCurrency),
               examType: exam.examType?.name,
               examLevel: exam.examLevel?.name,
               country: exam.country?.name,

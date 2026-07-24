@@ -4,13 +4,13 @@ import Link from "next/link";
 
 export default function StatsCard({ name, value, icon, color, href }) {
   const Content = () => (
-    <div className="flex items-center justify-between">
+    <div className="flex min-h-12 items-center justify-between">
       <div className="flex items-center min-w-0 flex-1">
         <div className="flex-shrink-0">
           <div
             className={`inline-flex items-center justify-center p-1.5 sm:p-2 ${color} rounded-md shadow-lg text-white`}
           >
-            <div className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 flex items-center justify-center">
+            <div className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 flex items-center justify-center [&>svg]:h-full [&>svg]:w-full">
               {icon}
             </div>
           </div>
@@ -20,8 +20,8 @@ export default function StatsCard({ name, value, icon, color, href }) {
             <div className="text-xs sm:text-sm font-medium text-gray-600 dark:text-white/70 overflow-hidden text-ellipsis whitespace-nowrap">
               {name}
             </div>
-            <div className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mt-0.5 sm:mt-1">
-              {value.toLocaleString()}
+            <div className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mt-0.5 sm:mt-1 tabular-nums">
+              {Number(value || 0).toLocaleString()}
             </div>
           </div>
         </div>
@@ -48,7 +48,7 @@ export default function StatsCard({ name, value, icon, color, href }) {
 
   if (href) {
     return (
-      <Link href={href} className="block">
+      <Link href={href} className="block h-full rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2">
         <div className="bg-white dark:bg-slate-900/70 border border-gray-200 dark:border-slate-800 rounded-lg shadow-sm p-3 sm:p-4 cursor-pointer hover:shadow-md hover:shadow-primary/10 transition-shadow transition-colors duration-300 h-full">
           <Content />
         </div>

@@ -187,13 +187,13 @@ export default function CountrySectionsPage({ params }) {
         <div className="flex gap-2 justify-center items-center">
           <button
             onClick={() => handleEdit(item)}
-            className="px-3 py-1 text-xs text-primary border border-primary rounded bg-transparent cursor-pointer hover:bg-blue-50 dark:hover:bg-primary/20 transition-colors"
+            className="admin-action admin-action-edit"
           >
             Edit
           </button>
           <button
             onClick={() => handleDeleteClick(item._id, item.title)}
-            className="px-3 py-1 text-xs text-secondary border border-secondary rounded bg-transparent cursor-pointer hover:bg-secondary-50 dark:hover:bg-secondary/20 transition-colors"
+            className="admin-action admin-action-delete"
           >
             Delete
           </button>

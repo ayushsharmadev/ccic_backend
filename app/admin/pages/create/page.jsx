@@ -190,7 +190,7 @@ const CreatePage = () => {
     "text-xl font-semibold text-gray-900 dark:text-white mb-0.5";
   const headerSubtitleClass = "text-xs text-gray-600 dark:text-white/70";
   const aiButtonClass =
-    "flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-700 transition-colors duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed text-sm focus:outline-none focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary/30";
+    "flex shrink-0 self-end items-center gap-2 whitespace-nowrap px-4 py-2 bg-primary sm:self-auto text-white rounded-lg hover:bg-primary-700 transition-colors duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed text-sm focus:outline-none focus:ring-2 focus:ring-primary-200 dark:focus:ring-primary/30";
   const cardClass =
     "bg-white dark:bg-slate-900/70 border border-gray-200 dark:border-slate-800 rounded-lg p-5 shadow-sm transition-colors";
   const labelClassName =
@@ -519,7 +519,7 @@ const CreatePage = () => {
             Back to Pages
           </Link>
         </div>
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className={headerTitleClass}>Add New Page</h1>
             <p className={headerSubtitleClass}>
@@ -549,7 +549,7 @@ const CreatePage = () => {
                 type="text"
                 value={formData.title}
                 onChange={(e) => handleInputChange("title", e.target.value)}
-                placeholder="e.g., About MBBS Education in India"
+                placeholder="e.g., Study Abroad Guidance and Counselling"
                 required
                 className={inputClassName}
               />
@@ -561,7 +561,7 @@ const CreatePage = () => {
                 type="text"
                 value={formData.slug}
                 onChange={(e) => handleInputChange("slug", e.target.value)}
-                placeholder="about-mbbs-education-in-india"
+                placeholder="study-abroad-guidance"
                 required
                 className={inputClassName}
               />
@@ -786,7 +786,7 @@ const CreatePage = () => {
                       handleInputChange("metaTitle", e.target.value)
                     }
                     maxLength={60}
-                    placeholder="MBBS Education India | Complete Guide"
+                    placeholder="Study Abroad Guidance | Complete Guide"
                     className={inputClassName}
                   />
                   <p className={helperTextClassName}>
@@ -803,7 +803,7 @@ const CreatePage = () => {
                       handleInputChange("focusKeyword", e.target.value)
                     }
                     maxLength={100}
-                    placeholder="MBBS Education India"
+                    placeholder="Study Abroad Guidance"
                     className={inputClassName}
                   />
                 </div>
@@ -820,7 +820,7 @@ const CreatePage = () => {
                   }
                   rows={2}
                   maxLength={160}
-                  placeholder="Explore MBBS colleges, admission process, eligibility criteria and career opportunities in Bangladesh medicine."
+                  placeholder="Explore universities, courses, admission processes, eligibility criteria and study abroad opportunities."
                   className={textareaClassName}
                 />
                 <p className={helperTextClassName}>
@@ -838,7 +838,7 @@ const CreatePage = () => {
                   onChange={(e) =>
                     handleInputChange("metaKeywords", e.target.value)
                   }
-                  placeholder="mbbs, ayurveda, college"
+                  placeholder="study abroad, admissions, counselling"
                   className={inputClassName}
                 />
               </div>
@@ -851,7 +851,7 @@ const CreatePage = () => {
                   onChange={(e) =>
                     handleInputChange("canonicalUrl", e.target.value)
                   }
-                  placeholder="https://mbbscollegeBangladesh.com/page/your-slug"
+                  placeholder="https://example.com/page/your-slug"
                   className={inputClassName}
                 />
               </div>
@@ -873,7 +873,7 @@ const CreatePage = () => {
                       handleInputChange("ogTitle", e.target.value)
                     }
                     maxLength={60}
-                    placeholder="MBBS Education Guide | Colleges & Admission"
+                    placeholder="Study Abroad Guide | Universities & Admission"
                     className={inputClassName}
                   />
                   <p className={helperTextClassName}>
@@ -892,7 +892,7 @@ const CreatePage = () => {
                     }
                     rows={2}
                     maxLength={160}
-                    placeholder="Discover top MBBS colleges, admission process, eligibility criteria and career opportunities in Bangladesh medicine."
+                    placeholder="Discover universities, courses, admission requirements and study abroad opportunities."
                     className={textareaClassName}
                   />
                   <p className={helperTextClassName}>
@@ -935,7 +935,7 @@ const CreatePage = () => {
                       handleInputChange("twitterTitle", e.target.value)
                     }
                     maxLength={60}
-                    placeholder="MBBS Education Guide | Colleges & Admission"
+                    placeholder="Study Abroad Guide | Universities & Admission"
                     className={inputClassName}
                   />
                   <p className={helperTextClassName}>
@@ -954,7 +954,7 @@ const CreatePage = () => {
                     }
                     rows={2}
                     maxLength={160}
-                    placeholder="Discover top MBBS colleges, admission process, eligibility criteria and career opportunities in Bangladesh medicine."
+                    placeholder="Discover universities, courses, admission requirements and study abroad opportunities."
                     className={textareaClassName}
                   />
                   <p className={helperTextClassName}>

@@ -6,6 +6,7 @@ import ApnaTable from "@/components/utils/ApnaTable";
 import ApnaModalConfirmation from "@/components/utils/ApnaModalConfirmation";
 import ApnaModal from "@/components/utils/ApnaModal";
 import { showSuccess, showError } from "@/components/utils/ApnaNotify";
+import { getTestimonialEmbedUrl } from "@/lib/utils/testimonialVideo";
 
 export default function TestimonialsPage() {
   const [testimonials, setTestimonials] = useState([]);
@@ -25,6 +26,8 @@ export default function TestimonialsPage() {
     isOpen: false,
     testimonialName: "",
     testimonial: "",
+    videoUrl: "",
+    videoType: "",
   });
 
   // Define table columns
@@ -107,19 +110,19 @@ export default function TestimonialsPage() {
       render: (item) => (
         <div className="flex gap-2 justify-center">
           <button
-            onClick={() => handleViewClick(item.name, item.testimonial)}
-            className="px-2 py-1 text-xs text-blue-600 dark:text-blue-200 border border-blue-600 dark:border-blue-500/60 rounded bg-transparent cursor-pointer transition-colors duration-200 hover:bg-blue-50 dark:hover:bg-blue-500/20"
+            onClick={() => handleViewClick(item)}
+            className="admin-action admin-action-view"
           >
             View
           </button>
           <Link
             href={`/admin/testimonials/edit/${item.id}`}
-            className="px-2 py-1 text-xs text-primary dark:text-primary-200 border border-primary dark:border-primary/60 rounded bg-transparent no-underline transition-colors duration-200 hover:bg-primary-50 dark:hover:bg-primary/20"
+            className="admin-action admin-action-edit"
           >
             Edit
           </Link>
           <button
-            className="px-2 py-1 text-xs text-secondary dark:text-secondary-200 border border-secondary dark:border-secondary/60 rounded bg-transparent cursor-pointer transition-colors duration-200 hover:bg-secondary-50 dark:hover:bg-secondary/20"
+            className="admin-action admin-action-delete"
             onClick={() => handleDeleteClick(item.id, item.name)}
           >
             Delete
@@ -130,11 +133,13 @@ export default function TestimonialsPage() {
   ];
 
   // View modal handlers
-  const handleViewClick = (testimonialName, testimonial) => {
+  const handleViewClick = (item) => {
     setViewModal({
       isOpen: true,
-      testimonialName,
-      testimonial: testimonial || "No testimonial content available.",
+      testimonialName: item.name,
+      testimonial: item.testimonial || "No testimonial content available.",
+      videoUrl: item.videoUrl || "",
+      videoType: item.videoType || "",
     });
   };
 
@@ -143,6 +148,8 @@ export default function TestimonialsPage() {
       isOpen: false,
       testimonialName: "",
       testimonial: "",
+      videoUrl: "",
+      videoType: "",
     });
   };
 
@@ -238,6 +245,8 @@ export default function TestimonialsPage() {
           designation: item.designation,
           college: item.college,
           testimonial: item.testimonial,
+          videoUrl: item.videoUrl,
+          videoType: item.videoType,
           rating: item.rating,
           avatar: item.avatar,
           status: item.status,
@@ -299,9 +308,9 @@ export default function TestimonialsPage() {
       </div>
 
       {/* Search & Add Button Skeleton */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-        <div className="h-9 w-full sm:w-60 rounded bg-gray-200 dark:bg-slate-800 animate-pulse"></div>
-        <div className="h-9 w-36 rounded bg-gray-200 dark:bg-slate-800 animate-pulse"></div>
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 mb-4 sm:flex sm:justify-between">
+        <div className="h-9 min-w-0 w-full sm:w-60 rounded bg-gray-200 dark:bg-slate-800 animate-pulse"></div>
+        <div className="h-9 w-30 sm:w-36 rounded bg-gray-200 dark:bg-slate-800 animate-pulse"></div>
       </div>
 
       {/* Table Skeleton */}
@@ -340,10 +349,6 @@ export default function TestimonialsPage() {
     </div>
   );
 
-  if (loading) {
-    return <LoadingSkeleton />;
-  }
-
   return (
     <div className="h-full p-4 sm:p-5 md:p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
       {/* Page Header */}
@@ -357,8 +362,8 @@ export default function TestimonialsPage() {
       </div>
 
       {/* Search and Add Button */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-        <div className="relative w-full sm:w-60">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 mb-4 sm:flex sm:justify-between">
+        <div className="relative min-w-0 w-full sm:w-60">
           <svg
             className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-white/50 transition-colors duration-300"
             fill="none"
@@ -407,7 +412,7 @@ export default function TestimonialsPage() {
         </div>
         <Link
           href="/admin/testimonials/add"
-          className="bg-primary hover:bg-primary-700 text-white px-3 py-1.5 rounded text-xs font-medium flex items-center gap-1 transition-colors no-underline focus:outline-none focus:ring-2 focus:ring-primary/40"
+          className="bg-primary hover:bg-primary-700 text-white px-3 py-1.5 rounded text-xs font-medium flex shrink-0 cursor-pointer items-center gap-1 whitespace-nowrap transition-colors no-underline focus:outline-none focus:ring-2 focus:ring-primary/40"
         >
           <svg
             className="w-3.5 h-3.5"
@@ -479,6 +484,24 @@ export default function TestimonialsPage() {
         showFooter={false}
       >
         <div className="prose prose-lg max-w-none text-gray-700 dark:text-white/80 transition-colors duration-300">
+          {viewModal.videoType === "local" && viewModal.videoUrl && (
+            <video
+              src={viewModal.videoUrl}
+              controls
+              preload="metadata"
+              className="mb-4 max-h-80 w-full rounded bg-black"
+            />
+          )}
+          {viewModal.videoType === "external" &&
+            getTestimonialEmbedUrl(viewModal.videoUrl) && (
+              <iframe
+                src={getTestimonialEmbedUrl(viewModal.videoUrl)}
+                title={`Video testimonial from ${viewModal.testimonialName}`}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="mb-4 aspect-video w-full rounded"
+              />
+            )}
           <div className="leading-relaxed text-base">
             "{viewModal.testimonial}"
           </div>

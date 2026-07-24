@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import ImageUpload from "@/components/utils/ImageUpload";
+import ApnaSelect from "@/components/utils/ApnaSelect";
 import { showSuccess, showError } from "@/components/utils/ApnaNotify";
 
 export default function EditCountryPage() {
@@ -15,6 +16,7 @@ export default function EditCountryPage() {
     name: "",
     code: "",
     logo: null,
+    status: "active",
   });
   const [logoPreview, setLogoPreview] = useState(null);
 
@@ -27,11 +29,14 @@ export default function EditCountryPage() {
           return;
         }
 
-        const response = await fetch(`/api/locations/countries/${params.id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          `/api/locations/country-master/${params.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         const result = await response.json();
 
@@ -41,6 +46,7 @@ export default function EditCountryPage() {
             name: countryData.name || "",
             code: countryData.code || "",
             logo: countryData.logo || null,
+            status: countryData.status || "active",
           });
 
           if (countryData.logo) {
@@ -104,7 +110,7 @@ export default function EditCountryPage() {
       const apiData = {
         name: formData.name.trim(),
         code: formData.code.trim().toUpperCase(),
-        status: "active",
+        status: formData.status,
       };
 
       if (formData.logo) {
@@ -137,14 +143,17 @@ export default function EditCountryPage() {
         apiData.logo = null;
       }
 
-      const response = await fetch(`/api/locations/countries/${params.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(apiData),
-      });
+      const response = await fetch(
+        `/api/locations/country-master/${params.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(apiData),
+        }
+      );
 
       const result = await response.json();
 
@@ -221,7 +230,7 @@ export default function EditCountryPage() {
           Edit Country - {formData.name}
         </h1>
         <p className="text-xs text-gray-600 dark:text-white/70">
-          Update country information for CCIC colleges
+          Update country information for VidyaVidhi colleges
         </p>
       </div>
 
@@ -276,6 +285,21 @@ export default function EditCountryPage() {
                 showError(`Logo upload failed: ${error}`)
               }
             />
+            <div>
+              <ApnaSelect
+                title="Status"
+                value={formData.status}
+                onChange={(status) =>
+                  setFormData((prev) => ({ ...prev, status }))
+                }
+                options={[
+                  { value: "active", label: "Active" },
+                  { value: "inactive", label: "Inactive" },
+                ]}
+                required
+                buttonClassName="w-full px-2 py-1.5 rounded text-xs text-left flex items-center justify-between outline-none transition-all duration-200 border border-gray-300 dark:border-slate-700 focus:border-primary focus:ring-2 focus:ring-primary-100 dark:focus:ring-primary/30 bg-white dark:bg-slate-900/70 text-gray-700 dark:text-white/80 cursor-pointer"
+              />
+            </div>
           </div>
 
           <div className="flex justify-end gap-2 border-t border-gray-200 dark:border-slate-800 pt-4">

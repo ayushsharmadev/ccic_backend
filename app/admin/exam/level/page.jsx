@@ -254,13 +254,13 @@ export default function ExamLevelList() {
         <div className="flex gap-2 justify-center">
           <button
             onClick={() => handleEditExamLevel(item)}
-            className="px-2 py-1 text-xs text-primary dark:text-primary-200 border border-primary dark:border-primary/60 rounded bg-transparent cursor-pointer transition-colors duration-200 hover:bg-primary-50 dark:hover:bg-primary/20"
+            className="admin-action admin-action-edit"
           >
             Edit
           </button>
           <button
             onClick={() => handleDeleteClick(item)}
-            className="px-2 py-1 text-xs text-secondary dark:text-secondary-200 border border-secondary dark:border-secondary/60 rounded bg-transparent cursor-pointer transition-colors duration-200 hover:bg-secondary-50 dark:hover:bg-secondary/20"
+            className="admin-action admin-action-delete"
           >
             Delete
           </button>
@@ -344,8 +344,8 @@ export default function ExamLevelList() {
       </div>
 
       {/* Search & Add Button Skeleton */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-        <div className="h-9 w-full sm:w-60 rounded bg-gray-200 dark:bg-slate-800 animate-pulse"></div>
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 mb-4 sm:flex sm:justify-between">
+        <div className="h-9 min-w-0 w-full sm:w-60 rounded bg-gray-200 dark:bg-slate-800 animate-pulse"></div>
         <div className="h-9 w-32 rounded bg-gray-200 dark:bg-slate-800 animate-pulse"></div>
       </div>
 
@@ -379,10 +379,6 @@ export default function ExamLevelList() {
     </div>
   );
 
-  if (loading) {
-    return <LoadingSkeleton />;
-  }
-
   return (
     <div className="h-full p-4 sm:p-5 md:p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
       {/* Page Header */}
@@ -396,8 +392,8 @@ export default function ExamLevelList() {
       </div>
 
       {/* Search and Add Button */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-        <div className="relative w-full sm:w-60">
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 mb-4 sm:flex sm:justify-between">
+        <div className="relative min-w-0 w-full sm:w-60">
           <svg
             className="absolute left-2 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-white/50 transition-colors duration-300"
             fill="none"
@@ -446,7 +442,7 @@ export default function ExamLevelList() {
         </div>
         <button
           onClick={handleAddExamLevel}
-          className="bg-primary hover:bg-primary-700 text-white px-3 py-1.5 rounded text-xs font-medium flex items-center gap-1 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/40"
+          className="bg-primary hover:bg-primary-700 text-white px-3 py-1.5 rounded text-xs font-medium flex shrink-0 cursor-pointer items-center gap-1 whitespace-nowrap transition-colors focus:outline-none focus:ring-2 focus:ring-primary/40"
         >
           <svg
             className="w-3.5 h-3.5"

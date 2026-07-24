@@ -5,6 +5,30 @@ import { useRouter } from "next/navigation";
 
 const AuthContext = createContext();
 
+const clearStoredAuth = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("refreshToken");
+  localStorage.removeItem("user");
+};
+
+const hasUsableAccessToken = (token) => {
+  try {
+    const payloadPart = token.split(".")[1];
+    if (!payloadPart) return false;
+
+    const normalized = payloadPart
+      .replace(/-/g, "+")
+      .replace(/_/g, "/")
+      .padEnd(Math.ceil(payloadPart.length / 4) * 4, "=");
+    const payload = JSON.parse(atob(normalized));
+
+    return Number.isFinite(payload.exp) && payload.exp * 1000 > Date.now();
+  } catch {
+    return false;
+  }
+};
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -29,18 +53,21 @@ export const AuthProvider = ({ children }) => {
       const accessToken = localStorage.getItem("token");
       const userData = localStorage.getItem("user");
 
-      if (accessToken && userData) {
+      if (accessToken && userData && hasUsableAccessToken(accessToken)) {
         const user = JSON.parse(userData);
         setUser(user);
         setIsAuthenticated(true);
       } else {
+        clearStoredAuth();
         console.log("❌ No valid auth data found");
         setUser(null);
         setIsAuthenticated(false);
       }
     } catch (error) {
       console.error("Error checking auth status:", error);
-      logout();
+      clearStoredAuth();
+      setUser(null);
+      setIsAuthenticated(false);
     } finally {
       setLoading(false);
     }
@@ -152,10 +179,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
-    // Clear localStorage
-    localStorage.removeItem("token");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("user");
+    clearStoredAuth();
 
     // Reset state
     setUser(null);
@@ -185,7 +209,7 @@ export const AuthProvider = ({ children }) => {
 
       if (data.success) {
         const { accessToken } = data.data;
-        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("token", accessToken);
         return accessToken;
       } else {
         throw new Error("Token refresh failed");

@@ -72,7 +72,7 @@ const actions = [
     color: "bg-primary-600 hover:bg-primary-700",
   },
   {
-    name: "Add MBBS Exam",
+    name: "Add Exam",
     description: "Create new Bangladesh exam entry",
     href: "/admin/exam/add",
     icon: (

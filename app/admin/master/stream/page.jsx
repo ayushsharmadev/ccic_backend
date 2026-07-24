@@ -116,12 +116,12 @@ export default function StreamList() {
         <div className="flex gap-2 justify-center">
           <Link
             href={`/admin/master/stream/edit/${item.id}`}
-            className="px-2 py-1 text-xs text-primary border border-primary rounded bg-transparent no-underline hover:bg-primary-50 dark:hover:bg-primary/20 transition-colors"
+            className="admin-action admin-action-edit"
           >
             Edit
           </Link>
           <button
-            className="px-2 py-1 text-xs text-secondary border border-secondary rounded bg-transparent cursor-pointer hover:bg-secondary-50 dark:hover:bg-secondary/20 transition-colors"
+            className="admin-action admin-action-delete"
             onClick={() => handleDeleteClick(item.id, item.name)}
           >
             Delete
@@ -320,10 +320,6 @@ export default function StreamList() {
       </div>
     </div>
   );
-
-  if (loading) {
-    return <LoadingSkeleton />;
-  }
 
   return (
     <div className="h-full p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">

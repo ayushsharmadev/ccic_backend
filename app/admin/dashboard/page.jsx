@@ -184,7 +184,7 @@ export default function Dashboard() {
         </svg>
       ),
       color: "bg-secondary",
-      href: "/admin/master/course-name",
+      href: "/admin/master/course",
     },
     {
       name: "Affiliations",
@@ -226,7 +226,7 @@ export default function Dashboard() {
         </svg>
       ),
       color: "bg-secondary-800",
-      href: "/admin/exam/exam-type",
+      href: "/admin/master/exam-type",
     },
     {
       name: "Rankings",
@@ -316,14 +316,14 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="h-full p-3 sm:p-4 md:p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
+      <div className="min-h-full p-3 sm:p-4 md:p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
         <div className="mb-4 sm:mb-6">
           <div className="h-6 sm:h-8 bg-gray-200 dark:bg-slate-800 rounded-md w-48 sm:w-64 mb-2 animate-pulse"></div>
-          <div className="h-4 sm:h-6 bg-gray-200 dark:bg-slate-800 rounded-md w-72 sm:w-96 animate-pulse"></div>
+          <div className="h-4 sm:h-6 bg-gray-200 dark:bg-slate-800 rounded-md w-full max-w-72 sm:max-w-96 animate-pulse"></div>
         </div>
 
         {/* Responsive loading grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-1 min-[380px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
           {[...Array(12)].map((_, i) => (
             <div
               key={i}
@@ -351,10 +351,10 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="h-full p-3 sm:p-4 md:p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
+    <div className="min-h-full p-3 sm:p-4 md:p-6 bg-gray-50 dark:bg-slate-950 transition-colors duration-300">
       {/* Page header - Responsive */}
       <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-1">
             Dashboard
           </h1>
@@ -365,7 +365,7 @@ export default function Dashboard() {
         <button
           onClick={() => fetchStats(true)}
           disabled={refreshing}
-          className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-slate-700 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-white bg-white dark:bg-slate-900 hover:bg-primary-50 dark:hover:bg-primary/20 hover:text-primary dark:hover:text-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="inline-flex w-full sm:w-auto items-center justify-center px-3 py-2 border border-gray-300 dark:border-slate-700 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-white bg-white dark:bg-slate-900 hover:bg-primary-50 dark:hover:bg-primary/20 hover:text-primary dark:hover:text-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {refreshing ? (
             <>
@@ -382,7 +382,7 @@ export default function Dashboard() {
       </div>
 
       {/* Stats grid - Fully responsive */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+      <div className="grid grid-cols-1 min-[380px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
         {dashboardStats.map((stat) => (
           <StatsCard
             key={stat.name}
