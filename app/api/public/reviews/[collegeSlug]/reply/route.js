@@ -48,24 +48,21 @@ export async function POST(request, { params }) {
         { status: 404 }
       );
     }
-
-    review.replies.push({
+    const newReply = {
       name: name.trim(),
       mobile: mobile?.trim() || undefined,
       email: email?.trim() || undefined,
       comment: comment.trim(),
       status: "pending",
-    });
+    }
+    review.replies.push(newReply);
 
     await review.save();
 
     return NextResponse.json({
       success: true,
       message: "Reply submitted successfully. It will be visible after admin approval.",
-      data: {
-        _id: review._id,
-        replies: review.replies,
-      },
+      data: newReply,
     });
   } catch (error) {
     if (error.name === "ValidationError") {
